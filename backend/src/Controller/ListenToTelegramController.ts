@@ -23,10 +23,23 @@ export class TelegramController {
                 if (chatId !== Env.TELEGRAM_KABUM_ID) return;
 
                 // Captura texto de mensagens normais ou de mídias (fotos/vídeos)
-                const text = ctx.message.text || ctx.message.caption;
-                if (!text) return;
+                let text = ctx.message.text || ctx.message.caption || "";
 
-                console.log(`\n📦 Nova oferta detectada no Telegram. Processando links...`);
+                const buttons = ctx.message.reply_markup?.inline_keyboard;
+                if (buttons) {
+                    for (const row of buttons) {
+                        for (const button of row) {
+                            if (button.url) {
+                                // Anexa o link oculto no final do texto para a esteira do Express processar
+                                text += `\n\n${button.url}`;
+                            }
+                        }
+                    }
+                }
+
+                if(!text.trim()) return
+
+                console.log(`\n📦 Nova oferta detectada no Telegram (com botões tratados).`);
 
                 // 1. Extrai as URLs do texto
                 const urls = this.linkParser.extractUrls(text);

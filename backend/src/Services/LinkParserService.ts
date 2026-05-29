@@ -1,11 +1,13 @@
+import { Env } from "../utils/Envirolment.js";
+
 export class LinkParserService {
 
-    amazonTag = process.env.AMAZON_TAG;
-    shopeeId = process.env.SHOPEE_ID;
+    amazonTag = Env.AMAZON_TAG;
+    shopeeId = Env.SHOPEE_ID;
+    awinId = Env.AWIN_PUBLISHER_ID;
 
     async expandUrl(url: string) {
         try {
-
             const response = await fetch(url, {
                 method: 'GET',
                 redirect: 'manual',
@@ -14,7 +16,7 @@ export class LinkParserService {
                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                     'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
                 }
-            })
+            });
 
             const location = response.headers.get('location');
 
@@ -36,28 +38,49 @@ export class LinkParserService {
 
     async convertUrl(url: string): Promise<string> {
         try {
-            let targetUrl = url;
+            // 1. Primeiro expande a URL para o caso de ser um encurtador (ex: tidd.ly ou amzn.to)
+            let targetUrl = await this.expandUrl(url);
 
             // CASO 1: Links encurtados oficiais da Amazon (amzn.to ou a.co)
             if (targetUrl.includes("amzn.to") || targetUrl.includes("a.co")) {
-                // Remove qualquer barra extra ou espaços
                 const cleanUrl = targetUrl.trim();
-
-                // Retorna o link usando o endpoint global de redirecionamento de afiliados da Amazon.
-                // O próprio navegador do usuário vai resolver o produto e aplicar seu ID de afiliado.
                 return `https://www.amazon.com.br/g/ch/redirect?url=${encodeURIComponent(cleanUrl)}&tag=${this.amazonTag}`;
             }
 
             // CASO 2: Links já expandidos ou links longos diretos
             const urlObj = new URL(targetUrl);
 
+            // --- INSTÂNCIA DA KABUM (AWIN) ---
+            if (urlObj.hostname.includes("kabum.com.br")) {
+                // Remove parâmetros antigos de rastreamento do Telegram alheio
+                urlObj.searchParams.delete("utm_source");
+                urlObj.searchParams.delete("utm_medium");
+                urlObj.searchParams.delete("utm_campaign");
+                const cleanKabumUrl = urlObj.toString();
+
+                // Mude para 'true' assim que a KaBuM! aprovar o "Pendente" no painel da Awin!
+                const kabumAprovado = false;
+
+                if (kabumAprovado) {
+                    const kabumMerchantId = "22143";   // ID fixo da KaBuM! na Awin
+
+                    // CORREÇÃO AQUI: Adicionado o "this." para acessar a propriedade da classe
+                    return `https://awin1.com/cread.php?awinmid=${kabumMerchantId}&awinaffid=${this.awinId}&ued=${encodeURIComponent(cleanKabumUrl)}`;
+                }
+
+                // Enquanto estiver pendente, envia o link limpo original para o grupo rodar os testes
+                return cleanKabumUrl;
+            }
+
+            // --- INSTÂNCIA DA AMAZON ---
             if (urlObj.hostname.includes("amazon.com")) {
-                urlObj.searchParams.set("tag", this.amazonTag!);
+                urlObj.searchParams.set("tag", this.amazonTag);
                 return urlObj.toString();
             }
 
+            // --- INSTÂNCIA DA SHOPEE ---
             if (urlObj.hostname.includes("shopee.com")) {
-                urlObj.searchParams.set("shopId", this.shopeeId!);
+                urlObj.searchParams.set("shopId", this.shopeeId);
                 return urlObj.toString();
             }
 

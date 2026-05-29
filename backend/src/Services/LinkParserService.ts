@@ -38,48 +38,44 @@ export class LinkParserService {
 
     async convertUrl(url: string): Promise<string> {
         try {
-            // 1. Primeiro expande a URL para o caso de ser um encurtador (ex: tidd.ly ou amzn.to)
-            let targetUrl = await this.expandUrl(url);
+            // 1. Força a limpeza de espaços/quebras de linha na string da URL recebida
+            let targetUrl = (await this.expandUrl(url)).trim();
 
             // CASO 1: Links encurtados oficiais da Amazon (amzn.to ou a.co)
             if (targetUrl.includes("amzn.to") || targetUrl.includes("a.co")) {
-                const cleanUrl = targetUrl.trim();
-                return `https://www.amazon.com.br/g/ch/redirect?url=${encodeURIComponent(cleanUrl)}&tag=${this.amazonTag}`;
+                return `https://www.amazon.com.br/g/ch/redirect?url=${encodeURIComponent(targetUrl)}&tag=${this.amazonTag}`;
             }
 
-            // CASO 2: Links já expandidos ou links longos diretos
+            // CASO 2: Garante a criação segura do objeto de URL
             const urlObj = new URL(targetUrl);
+            const hostname = urlObj.hostname.toLowerCase();
 
             // --- INSTÂNCIA DA KABUM (AWIN) ---
-            if (urlObj.hostname.includes("kabum.com.br")) {
-                // Remove parâmetros antigos de rastreamento do Telegram alheio
-                urlObj.searchParams.delete("utm_source");
-                urlObj.searchParams.delete("utm_medium");
-                urlObj.searchParams.delete("utm_campaign");
-                const cleanKabumUrl = urlObj.toString();
+            if (hostname.includes("kabum.com.br")) {
+                // Cria uma query limpa isolando os utm antigos de terceiros
+                const cleanParams = new URLSearchParams(urlObj.search);
+                cleanParams.delete("utm_source");
+                cleanParams.delete("utm_medium");
+                cleanParams.delete("utm_campaign");
 
-                // Mude para 'true' assim que a KaBuM! aprovar o "Pendente" no painel da Awin!
-                const kabumAprovado = false;
+                // Reconstrói a URL crua do produto sem a sujeira antiga
+                const searchStr = cleanParams.toString();
+                const cleanKabumUrl = `${urlObj.origin}${urlObj.pathname}${searchStr ? '?' + searchStr : ''}`;
 
-                if (kabumAprovado) {
-                    const kabumMerchantId = "22143";   // ID fixo da KaBuM! na Awin
+                const kabumMerchantId = "22143"; // ID fixo da KaBuM! na Awin
 
-                    // CORREÇÃO AQUI: Adicionado o "this." para acessar a propriedade da classe
-                    return `https://awin1.com/cread.php?awinmid=${kabumMerchantId}&awinaffid=${this.awinId}&ued=${encodeURIComponent(cleanKabumUrl)}`;
-                }
-
-                // Enquanto estiver pendente, envia o link limpo original para o grupo rodar os testes
-                return cleanKabumUrl;
+                // Retorna diretamente a conversão estruturada da Awin
+                return `https://awin1.com/cread.php?awinmid=${kabumMerchantId}&awinaffid=${this.awinId}&ued=${encodeURIComponent(cleanKabumUrl)}`;
             }
 
             // --- INSTÂNCIA DA AMAZON ---
-            if (urlObj.hostname.includes("amazon.com")) {
+            if (hostname.includes("amazon.com")) {
                 urlObj.searchParams.set("tag", this.amazonTag);
                 return urlObj.toString();
             }
 
             // --- INSTÂNCIA DA SHOPEE ---
-            if (urlObj.hostname.includes("shopee.com")) {
+            if (hostname.includes("shopee.com")) {
                 urlObj.searchParams.set("shopId", this.shopeeId);
                 return urlObj.toString();
             }
@@ -92,9 +88,10 @@ export class LinkParserService {
         }
     }
 
+    // Melhora a Regex para capturar URLs isolando pontuações e quebras de linha comuns do Telegram
     extractUrls(text: string): string[] {
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-        return text.match(urlRegex) || [];
+        const urlRegex = /(https?:\/\/[^\s\n\r]+)/g;
+        const matches = text.match(urlRegex) || [];
+        return matches.map(url => url.trim());
     }
-
 }

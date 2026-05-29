@@ -39,8 +39,8 @@ export class TelegramController {
                 }
 
                 // 3. Dispara para o WhatsApp no JID do Promos Gamer 🔥
-                await this.whatsappService.sendMessage(Env.WHATSAPP_GROUP_JID!, { text: newText });
-                
+                await this.whatsappService.sendMessage(Env.WHATSAPP_GROUP_JID!, newText);
+
                 console.log("🚀 Oferta processada e enviada com sucesso para o WhatsApp!");
 
             } catch (error) {

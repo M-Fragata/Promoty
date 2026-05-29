@@ -1,9 +1,12 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 
 import { routes } from './Routes/index.js';
+import { WhatsAppService } from './Services/WhatsAppService.js';
 
-dotenv.config();
+export const whatsAppService = new WhatsAppService();
 
 export const app = express();
 

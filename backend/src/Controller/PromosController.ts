@@ -31,18 +31,33 @@ export class PromosController {
         }
         lines.push('')
 
-        // 2. Alerta de Cupom (Se houver)
-        if (product.coupon) {
-            lines.push(`🏷️ ${product.coupon} `);
-        }
-
         // 3. Bloco de Preços
         if (product.originalPrice) {
             lines.push(`~De$ ${product.originalPrice.toFixed(2)}~`);
         }
 
         lines.push(`Por: R$ ${product.price.toFixed(2)}`);
-        lines.push('');
+        
+        // 2. Alerta de Cupom (Se houver)
+        if (product.coupon) {
+            // Remove quebras de linha (\n, \r) e espaços duplicados trazidos pelo scraper
+            const cupomLimpo = product.coupon
+                .replace(/[\r\n]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            if (cupomLimpo) {
+                // Se a string já contiver a palavra "Cupom", não duplicamos o texto
+                if (cupomLimpo.toLowerCase().includes('cupom')) {
+                    lines.push(`🎟️ *${cupomLimpo}*`);
+                } else {
+                    lines.push(`🎟️ *Cupom:* \`${cupomLimpo}\``);
+                }
+                lines.push(''); // Linha em branco para separar do preço
+            }
+        }
+
+lines.push('');
 
         // 4. Link de Destino (Onde a mágica acontece)
         const urlOriginal = product.link;

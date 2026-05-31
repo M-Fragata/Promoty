@@ -22,3 +22,8 @@ export * from './enums';
  * 
  */
 export type Ofertas = Prisma.OfertasModel
+/**
+ * Model ProductsMl
+ * 
+ */
+export type ProductsMl = Prisma.ProductsMlModel

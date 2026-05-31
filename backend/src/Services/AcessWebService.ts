@@ -113,9 +113,7 @@ export class AccesWeb {
                                     const textElement = await countdownContainer.$('.poly-highlight-countdown__text');
                                     if (textElement) {
                                         const labelText = await textElement.innerText();
-                                        if (labelText && labelText.toUpperCase().includes('RELÂMPAGO')) {
-                                            textosDestaque.push('Oferta Relâmpago');
-                                        }
+                                        textosDestaque.push(labelText);
                                     }
                                 }
 

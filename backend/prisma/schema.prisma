@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -10,16 +5,33 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+ url      = "" //Só para calar a boca
 }
 
 model Ofertas {
-  id String @id @default(uuid())
-  source_id String
-  title String
-  original_url String
+  id            String   @id @default(uuid())
+  source_id     String
+  title         String
+  original_url  String
   converted_url String
-  posted_at DateTime @default(now())
-  status Status @default(Pending)
+  posted_at     DateTime @default(now())
+  status        Status   @default(Pending)
+}
+
+model ProductsMl {
+  id            String   @id
+  title         String
+  price         Float
+  originalPrice Float?
+  coupon        String?
+  badge         String?
+  imageUrl      String?
+  link          String
+  store         String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("products_ml")
 }
 
 enum Status {

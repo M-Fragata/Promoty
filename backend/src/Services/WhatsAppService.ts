@@ -24,16 +24,18 @@ export class WhatsAppService {
             const { state, saveCreds } = await useMultiFileAuthState(this.authFolder);
             console.log('✅ Pasta de autenticação carregada com sucesso.');
 
-            this.socket = makeWASocket({
+            const sock = makeWASocket({
                 logger: pino({ level: 'silent' }),
                 auth: state,
                 printQRInTerminal: false,
                 defaultQueryTimeoutMs: undefined
             });
+
+            this.socket = sock;
             console.log('🤖 Socket criado. Aguardando eventos do WhatsApp...');
 
             // Monitoramento da Conexão
-            this.socket.ev.on('connection.update', async (update) => {
+            sock.ev.on('connection.update', async (update) => {
                 const { connection, lastDisconnect, qr } = update;
 
                 if (qr) {
@@ -49,31 +51,36 @@ export class WhatsAppService {
 
                 } else if (connection === 'open') {
                     console.log('🎉 Parabéns! Seu robô está conectado com sucesso ao WhatsApp e pronto para enviar ofertas!');
+                    console.log('✅ [WhatsApp] Conectado com sucesso e em prontidão!');
                 }
             });
 
-            this.socket.ev.on('creds.update', saveCreds);
+            sock.ev.on('creds.update', saveCreds);
 
         } catch (error) {
             console.error('💥 Erro CRÍTICO dentro do WhatsAppService:', error);
         }
     }
 
-    async sendMessage(jid: string, text: string): Promise<boolean> {
+    async sendMessage(jid: string, text: string, imageUrl?: string | null): Promise<boolean> {
         try {
             if (!this.socket) {
                 console.error('❌ [WhatsAppService] Erro: O socket não foi inicializado.');
                 return false;
             }
 
-            console.log(`📱 [WhatsAppService] Preparando envio para o JID: ${jid}...`);
+            // Determina o payload correto do Baileys baseado na presença da imagem
+            const messagePayload = (imageUrl)
+                ? { image: { url: imageUrl }, caption: text } // Envia a foto com o texto embaixo
+                : { text: text };                             // Envia apenas o texto puro
 
             const delay = (ms: number) => new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT_BAILEYS')), ms));
-            const sendPromise = this.socket.sendMessage(jid, { text });
+
+            // Passa o payload dinâmico para o Baileys
+            const sendPromise = this.socket.sendMessage(jid.trim(), messagePayload);
 
             await Promise.race([sendPromise, delay(8000)]);
 
-            console.log('✅ [WhatsAppService] Mensagem entregue ao servidor do WhatsApp com sucesso!');
             return true;
 
         } catch (error: any) {

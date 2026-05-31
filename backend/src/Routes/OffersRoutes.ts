@@ -4,4 +4,5 @@ import { PromosController } from '../Controller/PromosController.js';
 export const offersRoutes = Router();
 const promosController = new PromosController();
 
-offersRoutes.post('/', promosController.getPromo);
+offersRoutes.post('/mercadolivre', promosController.processProductsML);
+offersRoutes.post('/amazon', promosController.processProductsAmazon);

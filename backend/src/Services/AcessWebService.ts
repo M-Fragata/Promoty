@@ -9,11 +9,11 @@ export class AccesWeb {
 
     async AcessMercadoLivre(): Promise<MlProducts[]> {
 
-        // 1- informática; 2- celulares e telefones; 3-games
+        // 1- informática; 2- celulares e telefones; 3-games, 4- oferta do dia
         const URLs: string[] = [
             "https://www.mercadolivre.com.br/ofertas?category=MLB1648&promotion_type=lightning#filter_applied=category&filter_position=3&origin=qcat",
             "https://www.mercadolivre.com.br/ofertas?category=MLB1051&promotion_type=lightning#filter_applied=category&filter_position=3&origin=qcat",
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1144&promotion_type=lightning#filter_applied=category&filter_position=3&origin=qcat"
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1144&promotion_type=lightning#filter_applied=category&filter_position=3&origin=qcat", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat"
         ];
 
         const browser = await chromium.launch({
@@ -52,9 +52,21 @@ export class AccesWeb {
                             const linkOriginal = await linkElement.getAttribute('href');
                             if (!linkOriginal) continue;
 
-                            const idHtml = await card.getAttribute('id');
-                            if (!idHtml) continue;
-                            const id = idHtml.trim();
+                            let id: string = ""
+
+                            const splitUrl = linkOriginal.split("?")
+                            if (splitUrl[1]) {
+                                const parameters = splitUrl[1].split("&")
+                                const parametersWithWid = parameters.find((p) => p.startsWith("wid="))
+                                if (parametersWithWid) {
+                                    const ProductId = parametersWithWid.split("=")[1]
+                                    id = ProductId ? ProductId : "falhou2"
+                                } else {
+                                    id = "falhou_sem_wid"
+                                }
+                            } else {
+                                id = "falhou1"
+                            }
 
                             // 2. CAPTURA TÍTULO
                             const title = await linkElement.innerText();

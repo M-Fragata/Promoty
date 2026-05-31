@@ -1,132 +1,157 @@
 import { type Request, type Response } from "express";
-import { LinkParserService } from "../Services/LinkParserService.js";
 import { whatsAppService } from "../app.js";
 import { prisma } from "../Database/Prisma.js";
-
 import { Env } from "../utils/Envirolment.js";
-import { text } from "input";
 
-const linkParser = new LinkParserService();
+
+import { type MlProducts } from "../types/MLPRODUCTS.js"
 
 export class PromosController {
 
-    private formatTextForWhatsApp(text: string, originalUrl: string, convertedUrl: string): string {
-        let formatted = text;
 
-        // 1. Identifica se a oferta pertence à KaBuM!
-        if (text.toLowerCase().includes("kabum.com.br")) {
-            const lines = formatted.split("\n");
+    messageFormat(product: MlProducts) {
 
-            // Descobre em qual linha a URL original está posicionada
-            const urlLineIndex = lines.findIndex(line => line.includes(originalUrl));
+        const lines: string[] = []
 
-            if (urlLineIndex !== -1) {
-                // A linha imediatamente ANTES da URL costuma ser a chamada de ação (CTA)
-                const ctaLineIndex = urlLineIndex - 1;
+        lines.push(`🔥 *${product.title.trim()}*`);
+        lines.push(''); // Linha em branco para respirar
 
-                // Se existir uma linha de CTA acima da URL, nós limpamos ela
-                if (ctaLineIndex >= 0 && lines[ctaLineIndex].trim() !== "") {
-                    lines[ctaLineIndex] = "🛒 *GARANTA AQUI:*";
-                } else {
-                    // Caso a linha anterior esteja vazia, coloca a CTA na própria linha da URL
-                    lines[urlLineIndex] = "🛒 *GARANTA AQUI:*\n" + convertedUrl;
+        if ((product).badge) {
+            lines.push(`⚡ *Destaque:* _${product.badge}_`);
+        }
+        lines.push('')
+
+        // 2. Alerta de Cupom (Se houver)
+        if (product.coupon) {
+            lines.push(`🏷️ ${product.coupon} `);
+        }
+
+        // 3. Bloco de Preços
+        if (product.originalPrice) {
+            lines.push(`De: ~~R$ ${product.originalPrice.toFixed(2).replace('.', ',')}~~`);
+        }
+
+        lines.push(`*Por: R$ ${product.price.toFixed(2).replace('.', ',')}*`);
+        lines.push('');
+
+        // 4. Link de Destino (Onde a mágica acontece)
+        const urlOriginal = product.link;
+
+        // Injetamos as tuas tags de afiliado direto nela usando a sintaxe de URL do JS
+        const urlObj = new URL(urlOriginal);
+
+        if (urlObj.hostname.toLowerCase().includes("mercadolivre")) {
+            urlObj.searchParams.set('matt_tool', Env.MATT_TOOL);
+            urlObj.searchParams.set('matt_word', Env.MELI_ID);
+            urlObj.searchParams.set('forceInApp', 'true');
+        }
+        if (urlObj.hostname.toLowerCase().includes("amazon")) {
+            // Injeta o seu ID exclusivo do Amazon Associados
+            urlObj.searchParams.set('tag', Env.AMAZON_TAG);
+
+            // Limpeza opcional: remove lixos de rastreamento do scraper para encurtar o link longo original
+            urlObj.searchParams.delete('qid');
+            urlObj.searchParams.delete('sr');
+            urlObj.searchParams.delete('pf_rd_r');
+            urlObj.searchParams.delete('pf_rd_p');
+            urlObj.searchParams.delete('ref_');
+        }
+
+        // Encurtamos essa URL customizada (vamos falar disso abaixo)
+        lines.push(`*Link com desconto:*`);
+        lines.push(urlObj.toString());
+
+        // Retorna todas as linhas juntas separadas por quebra de linha do WhatsApp
+        return {
+            caption: lines.join('\n'), // O texto formatado que será a legenda
+            image: product.imageUrl    // O link da foto que capturamos no scraping
+        };
+    }
+
+    processProductsML = async (req: Request, res: Response) => {
+        try {
+            const products = req.body;
+
+            if (!Array.isArray(products)) {
+                return res.status(400).json({ error: "O corpo da requisição deve ser um array de produtos." });
+            }
+
+            for (const prod of products) {
+                try {
+                    // 1. Busca se esse ID de promoção já existe no banco
+                    const produtoExistente = await prisma.productsMl.findUnique({
+                        where: { id: prod.id }
+                    });
+
+                    if (!produtoExistente) {
+                        // 🚀 CENÁRIO A: Produto/Promoção nova! 
+                        // Salva no banco e dispara para o WhatsApp
+                        await prisma.productsMl.create({ data: prod });
+
+                        console.log(`📣 [NOVA OFERTA ML] ${prod.title} por R$ ${prod.price} - Enviando para o WhatsApp...`);
+
+                        // Formata a mensagem para enviar
+                        const { caption, image } = this.messageFormat(prod);
+
+                        // Envia de forma assíncrona protegida para não travar o loop caso o Baileys falhe
+                        await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image);
+                    }
+                } catch (itemError: any) {
+                    // Se der erro em UM produto, loga o erro mas NÃO quebra o loop dos outros produtos
+                    console.error(`❌ [Erro Item ML] Falha ao processar o produto ID: ${prod.id}. Erro:`, itemError.message);
                 }
             }
 
-            // 2. Processa as linhas de preço (De/Por) de forma isolada
-            const processedLines = lines.map(line => {
-                let trimmedLine = line.trim();
+            // Responde ao robô que o processamento terminou com sucesso
+            return res.status(200).json({ success: true, message: "Produtos do Mercado Livre processados." });
 
-                if (/^De:/i.test(trimmedLine)) {
-                    const preco = trimmedLine.replace(/^De:\s*/i, "").trim();
-                    return `De: ~${preco}~`;
-                }
-
-                if (/^Por:/i.test(trimmedLine)) {
-                    const preco = trimmedLine.replace(/^Por:\s*/i, "").trim();
-                    return `Por: 🔥 *${preco}*`;
-                }
-
-                // Substitui a URL original pela sua convertida se ela ainda estiver solta na linha
-                if (line.includes(originalUrl) && !line.includes("PROMOÇÃO ATIVA")) {
-                    return line.replace(originalUrl, convertedUrl);
-                }
-
-                return line;
-            });
-
-            formatted = processedLines.join("\n");
+        } catch (error: any) {
+            // Captura falhas graves de infraestrutura (ex: banco desconectado)
+            console.error("💥 [Erro Crítico ML] Falha geral no processProductsML:", error);
+            return res.status(500).json({ error: "Erro interno ao processar ofertas do Mercado Livre." });
         }
-
-        // 3. Fallback para outras lojas (Amazon, Shopee, etc.) se não for KaBuM!
-        else {
-            formatted = formatted.replace(originalUrl, convertedUrl);
-        }
-
-        return formatted;
     }
 
-    getPromo = async (req: Request, res: Response) => {
-    try {
-        const { sourceId, rawText } = req.body;
+    processProductsAmazon = async (req: Request, res: Response) => {
+        try {
+            const products = req.body;
 
-        // 1. Validações básicas iniciais
-        if (!rawText) return res.status(400).json({ error: "Mensagem é obrigatória" });
-
-        const urls = linkParser.extractUrls(rawText);
-        if (urls.length === 0) return res.status(400).json({ error: "Nenhuma URL encontrada na mensagem" });
-
-        const originalUrl = urls[0];
-        if (!originalUrl) return res.status(400).json({ error: "URL é obrigatória" });
-
-        // 2. Proteção contra duplicidade usando findFirst
-        const checkDuplicate = await prisma.ofertas.findFirst({
-            where: { source_id: sourceId }
-        });
-
-        if (checkDuplicate) {
-            return res.status(200).json({ message: "Promoção já cadastrada para essa fonte", oferta: checkDuplicate });
-        }
-
-        // 3. Conversão de links síncrona/blindada
-        const convertedUrl = await linkParser.convertUrl(originalUrl);
-
-        // 🔥 CORREÇÃO AQUI: Passamos os 3 parâmetros e usamos o rawText intacto!
-        const formattedText = this.formatTextForWhatsApp(rawText, originalUrl, convertedUrl);
-
-        // 4. Salva no banco com status 'Posted'
-        const offer = await prisma.ofertas.create({
-            data: {
-                source_id: sourceId,
-                title: "",
-                original_url: originalUrl,
-                converted_url: convertedUrl,
-                status: "Posted",
+            if (!Array.isArray(products)) {
+                return res.status(400).json({ error: "O corpo da requisição deve ser um array de produtos." });
             }
-        });
 
-        // 5. DISPARO PARA O GRUPO DO WHATSAPP
-        const TARGET_GROUP_JID = Env.WHATSAPP_GROUP_JID;
-        const whatsappDispatched = await whatsAppService.sendMessage(TARGET_GROUP_JID, formattedText);
+            for (const prod of products) {
+                try {
+                    // 1. Busca se esse ID de promoção já existe no banco
+                    const produtoExistente = await prisma.productsMl.findUnique({
+                        where: { id: prod.id }
+                    });
 
-        if (!whatsappDispatched) {
-            await prisma.ofertas.update({
-                where: { id: offer.id },
-                data: { status: "Failed" }
-            });
-            return res.status(500).json({ error: "Erro ao enviar a mensagem para o grupo do WhatsApp." });
+                    if (!produtoExistente) {
+                        // 🚀 CENÁRIO A: Produto/Promoção nova! 
+                        // Salva no banco e dispara para o WhatsApp
+                        await prisma.productsMl.create({ data: prod });
+
+                        console.log(`📣 [NOVA OFERTA AMAZON] ${prod.title} por R$ ${prod.price} - Enviando para o WhatsApp...`);
+
+                        // Formata a mensagem para enviar
+                        const { caption, image } = this.messageFormat(prod);
+
+                        // Envia de forma assíncrona protegida
+                        await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image);
+                    }
+                } catch (itemError: any) {
+                    // Se der erro em um produto da Amazon, continua o loop de forma segura
+                    console.error(`❌ [Erro Item Amazon] Falha ao processar o produto ID: ${prod.id}. Erro:`, itemError.message);
+                }
+            }
+
+            // Responde ao robô que o processamento terminou com sucesso
+            return res.status(200).json({ success: true, message: "Produtos da Amazon processados." });
+
+        } catch (error: any) {
+            console.error("💥 [Erro Crítico Amazon] Falha geral no processProductsAmazon:", error);
+            return res.status(500).json({ error: "Erro interno ao processar ofertas da Amazon." });
         }
-
-        return res.status(200).json({
-            message: "Oferta processada e enviada para o WhatsApp!",
-            offer
-        });
-
-    } catch (error) {
-        console.error("Erro interno no PromosController:", error);
-        return res.status(500).json({ error: "Erro interno no servidor" });
     }
-}
-
-
 }

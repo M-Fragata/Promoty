@@ -46,3 +46,8 @@ export { Prisma }
  * 
  */
 export type Ofertas = Prisma.OfertasModel
+/**
+ * Model ProductsMl
+ * 
+ */
+export type ProductsMl = Prisma.ProductsMlModel

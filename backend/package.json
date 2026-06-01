@@ -24,6 +24,7 @@
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@whiskeysockets/baileys": "^7.0.0-rc13",
+    "chromium": "^3.0.3",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "input": "^1.0.1",

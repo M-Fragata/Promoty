@@ -8,6 +8,8 @@ import { type MlProducts } from "../types/MLPRODUCTS.js"
 
 const MARGEM_TOLERANCIA = 0.04 //Margem de tolerância: 4% acima do menor preço histórico
 
+const groupURL = "https://chat.whatsapp.com/DVuVPqJ2DwZ4oZUU1maZIi"
+
 export class PromosController {
 
 
@@ -15,7 +17,7 @@ export class PromosController {
 
         const lines: string[] = []
 
-        lines.push(`🔥 *${product.title.trim()}*`);
+        lines.push(`*${product.title.trim()}*`);
         lines.push(''); // Linha em branco para respirar
 
         if (product.badge) {
@@ -37,7 +39,7 @@ export class PromosController {
         }
 
         lines.push(`Por: R$ ${product.price.toFixed(2)}`);
-        
+
         // 2. Alerta de Cupom (Se houver)
         if (product.coupon) {
             // Remove quebras de linha (\n, \r) e espaços duplicados trazidos pelo scraper
@@ -57,7 +59,7 @@ export class PromosController {
             }
         }
 
-lines.push('');
+        lines.push('');
 
         // 4. Link de Destino (Onde a mágica acontece)
         const urlOriginal = product.link;
@@ -71,20 +73,44 @@ lines.push('');
             urlObj.searchParams.set('forceInApp', 'true');
         }
         if (urlObj.hostname.toLowerCase().includes("amazon")) {
-            // Injeta o seu ID exclusivo do Amazon Associados
-            urlObj.searchParams.set('tag', Env.AMAZON_TAG);
+            // 1. Tenta encontrar o código ASIN na rota da URL usando Regex
+            // O ASIN sempre tem 10 caracteres alfanuméricos após /dp/ ou /gp/product/
+            const asinMatch = urlObj.pathname.match(/(?:dp|gp\/product)\/([A-Z0-9]{10})/i);
 
-            // Limpeza opcional: remove lixos de rastreamento do scraper para encurtar o link longo original
-            urlObj.searchParams.delete('qid');
-            urlObj.searchParams.delete('sr');
-            urlObj.searchParams.delete('pf_rd_r');
-            urlObj.searchParams.delete('pf_rd_p');
-            urlObj.searchParams.delete('ref_');
+            if (asinMatch && asinMatch[1]) {
+                const asin = asinMatch[1].toUpperCase();
+
+                // 2. Simplifica a rota da URL deixando apenas /dp/ASIN
+                urlObj.pathname = `/dp/${asin}`;
+
+                // 3. Limpa TODOS os parâmetros de busca antigos de uma vez só
+                urlObj.search = '';
+            } else {
+                // Caso não ache o ASIN (mecanismo de segurança), remove apenas os principais lixos que você já tinha mapeado
+                urlObj.searchParams.delete('qid');
+                urlObj.searchParams.delete('sr');
+                
+                urlObj.searchParams.delete('pf_rd_r');
+                urlObj.searchParams.delete('pf_rd_p');
+                urlObj.searchParams.delete('ref_');
+                urlObj.searchParams.delete('sbo');
+                urlObj.searchParams.delete('linkCode');
+                urlObj.searchParams.delete('linkId');
+            }
+
+            // 4. Injeta o seu ID exclusivo do Amazon Associados (garante a comissão)
+            urlObj.searchParams.set('tag', Env.AMAZON_TAG);
         }
 
         // Encurtamos essa URL customizada (vamos falar disso abaixo)
         lines.push(`*Link com desconto:*`);
         lines.push(urlObj.toString());
+
+        //link do grupo
+        lines.push('')
+        lines.push('🔥 *As melhores ofertas aqui:*')
+        lines.push(groupURL)
+
 
         // Retorna todas as linhas juntas separadas por quebra de linha do WhatsApp
         return {

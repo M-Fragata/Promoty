@@ -1,9 +1,17 @@
 import { chromium } from 'playwright-extra';
 import stealthPlugin from 'puppeteer-extra-plugin-stealth';
+import { type MlProducts } from "../types/MLPRODUCTS";
 
 chromium.use(stealthPlugin());
 
-import { type MlProducts } from "../types/MLPRODUCTS";
+const USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+]
+
+const HUMAN_DELAY = (min = 2000, max = 5000) => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)))
 
 export class AccesWeb {
 
@@ -22,9 +30,13 @@ export class AccesWeb {
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
+        const userAgentRandom = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] ?? USER_AGENTS[0]
+
         const context = await browser.newContext({
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            locale: 'pt-BR'
+            userAgent: userAgentRandom as string,
+            viewport: { width: 1366, height: 768 }, // Resolução padrão de notebook comum
+            locale: 'pt-BR',
+            timezoneId: 'America/Sao_Paulo',
         });
 
         const page = await context.newPage();
@@ -38,6 +50,8 @@ export class AccesWeb {
 
                     // O robô navega exatamente para a URL com os filtros que você escolheu
                     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+                    await HUMAN_DELAY(3000, 6000)
 
                     // Mapeia os cards que aparecem nessa listagem específica
                     const cards = await page.$$('.poly-card');
@@ -146,11 +160,13 @@ export class AccesWeb {
 
                 } catch (errorUrl: any) {
                     // Trata o erro de uma página específica (ex: timeout) e deixa o laço ir para a próxima URL
+                    await page.screenshot({ path: `logs/erro-mercadolivre-${Date.now()}.png`, fullPage: true });
                     console.error(`❌ Erro ao acessar a URL filtrada do Mercado Livre:`, errorUrl.message);
                 }
             } // 🔄 Fim do laço for
 
         } catch (error) {
+            await page.screenshot({ path: `logs/erro-mercadolivre-${Date.now()}.png`, fullPage: true });
             console.error("❌ Erro catastrófico geral no processamento das páginas:", error);
         } finally {
             // O bloco finally fecha o navegador uma única vez ao término de todas as iterações ou em caso de quebra do try principal
@@ -175,9 +191,13 @@ export class AccesWeb {
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
+        const userAgentRandom = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] ?? USER_AGENTS[0]
+
         const context = await browser.newContext({
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            locale: 'pt-BR'
+            userAgent: userAgentRandom as string,
+            viewport: { width: 1366, height: 768 }, // Resolução padrão de notebook comum
+            locale: 'pt-BR',
+            timezoneId: 'America/Sao_Paulo',
         });
 
         const page = await context.newPage();
@@ -189,6 +209,8 @@ export class AccesWeb {
                     console.log(`🌐 [Amazon Scraper] Acessando URL de Departamento...`);
 
                     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+                    await HUMAN_DELAY(3000, 6000)
 
                     // Espera carregar os cards da nova estrutura da Amazon baseada em CSS Modules
                     await page.waitForSelector('div[data-testid="product-card"]', { timeout: 10000 }).catch(() => null);
@@ -271,11 +293,13 @@ export class AccesWeb {
                     }
 
                 } catch (errorUrl: any) {
+                    await page.screenshot({ path: `logs/erro-amazon-${Date.now()}.png`, fullPage: true });
                     console.error(`❌ Erro ao acessar departamento da Amazon:`, errorUrl.message);
                 }
             }
 
         } catch (error) {
+            await page.screenshot({ path: `logs/erro-amazon-${Date.now()}.png`, fullPage: true });
             console.error("❌ Erro geral no processamento das páginas da Amazon:", error);
         } finally {
             console.log("🔒 [Amazon Scraper] Fechando navegador de forma segura...");

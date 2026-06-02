@@ -35,7 +35,7 @@ export class PromosController {
 
         // 3. Bloco de Preços
         if (product.originalPrice) {
-            lines.push(`~De$ ${product.originalPrice.toFixed(2)}~`);
+            lines.push(`~De: R$ ${product.originalPrice.toFixed(2)}~`);
         }
 
         lines.push(`Por: R$ ${product.price.toFixed(2)}`);
@@ -143,7 +143,7 @@ export class PromosController {
 
                         const { caption, image } = this.messageFormat(prod);
 
-                        await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image);
+                        await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
                     } else {
                         const precoHistorico = produtoExistente.price;
                         const precoNovo = prod.price;
@@ -170,7 +170,7 @@ export class PromosController {
                             });
 
                             const { caption, image } = this.messageFormat(prod);
-                            await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image);
+                            await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
 
                         } else if (precoNovo <= precoLimiteMaximo) {
                             // ⭐ Sub-cenário B2: Está dentro da margem de 4% (Preço Excelente)
@@ -195,7 +195,7 @@ export class PromosController {
 
                                 const { caption, image } = this.messageFormat(prod);
 
-                                await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image);
+                                await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
                             } else {
                                 // 🤫 Continua na promoção pelo mesmo preço dentro da janela de 24h
                                 console.log(`🤫 [ML - SILENCIADO] ${prod.title} continua por R$ ${precoNovo} dentro das 24h. Apenas atualizando banco.`);
@@ -269,7 +269,7 @@ export class PromosController {
                         const { caption, image } = this.messageFormat(prod);
 
                         // Envia de forma assíncrona protegida
-                        await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image);
+                        await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
 
                     } else {
 
@@ -297,7 +297,7 @@ export class PromosController {
                             });
 
                             const { caption, image } = this.messageFormat(prod);
-                            await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image);
+                            await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
 
                         } else if (precoNovo <= precoLimiteMaximo) {
                             // ⏰ Define o tempo de Cooldown (Ex: 24 horas atrás)
@@ -322,7 +322,7 @@ export class PromosController {
                                 });
 
                                 const { caption, image } = this.messageFormat(prod);
-                                await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image);
+                                await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
 
                             } else {
                                 // 🤫 O preço continua igual e está dentro das 24h desde o último envio.

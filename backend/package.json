@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx src/server.ts",
-    "crawler": "tsx src/scripts/crawler.ts"
+    "crawler": "tsx src/scripts/crawler.ts",
+    "shopee": "tsx src/scripts/shopee.ts"
   },
   "keywords": [],
   "author": "",

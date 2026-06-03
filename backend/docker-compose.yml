@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # 1. Banco de Dados Relacional
+  kutt_db:
+    image: postgres:15-alpine
+    container_name: fragata_kutt_db
+    environment:
+      POSTGRES_USER: kuttuser
+      POSTGRES_PASSWORD: 
+      POSTGRES_DB: kuttdb
+    volumes:
+      - kutt_postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  # 2. Cache de Alta Performance
+  kutt_redis:
+    image: redis:7-alpine
+    container_name: fragata_kutt_redis
+    restart: always
+
+  # 3. A Aplicação Kutt (Node.js/TypeScript)
+  kutt:
+    image: kutt/kutt:latest
+    container_name: fragata_kutt_app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DEFAULT_DOMAIN=localhost:3000 # Altere para frgt.to ou fragata.me em produção
+      - DB_CLIENT=postgres
+      - DB_HOST=kutt_db
+      - DB_USER=kuttuser
+      - DB_PASSWORD=SuaSenhaSuperSeguraAqui
+      - DB_NAME=kuttdb
+      - REDIS_HOST=kutt_redis
+      - JWT_SECRET=UmHashQualquerEAleatorioParaSegurancaDoPainel
+      - ADMIN_EMAILS=seu-email@gmail.com # O e-mail que você usará para logar como Admin
+      - REGISTRATION_INVALID_EMAIL=false
+      - DISALLOW_REGISTRATION=false # Mude para true após criar sua conta para fechar o sistema
+    depends_on:
+      - kutt_db
+      - kutt_redis
+    restart: always
+
+volumes:
+  kutt_postgres_data:

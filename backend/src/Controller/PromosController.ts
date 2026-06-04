@@ -3,6 +3,7 @@ import { whatsAppService } from "../app.js";
 import { prisma } from "../Database/Prisma.js";
 import { Env } from "../utils/Envirolment.js";
 
+import { EncurtaLinkController } from "./EncutarLinkController.js";
 
 import { type MlProducts } from "../types/MLPRODUCTS.js"
 
@@ -12,8 +13,7 @@ const groupURL = "https://chat.whatsapp.com/DVuVPqJ2DwZ4oZUU1maZIi"
 
 export class PromosController {
 
-
-    messageFormat(product: MlProducts) {
+    async messageFormat(product: MlProducts) {
 
         const lines: string[] = []
 
@@ -89,7 +89,7 @@ export class PromosController {
                 // Caso não ache o ASIN (mecanismo de segurança), remove apenas os principais lixos que você já tinha mapeado
                 urlObj.searchParams.delete('qid');
                 urlObj.searchParams.delete('sr');
-                
+
                 urlObj.searchParams.delete('pf_rd_r');
                 urlObj.searchParams.delete('pf_rd_p');
                 urlObj.searchParams.delete('ref_');
@@ -102,9 +102,12 @@ export class PromosController {
             urlObj.searchParams.set('tag', Env.AMAZON_TAG);
         }
 
+        const customSlug = GetCustomSlug(product.title);
+        const urlEncurt = await EncurtaLinkController(urlObj.toString(), customSlug);
+
         // Encurtamos essa URL customizada (vamos falar disso abaixo)
         lines.push(`*Link com desconto:*`);
-        lines.push(urlObj.toString());
+        lines.push(urlEncurt);
 
         //link do grupo
         lines.push('')
@@ -141,7 +144,7 @@ export class PromosController {
 
                         console.log(`📣 [NOVA OFERTA ML] ${prod.title} por R$ ${prod.price} - Enviando para o WhatsApp...`);
 
-                        const { caption, image } = this.messageFormat(prod);
+                        const { caption, image } = await this.messageFormat(prod);
 
                         await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
                     } else {
@@ -169,7 +172,7 @@ export class PromosController {
                                 }
                             });
 
-                            const { caption, image } = this.messageFormat(prod);
+                            const { caption, image } = await this.messageFormat(prod);
                             await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
 
                         } else if (precoNovo <= precoLimiteMaximo) {
@@ -193,7 +196,7 @@ export class PromosController {
                                     }
                                 });
 
-                                const { caption, image } = this.messageFormat(prod);
+                                const { caption, image } = await this.messageFormat(prod);
 
                                 await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
                             } else {
@@ -266,7 +269,7 @@ export class PromosController {
                         console.log(`📣 [NOVA OFERTA AMAZON] ${prod.title} por R$ ${prod.price} - Enviando para o WhatsApp...`);
 
                         // Formata a mensagem para enviar
-                        const { caption, image } = this.messageFormat(prod);
+                        const { caption, image } = await this.messageFormat(prod);
 
                         // Envia de forma assíncrona protegida
                         await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
@@ -296,7 +299,7 @@ export class PromosController {
                                 }
                             });
 
-                            const { caption, image } = this.messageFormat(prod);
+                            const { caption, image } = await this.messageFormat(prod);
                             await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
 
                         } else if (precoNovo <= precoLimiteMaximo) {
@@ -321,7 +324,7 @@ export class PromosController {
                                     }
                                 });
 
-                                const { caption, image } = this.messageFormat(prod);
+                                const { caption, image } = await this.messageFormat(prod);
                                 await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
 
                             } else {
@@ -370,4 +373,28 @@ export class PromosController {
             return res.status(500).json({ error: "Erro interno ao processar ofertas da Amazon." });
         }
     }
+}
+
+function GetCustomSlug(title: string): string {
+    // 1. Deixa em minúsculas e remove acentos
+    const textoTratado = title
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+
+    // 2. Transforma hifens, barras ou caracteres especiais em espaços simples para isolar as palavras puro texto
+    const textoLimpo = textoTratado
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    // 3. Divide estritamente por espaços e captura as 5 primeiras palavras reais
+    const palavras = textoLimpo.split(" ").filter(p => p.length > 0);
+    const primeirasPalavras = palavras.slice(0, 5);
+
+    // 4. Junta tudo com hífen
+    const slugFinal = primeirasPalavras.join("-");
+
+    // 5. Garantia total anti-rejeição: remove hifens que possam ter sobrado nas pontas
+    return slugFinal.replace(/^-+|-+$/g, "");
 }

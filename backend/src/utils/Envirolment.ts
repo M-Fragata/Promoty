@@ -12,7 +12,8 @@ const EnvSchema = z.object({
     AWIN_PUBLISHER_ID: z.string(),
     MELI_ID: z.string(),
     TELEGRAM_SESSION: z.string(),
-    MATT_TOOL: z.string()
+    MATT_TOOL: z.string(),
+    KUTT_API_KEY: z.string()
 })
 
 const Envirol = EnvSchema.safeParse(process.env);

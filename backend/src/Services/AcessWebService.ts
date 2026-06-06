@@ -333,6 +333,7 @@ export class AccesWeb {
                             console.log(`🤔 [Scraper] Rolada atual não trouxe produtos inéditos. Contador: ${rodadasSemNovosProdutos + 1}/2`);
                             rodadasSemNovosProdutos++;
                         } else {
+                            console.log(`Produtos encontrados nesta rodada de scroll: ${novosProdutosNestaRolada}`);
                             rodadasSemNovosProdutos = 0; // Reseta o contador se ainda está achando coisas inéditas
                         }
                         // Rola a tela e aguarda um tempo curtinho para o React renderizar a nova fileira virtualizada

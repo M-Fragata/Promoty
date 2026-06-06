@@ -14,7 +14,7 @@ export async function EncurtaLinkController(longUrl: string, customSlug?: string
         const requestBody: any = {
             target: longUrl
         };
-
+console.log("🔗 Encurtando link:", longUrl, "com slug customizado:", customSlug);
         // Se o slug customizado foi enviado, injetamos no parâmetro "custom" que o Kutt espera
         if (customSlug) {
             requestBody.custom = customSlug;
@@ -37,7 +37,8 @@ export async function EncurtaLinkController(longUrl: string, customSlug?: string
         }
 
         const data = await response.json();
-        return data.link; // Retorna o link encurtador pronto (ex: http://localhost:3000/xyz)
+        console.log("🔗 Link encurtado:", data.link);
+        return data.link; // Retorna o link encurtador pronto (ex: http://fragata.me/xyz)
 
     } catch (error) {
         console.error("❌ Falha ao encurtar link no Kutt. Retornando link original:", error);

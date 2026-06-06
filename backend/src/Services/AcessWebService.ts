@@ -16,8 +16,8 @@ const HUMAN_DELAY = (min = 2000, max = 5000) => new Promise(resolve => setTimeou
 
 // Váriaveis globais
 const keywords: string[] = ["notebook", "celular", "smartphone", "monitor", "placa de vídeo", "ssd", "hd", "fone", "headset", "teclado", "mouse", "webcam", "caixa de som bluetooth", "smartwatch", "tablet", "processador", "memória ram", "gabinete gamer", "cooler", "fonte para pc", "impressora", "roteador", "tv", "videogame", "console", "jogo de videogame", "cadeira gamer", "cadeira ergonomica", "cadeira de escritório", "mesa gamer", "power bank", "cabo usb", "carregador portátil", "suporte para notebook", "microfone", "webcam", "filtro de linha", "no-break", "pen drive", "cartão de memória", "nvme"]
-const descountMin: number = 25
-const maxPrice: number = 4000
+const descountMin: number = 35
+const maxPrice: number = 3000
 
 export class AccesWeb {
 

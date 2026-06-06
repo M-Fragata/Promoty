@@ -14,7 +14,14 @@ const EnvSchema = z.object({
     TELEGRAM_SESSION: z.string(),
     MATT_TOOL: z.string(),
     KUTT_API_KEY: z.string(),
-    HEADLESS: z.coerce.boolean().default(true),//padrão produção
+    HEADLESS: z.preprocess(
+        (val) => {
+            if (val === 'true') return true;
+            if (val === 'false') return false;
+            return val;
+        },
+        z.boolean()
+    ).default(true),//padrão produção
 })
 
 const Envirol = EnvSchema.safeParse(process.env);

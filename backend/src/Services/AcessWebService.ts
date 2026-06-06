@@ -1,6 +1,6 @@
 import { chromium } from 'playwright-extra';
 import stealthPlugin from 'puppeteer-extra-plugin-stealth';
-import { type MlProducts } from "../types/MLPRODUCTS";
+import { type MlProducts } from "../types/MLPRODUCTS.js";
 
 chromium.use(stealthPlugin());
 

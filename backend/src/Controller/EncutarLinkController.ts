@@ -37,7 +37,7 @@ console.log("🔗 Encurtando link:", longUrl, "com slug customizado:", customSlu
         }
 
         const data = await response.json();
-        console.log("🔗 Link encurtado:", data.link);
+        console.log("🔍 Resposta completa da API do Kutt:", JSON.stringify(data, null, 2));
         return data.link; // Retorna o link encurtador pronto (ex: http://fragata.me/xyz)
 
     } catch (error) {

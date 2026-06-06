@@ -229,6 +229,9 @@ export class AccesWeb {
                     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
                     await HUMAN_DELAY(3000, 6000);
 
+                    await page.evaluate((dist) => window.scrollBy(0, dist), 1500);
+                    await page.waitForTimeout(1500);
+
                     // Espera inicial pelo contêiner de lista do Virtuoso
                     await page.waitForSelector('div[data-testid="virtuoso-item-list"]', { timeout: 15000 }).catch(() => null);
 
@@ -242,9 +245,6 @@ export class AccesWeb {
                     let rodadasSemNovosProdutos = 0;
 
                     console.log(`⏳ Iniciando varredura dinâmica por scroll...`);
-
-                    await page.evaluate((dist) => window.scrollBy(0, dist), 1500);
-                    await page.waitForTimeout(1500);
 
                     while (totalHeight < maxScrollSafe && rodadasSemNovosProdutos < 8) {
                         // Executa a extração dos dados crus diretamente no contexto do navegador
@@ -330,19 +330,18 @@ export class AccesWeb {
                         }
 
                         if (novosProdutosNestaRolada === 0) {
+                            console.log(`🤔 [Scraper] Rolada atual não trouxe produtos inéditos. Contador: ${rodadasSemNovosProdutos + 1}/8`);
                             rodadasSemNovosProdutos++;
                         } else {
                             rodadasSemNovosProdutos = 0; // Reseta o contador se ainda está achando coisas inéditas
-                            // Rola a tela e aguarda um tempo curtinho para o React renderizar a nova fileira virtualizada
-                            await page.evaluate((dist) => window.scrollBy(0, dist), distance);
-                            await page.waitForTimeout(2500);
                         }
-
-                        const currentScrollHeight = await page.evaluate(() => document.body.scrollHeight);
+                        // Rola a tela e aguarda um tempo curtinho para o React renderizar a nova fileira virtualizada
+                        await page.evaluate((dist) => window.scrollBy(0, dist), distance);
                         totalHeight += distance;
+                        await page.waitForTimeout(2500);
 
                         // Se o scroll alcançou o fim absoluto do contêiner físico
-                        if (totalHeight >= currentScrollHeight) break;
+                        if (totalHeight >= maxScrollSafe) break;
                     }
 
                     console.log(`📦 Encontrados e validados ${productsPage.length} cards exclusivos nesta página da Amazon.`);

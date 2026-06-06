@@ -2,7 +2,7 @@ import { Env } from '../utils/Envirolment.js';
 
 export async function EncurtaLinkController(longUrl: string, customSlug?: string): Promise<string> {
     try {
-        const KUTT_API_URL = "http://localhost:3000/api/v2/links"
+        const KUTT_API_URL = "https://fragata.me/api/v2/links"
         const API_KEY = Env.KUTT_API_KEY;
 
         if (!API_KEY) {
@@ -12,13 +12,15 @@ export async function EncurtaLinkController(longUrl: string, customSlug?: string
 
         // Montamos o corpo da requisição
         const requestBody: any = {
-            target: longUrl,
-            reuse: true
+            target: longUrl
         };
 
         // Se o slug customizado foi enviado, injetamos no parâmetro "custom" que o Kutt espera
         if (customSlug) {
             requestBody.custom = customSlug;
+            requestBody.reuse = false; // 👈 ADICIONE ESSA LINHA AQUI!
+        } else {
+            requestBody.reuse = true;  // 👈 E ESSA AQUI (caso algum link não tenha título)
         }
 
         const response = await fetch(KUTT_API_URL, {

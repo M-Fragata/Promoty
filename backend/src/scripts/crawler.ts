@@ -2,6 +2,9 @@ import { AccesWeb } from '../Services/AcessWebService';
 
 const delay = (minutos: number) => new Promise(resolve => setTimeout(resolve, minutos * 60 * 1000))
 
+const TimeBetweenRunsDia = 30; //30minutos
+const timeBetweensRunsMadrugada = 180 //3 horas
+
 async function executarRobo() {
     console.log("🤖 Iniciando bateria de promoções para Amazon e Mercado Livre...\n");
 
@@ -46,8 +49,8 @@ async function executarRobo() {
             console.error("❌ [Amazon] Falha crítica no teste principal:", error);
         }
 
-        console.log('⏳ Aguardando 10 minutos de intervalo de segurança...', Date.now());
-        await delay(10);
+        console.log(`⏳ Aguardando ${TimeBetweenRunsDia} minutos de intervalo de segurança... [${new Date().toLocaleTimeString('pt-BR')}]`);
+        await delay(TimeBetweenRunsDia);
 
         // ==========================================
         // 🔵 BLOCO TESTE: MERCADO LIVRE
@@ -88,11 +91,20 @@ async function executarRobo() {
             console.error("❌ [Mercado Livre] Falha crítica no teste principal:", error);
         }
 
-        console.log('⏳ Aguardando 10 minutos de intervalo de segurança...', Date.now());
-        await delay(10);
+        console.log(`⏳ Aguardando ${hourOfDay()} minutos de intervalo de segurança...`, Date.now());
+        await delay(hourOfDay());
 
         console.log("\n🏁 Bateria de testes finalizada.");
     }
+}
+
+function hourOfDay() {
+    const now = new Date();
+    const hours = now.getHours();
+
+    if (hours >= 0 && hours < 7) return timeBetweensRunsMadrugada;
+
+    return TimeBetweenRunsDia
 }
 
 executarRobo();

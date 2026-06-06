@@ -224,105 +224,133 @@ export class AccesWeb {
 
         try {
             for (const URL of URLs) {
-
                 try {
                     console.log(`🌐 [Amazon Scraper] Acessando URL de Departamento...`);
-
                     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+                    await HUMAN_DELAY(3000, 6000);
 
-                    await HUMAN_DELAY(3000, 6000)
-
-                    // Espera carregar os cards da nova estrutura da Amazon baseada em CSS Modules
-                    await page.waitForSelector('div[data-testid="product-card"]', { timeout: 10000 }).catch(() => null);
-
-                    // Mapeia os cards baseado na tag test-id que vimos no exemplo do HTML
-                    const cards = await page.$$('div[data-testid="product-card"]');
-                    console.log(`📦 Encontrados ${cards.length} cards nesta página da Amazon.`);
+                    // Espera inicial pelo contêiner de lista do Virtuoso
+                    await page.waitForSelector('div[data-testid="virtuoso-item-list"]', { timeout: 15000 }).catch(() => null);
 
                     const productsPage: MlProducts[] = [];
+                    const linksCapturados = new Set<string>();
 
-                    for (const card of cards) {
-                        try {
-                            // 1. CAPTURA LINK E ASIN (ID Único da Amazon)
-                            const linkElement = await card.$('a[data-testid="product-card-link"]');
-                            if (!linkElement) continue;
+                    // Lógica de Scroll Incremental para burlar a destruição de elementos do Virtuoso
+                    let totalHeight = 0;
+                    const distance = 450; // Rola aproximadamente uma tela por vez
+                    const maxScrollSafe = 15000; // Trava para evitar loops em páginas infinitas
+                    let rodadasSemNovosProdutos = 0;
 
-                            const linkOriginal = await linkElement.getAttribute('href');
-                            if (!linkOriginal) continue;
+                    console.log(`⏳ Iniciando varredura dinâmica por scroll...`);
 
-                            const asin = await card.getAttribute('data-asin');
-                            if (!asin) continue;
+                    await page.evaluate((dist) => window.scrollBy(0, dist), 1500);
+                    await page.waitForTimeout(1500);
 
-                            // 2. CAPTURA TÍTULO
-                            const titleElement = await card.$('.ProductCard-module__title_awabIOxk6xfKvxKcdKDH .a-truncate-full');
-                            const title = titleElement ? await titleElement.innerText() : 'Produto sem título';
+                    while (totalHeight < maxScrollSafe && rodadasSemNovosProdutos < 8) {
+                        // Executa a extração dos dados crus diretamente no contexto do navegador
+                        const rawProducts = await page.evaluate(() => {
+                            const cards = Array.from(document.querySelectorAll('div[data-testid="product-card"]'));
 
-                            // 3. CAPTURA IMAGEM (Buscando dinamicamente pela classe de imagem do card)
-                            const imgElement = await card.$('.ProductCardImage-module__image_SU6C7KYJpko3vQ2fK7Kf');
-                            const imageUrl = imgElement ? await imgElement.getAttribute('src') : null;
+                            return cards.map(card => {
+                                const linkElement = card.querySelector('a[data-testid="product-card-link"]');
+                                const linkOriginal = linkElement ? (linkElement as HTMLAnchorElement).href : null;
+                                const asin = card.getAttribute('data-asin');
 
-                            // 4. CAPTURA PREÇO ATUAL (Por)
-                            const precoElement = await card.$('.ProductCard-module__priceToPay_olAgJzVNGyj2javg2pAe .a-offscreen');
-                            if (!precoElement) continue; // Se não tem preço visível, pula o card
-                            const precoTexto = await precoElement.innerText();
-                            // Remove o texto "Preço da Oferta: R$" deixando apenas os números
-                            const price = parseFloat(precoTexto.replace(/[^\d]/g, '')) / 100;
+                                const titleElement = card.querySelector('.ProductCard-module__title_awabIOxk6xfKvxKcdKDH .a-truncate-full');
+                                const title = titleElement ? (titleElement as HTMLElement).innerText : 'Produto sem título';
 
-                            // 5. CAPTURA PREÇO ANTIGO (De - se houver)
-                            const precoOriginalElement = await card.$('.ProductCard-module__wrapPrice__sMO92NjAjHmGPn3jnIH .a-text-price .a-offscreen');
-                            let originalPrice: number | null = null;
-                            if (precoOriginalElement) {
-                                const precoOriginalTexto = await precoOriginalElement.innerText();
-                                originalPrice = parseFloat(precoOriginalTexto.replace(/[^\d]/g, '')) / 100;
-                            }
+                                const imgElement = card.querySelector('.ProductCardImage-module__image_SU6C7KYJpko3vQ2fK7Kf');
+                                const imageUrl = imgElement ? imgElement.getAttribute('src') : null;
 
-                            if (!utils.verifyDiscount(originalPrice, price) || !utils.verifyMaxPrice(price) || !utils.verifyKeyWords(title)) continue;
+                                const precoElement = card.querySelector('.ProductCard-module__priceToPay_olAgJzVNGyj2javg2pAe .a-offscreen');
+                                const precoTexto = precoElement ? (precoElement as HTMLElement).innerText : null;
 
-                            //6 captura a badge
-                            let badgeText: string | null = null;
-                            const badgeContainer = await card.$('div[data-component="dui-badge"]');
-                            if (badgeContainer) {
-                                // Pega todos os spans internos (um costuma ser a porcentagem e o outro o texto)
-                                const spans = await badgeContainer.$$('span.a-size-mini');
-                                const textosBadge: string[] = [];
+                                const precoOriginalElement = card.querySelector('.ProductCard-module__wrapPrice__sMO92NjAjHmGPn3jnIH .a-text-price .a-offscreen');
+                                const precoOriginalTexto = precoOriginalElement ? (precoOriginalElement as HTMLElement).innerText : null;
 
-                                for (const span of spans) {
-                                    const texto = await span.innerText();
-                                    if (texto && texto.trim()) {
-                                        textosBadge.push(texto.trim());
-                                    }
+                                // Tratamento de badges internos do contêiner dui-badge
+                                let badgeText: string | null = null;
+                                const badgeContainer = card.querySelector('div[data-component="dui-badge"]');
+                                if (badgeContainer) {
+                                    const spans = Array.from(badgeContainer.querySelectorAll('span.a-size-mini'));
+                                    const textos = spans.map(s => (s as HTMLElement).innerText.trim()).filter(Boolean);
+                                    if (textos.length > 0) badgeText = textos.join(' • ');
                                 }
 
-                                // Se encontrou algum texto, junta eles. Ex: "29% off - Oferta" ou "34% off - Menor preço em 365 dias"
-                                if (textosBadge.length > 0) {
-                                    badgeText = textosBadge.join(' • ');
-                                }
-                            }
-
-                            productsPage.push({
-                                id: asin.trim(),
-                                title: title.trim(),
-                                price,
-                                originalPrice,
-                                coupon: null,
-                                badge: badgeText,
-                                imageUrl,
-                                link: linkOriginal,
-                                store: 'Amazon'
+                                return {
+                                    asin,
+                                    linkOriginal,
+                                    title,
+                                    imageUrl,
+                                    precoTexto,
+                                    precoOriginalTexto,
+                                    badgeText
+                                };
                             });
+                        });
 
-                        } catch (erroCard) {
-                            continue; // Erro em um item não para a raspagem da página toda
+                        let novosProdutosNestaRolada = 0;
+
+                        // Processa os dados extraídos no contexto do Node.js utilizando suas funções utilitárias
+                        for (const item of rawProducts) {
+                            try {
+                                if (!item.linkOriginal || !item.asin || !item.precoTexto) continue;
+                                if (linksCapturados.has(item.linkOriginal)) continue;
+
+                                const price = parseFloat(item.precoTexto.replace(/[^\d]/g, '')) / 100;
+
+                                let originalPrice: number | null = null;
+                                if (item.precoOriginalTexto) {
+                                    originalPrice = parseFloat(item.precoOriginalTexto.replace(/[^\d]/g, '')) / 100;
+                                }
+
+                                // Validações do seu backend
+                                if (!utils.verifyDiscount(originalPrice, price) || !utils.verifyMaxPrice(price) || !utils.verifyKeyWords(item.title)) {
+                                    continue;
+                                }
+
+                                linksCapturados.add(item.linkOriginal);
+                                novosProdutosNestaRolada++;
+
+                                productsPage.push({
+                                    id: item.asin.trim(),
+                                    title: item.title.trim(),
+                                    price,
+                                    originalPrice,
+                                    coupon: null,
+                                    badge: item.badgeText,
+                                    imageUrl: item.imageUrl,
+                                    link: item.linkOriginal,
+                                    store: 'Amazon'
+                                });
+
+                            } catch (e) {
+                                // Ignora falhas em cards individuais para não quebrar o fluxo
+                            }
                         }
 
-                        // Se terminou a página e achou produtos, envia IMEDIATAMENTE para o callback
-                        if (productsPage.length > 0 && onPageScraped) {
-                            console.log(`🚀 [Scraper] Página processada! Enviando ${productsPage.length} produtos para o Crawler em background...`);
-
-                            // Chamamos a função sem dar await aqui dentro para liberar o laço
-                            onPageScraped(productsPage);
+                        if (novosProdutosNestaRolada === 0) {
+                            rodadasSemNovosProdutos++;
+                        } else {
+                            rodadasSemNovosProdutos = 0; // Reseta o contador se ainda está achando coisas inéditas
+                            // Rola a tela e aguarda um tempo curtinho para o React renderizar a nova fileira virtualizada
+                            await page.evaluate((dist) => window.scrollBy(0, dist), distance);
+                            await page.waitForTimeout(2500);
                         }
 
+                        const currentScrollHeight = await page.evaluate(() => document.body.scrollHeight);
+                        totalHeight += distance;
+
+                        // Se o scroll alcançou o fim absoluto do contêiner físico
+                        if (totalHeight >= currentScrollHeight) break;
+                    }
+
+                    console.log(`📦 Encontrados e validados ${productsPage.length} cards exclusivos nesta página da Amazon.`);
+
+                    // Se terminou de rodar o scroll da página e achou produtos válidos, envia pro callback
+                    if (productsPage.length > 0 && onPageScraped) {
+                        console.log(`🚀 [Scraper] Página processada por completo! Enviando ${productsPage.length} produtos para o Crawler...`);
+                        onPageScraped(productsPage);
                     }
 
                 } catch (errorUrl: any) {

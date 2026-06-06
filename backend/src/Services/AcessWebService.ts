@@ -306,6 +306,7 @@ export class AccesWeb {
 
                                 // Validações do seu backend
                                 if (!utils.verifyDiscount(originalPrice, price) || !utils.verifyMaxPrice(price) || !utils.verifyKeyWords(item.title)) {
+                                    console.log(`🤔 [Scraper] Produto ignorado: ${item.title}, "Motivo: Desconto, keyword ou preço máximo"`);
                                     continue;
                                 }
 

@@ -13,7 +13,8 @@ const EnvSchema = z.object({
     MELI_ID: z.string(),
     TELEGRAM_SESSION: z.string(),
     MATT_TOOL: z.string(),
-    KUTT_API_KEY: z.string()
+    KUTT_API_KEY: z.string(),
+    HEADLESS: z.boolean().default(true),//padrão produção
 })
 
 const Envirol = EnvSchema.safeParse(process.env);

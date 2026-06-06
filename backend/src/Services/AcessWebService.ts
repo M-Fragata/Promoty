@@ -1,6 +1,7 @@
 import { chromium } from 'playwright-extra';
 import stealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { type MlProducts } from "../types/MLPRODUCTS.js";
+import { Env } from '../utils/Envirolment.js';
 
 chromium.use(stealthPlugin());
 
@@ -30,7 +31,7 @@ export class AccesWeb {
         ];
 
         const browser = await chromium.launch({
-            headless: false, // false ele irá abrir a tela do chrome
+            headless: Env.HEADLESS, // false ele irá abrir a tela do chrome
             slowMo: 100,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
@@ -204,7 +205,7 @@ export class AccesWeb {
         ];
 
         const browser = await chromium.launch({
-            headless: false,
+            headless: Env.HEADLESS,
             slowMo: 100,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
@@ -351,7 +352,7 @@ export class AccesWeb {
 
         try {
             browser = await chromium.launch({
-                headless: false,
+                headless: Env.HEADLESS,
                 slowMo: 100,
                 args: ['--no-sandbox', '--disable-setuid-sandbox']
             });

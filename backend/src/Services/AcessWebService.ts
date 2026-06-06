@@ -246,7 +246,7 @@ export class AccesWeb {
 
                     console.log(`⏳ Iniciando varredura dinâmica por scroll...`);
 
-                    while (totalHeight < maxScrollSafe && rodadasSemNovosProdutos < 8) {
+                    while (totalHeight < maxScrollSafe && rodadasSemNovosProdutos < 2) {
                         // Executa a extração dos dados crus diretamente no contexto do navegador
                         const rawProducts = await page.evaluate(() => {
                             const cards = Array.from(document.querySelectorAll('div[data-testid="product-card"]'));
@@ -330,7 +330,7 @@ export class AccesWeb {
                         }
 
                         if (novosProdutosNestaRolada === 0) {
-                            console.log(`🤔 [Scraper] Rolada atual não trouxe produtos inéditos. Contador: ${rodadasSemNovosProdutos + 1}/8`);
+                            console.log(`🤔 [Scraper] Rolada atual não trouxe produtos inéditos. Contador: ${rodadasSemNovosProdutos + 1}/2`);
                             rodadasSemNovosProdutos++;
                         } else {
                             rodadasSemNovosProdutos = 0; // Reseta o contador se ainda está achando coisas inéditas

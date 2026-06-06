@@ -1,4 +1,4 @@
-import { Env } from '../utils/Envirolment';
+import { Env } from '../utils/Envirolment.js';
 
 export async function EncurtaLinkController(longUrl: string, customSlug?: string): Promise<string> {
     try {

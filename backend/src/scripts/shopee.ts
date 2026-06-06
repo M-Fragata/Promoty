@@ -1,4 +1,4 @@
-import { AccesWeb } from '../Services/AcessWebService';
+import { AccesWeb } from '../Services/AcessWebService.js';
 
 const delay = (minutos: number) => new Promise(resolve => setTimeout(resolve, minutos * 60 * 1000))
 

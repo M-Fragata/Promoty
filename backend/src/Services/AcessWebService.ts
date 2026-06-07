@@ -282,6 +282,27 @@ export class AccesWeb {
                                 mlBadge = null;
                             }
 
+                            //8. captura o parcelamento sem juros se houver
+                            let installments: string | null = null;
+                            try {
+                                const installmentsElement = await card.$('.poly-price__installments');
+                                if (installmentsElement) {
+                                    let textInstallments = await installmentsElement.innerText();
+
+                                    // 🔥 TRATAMENTO DE STRING:
+                                    // O innerText pode trazer quebras de linha (\n) ou espaços extras entre o R$ e o valor.
+                                    // Esse replace transforma qualquer sequência de espaços/quebras em um único espaço em branco.
+                                    textInstallments = textInstallments.replace(/\s+/g, ' ').trim();
+
+                                    // Filtra para garantir que só vai levar se for "sem juros"
+                                    if (textInstallments.toLowerCase().includes("sem juros")) {
+                                        installments = textInstallments; // Resultado limpo: "7x R$ 22,86 sem juros"
+                                    }
+                                }
+                            } catch (error) {
+                                // Mantém como null se o card não tiver parcelamento e não quebra o robô
+                                installments = null;
+                            }
 
                             productsPage.push({
                                 id,
@@ -292,6 +313,7 @@ export class AccesWeb {
                                 badge: mlBadge,
                                 imageUrl,
                                 link: linkOriginal,
+                                installments,
                                 store: 'Mercado Livre'
                             });
 
@@ -455,6 +477,7 @@ export class AccesWeb {
                                     badge: item.badgeText,
                                     imageUrl: item.imageUrl,
                                     link: item.linkOriginal,
+                                    installments: null,
                                     store: 'Amazon'
                                 });
 
@@ -626,6 +649,7 @@ export class AccesWeb {
                                 badge: discountNumber.toString() + '% OFF',
                                 link: fullLink,
                                 imageUrl,
+                                installments: null,
                                 store: "Shopee"
                             };
 

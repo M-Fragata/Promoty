@@ -37,6 +37,8 @@ export class PromosController {
             lines.push(`~De: R$ ${product.originalPrice.toFixed(2)}~`);
         }
 
+        lines.push('')
+
         lines.push(`Por: R$ *${product.price.toFixed(2)}*`);
         if(product.installments){
             lines.push(`💳 ${product.installments}`)

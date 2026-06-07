@@ -15,19 +15,27 @@ const USER_AGENTS = [
 const HUMAN_DELAY = (min = 2000, max = 5000) => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)))
 
 // Váriaveis globais
-const keywords: string[] = ["notebook", "celular", "smartphone", "monitor", "placa de vídeo", "ssd", "hd", "fone", "headset", "teclado", "mouse", "webcam", "caixa de som bluetooth", "smartwatch", "tablet", "processador", "memória ram", "gabinete gamer", "cooler", "fonte para pc", "impressora", "roteador", "tv", "videogame", "console", "jogo de videogame", "cadeira gamer", "cadeira ergonomica", "cadeira de escritório", "mesa gamer", "power bank", "cabo usb", "carregador portátil", "suporte para notebook", "microfone", "webcam", "filtro de linha", "no-break", "pen drive", "cartão de memória", "nvme"]
+const keywords: string[] = ["notebook", "celular", "smartphone", "monitor", "placa de vídeo", "ssd", "hd", "fone", "headset", "teclado", "mouse", "webcam", "caixa de som bluetooth", "smartwatch", "tablet", "processador", "memória ram", "gabinete gamer", "cooler", "fonte para pc", "impressora", "roteador", "tv", "videogame", "console", "jogo de videogame", "cadeira gamer", "cadeira ergonomica", "cadeira de escritório", "mesa gamer", "power bank", "cabo usb", "carregador portátil", "suporte para notebook", "microfone", "webcam", "filtro de linha", "no-break", "pen drive", "cartão de memória", "nvme", "water cooler"]
 const descountMin: number = 35
 const maxPrice: number = 3000
 
+
 export class AccesWeb {
 
-    async AcessMercadoLivre(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
+    private static contadorML: number = 0
 
-        // 1- informática; 2- celulares e telefones; 3-games, 4- oferta do dia
-        const URLs: string[] = [
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&promotion_type=lightning#filter_applied=category&filter_position=3&origin=qcat",
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1051&promotion_type=lightning#filter_applied=category&filter_position=3&origin=qcat",
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1144&promotion_type=lightning#filter_applied=category&filter_position=3&origin=qcat", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat"
+    async AcessMercadoLivre(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
+        // 1- informática; 2- celulares e telefones; 3- oferta do dia + 1 e 2
+        const URLs: string[][] = [
+
+            ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=3&promotion_type=lightning"],
+
+
+            ["https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=3&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=4&promotion_type=lightning"],
+
+
+            ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat",
+                "https://www.mercadolivre.com.br/ofertas?category=MLB1051&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=4&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=5&promotion_type=lightning"]
         ];
 
         const browser = await chromium.launch({
@@ -48,9 +56,16 @@ export class AccesWeb {
         const page = await context.newPage();
         //const produtosEncontrados: MlProducts[] = [];
 
+        let urlCounter = URLs.length - 1
+
+
+        if(AccesWeb.contadorML > urlCounter) AccesWeb.contadorML = 0
+
         try {
+            const URLsGroup: string[] = URLs[AccesWeb.contadorML]!
+
             // 🔄 O laço percorre as URLs dentro do Try principal
-            for (const URL of URLs) {
+            for (const URL of URLsGroup) { // Acessa o último grupo de URLs (oferta do dia + 1 e 2) para priorizar os produtos mais quentes
                 try {
                     console.log(`🌐 [Scraper] Acessando URL: ${URL.substring(0, 60)}...`);
 
@@ -192,6 +207,7 @@ export class AccesWeb {
         } finally {
             // O bloco finally fecha o navegador uma única vez ao término de todas as iterações ou em caso de quebra do try principal
             console.log("🔒 [Scraper] Finalizando sessões e fechando o navegador de forma segura...");
+            AccesWeb.contadorML++
             await browser.close();
         }
     }

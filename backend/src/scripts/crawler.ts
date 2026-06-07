@@ -2,14 +2,24 @@ import { AccesWeb } from '../Services/AcessWebService.js';
 
 const delay = (minutos: number) => new Promise(resolve => setTimeout(resolve, minutos * 60 * 1000))
 
-const TimeBetweenRunsDia = 30; //30minutos
-const timeBetweensRunsMadrugada = 180 //3 horas
+const TimeBetweenRuns = 30; //30minutos
 
 async function executarRobo() {
     console.log("🤖 Iniciando bateria de promoções para Amazon e Mercado Livre...\n");
 
     const scraper = new AccesWeb();
     while (true) {
+
+        // 🚨 CHECAGEM DA MADRUGADA:
+        // Se NÃO for horário comercial/diurno, entra em modo de espera
+        if (!isHorarioComercial()) {
+            console.log(`😴 [Modo Hibernação] Horário de madrugada detectado. Pulando varreduras... [${new Date().toLocaleTimeString('pt-BR')}]`);
+
+            // Espera 30 minutos em silêncio e volta para o topo do while testar a hora de novo
+            await delay(TimeBetweenRuns);
+            continue; // 👈 Ignora tudo abaixo e volta para o topo do loop
+        }
+
         // ==========================================
         // 🟠 BLOCO TESTE: AMAZON
         // ==========================================
@@ -49,8 +59,8 @@ async function executarRobo() {
             console.error("❌ [Amazon] Falha crítica no teste principal:", error);
         }
 
-        console.log(`⏳ Aguardando ${TimeBetweenRunsDia} minutos de intervalo de segurança... [${new Date().toLocaleTimeString('pt-BR')}]`);
-        await delay(TimeBetweenRunsDia);
+        console.log(`⏳ Aguardando ${TimeBetweenRuns} minutos de intervalo de segurança... [${new Date().toLocaleTimeString('pt-BR')}]`);
+        await delay(TimeBetweenRuns);
 
         // ==========================================
         // 🔵 BLOCO TESTE: MERCADO LIVRE
@@ -91,20 +101,20 @@ async function executarRobo() {
             console.error("❌ [Mercado Livre] Falha crítica no teste principal:", error);
         }
 
-        console.log(`⏳ Aguardando ${hourOfDay()} minutos de intervalo de segurança...`, Date.now());
-        await delay(hourOfDay());
+        console.log(`⏳ Aguardando ${TimeBetweenRuns} minutos de intervalo de segurança...`, Date.now());
+        await delay(TimeBetweenRuns);
 
         console.log("\n🏁 Bateria de testes finalizada.");
     }
 }
 
-function hourOfDay() {
+function isHorarioComercial(): boolean {
     const now = new Date();
     const hours = now.getHours();
 
-    if (hours >= 0 && hours < 7) return timeBetweensRunsMadrugada;
+    if (hours >= 0 && hours < 7) return false;
 
-    return TimeBetweenRunsDia
+    return true
 }
 
 executarRobo();

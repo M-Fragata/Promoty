@@ -27,6 +27,7 @@ model ProductsMl {
   badge         String?
   imageUrl      String?
   link          String
+  installments  String?
   store         String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

@@ -29,7 +29,6 @@ export class PromosController {
                 // Para capturas normais do scraper, mantém o formato padrão que você já usa
                 lines.push(`⚡ *Destaque:* _${badgeTrimmed}_`);
             }
-            lines.push('');
         }
         lines.push('')
 
@@ -38,8 +37,11 @@ export class PromosController {
             lines.push(`~De: R$ ${product.originalPrice.toFixed(2)}~`);
         }
 
-        lines.push(`Por: R$ ${product.price.toFixed(2)}`);
-
+        lines.push(`Por: R$ *${product.price.toFixed(2)}*`);
+        if(product.installments){
+            lines.push(`💳 ${product.installments}`)
+        }
+/*
         // 2. Alerta de Cupom (Se houver)
         if (product.coupon) {
             // Remove quebras de linha (\n, \r) e espaços duplicados trazidos pelo scraper
@@ -58,7 +60,7 @@ export class PromosController {
                 lines.push(''); // Linha em branco para separar do preço
             }
         }
-
+*/
         lines.push('');
 
         // 4. Link de Destino (Onde a mágica acontece)

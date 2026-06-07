@@ -1,4 +1,5 @@
 import { chromium } from 'playwright-extra';
+import { type Page } from 'playwright'
 import stealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { type MlProducts } from "../types/MLPRODUCTS.js";
 import { Env } from '../utils/Envirolment.js';
@@ -19,24 +20,92 @@ const keywords: string[] = ["notebook", "celular", "smartphone", "monitor", "pla
 const descountMin: number = 35
 const maxPrice: number = 3000
 
+class secondaryFunction {
+    verifyKeyWords(text: string): boolean {
+        const textLower = text.toLowerCase();
+        return keywords.some(keyword => textLower.includes(keyword.toLowerCase()));
+    }
+    verifyDiscount(originalPrice: number | null, currentPrice: number): boolean {
+        if (!originalPrice || originalPrice <= currentPrice) return false;
+
+        const percentualDesconto = ((originalPrice - currentPrice) / originalPrice) * 100;
+        return percentualDesconto >= descountMin;
+    }
+    verifyMaxPrice(price: number): boolean {
+        return price <= maxPrice;
+    }
+    verifyOriginalPrice(priceWithDescount: number, descountPercentage: string): number {
+
+        // 1. Limpa a string tirando símbolos e converte para número inteiro positivo
+        const discountNumber = parseInt(descountPercentage.replace(/[^0-9]/g, ''), 10);
+
+        // 2. Valida se o número é válido ou zerado (evita NaN e divisões por zero)
+        if (isNaN(discountNumber) || discountNumber <= 0 || discountNumber >= 100) {
+            return priceWithDescount;
+        }
+
+        // 3. 🔥 CORREÇÃO: Usa a variável limpa 'discountNumber' em vez da string original
+        const descount = 1 - (discountNumber / 100);
+
+        // 4. Retorna o preço original (arredondado para duas casas decimais para evitar dízimas do JS)
+        return parseFloat((priceWithDescount / descount).toFixed(2));
+    }
+    gerarBlocoPichau(paginaInicial: number, paginaFinal: number): string[] {
+        const urlsBloco: string[] = [];
+        for (let p = paginaInicial; p <= paginaFinal; p++) {
+            if (p === 1) {
+                urlsBloco.push("https://lista.mercadolivre.com.br/loja/pichau/_Discount_20-100_NoIndex_True?tracking_id=c6ca5d7a297815906f045e8ab1fde59c");
+            } else {
+                // Formula exata para gerar 49, 97, 145...
+                const offset = ((p - 1) * 48) + 1;
+                urlsBloco.push(`https://lista.mercadolivre.com.br/loja/pichau/_Desde_${offset}_Discount_20-100_NoIndex_True?tracking_id=c6ca5d7a297815906f045e8ab1fde59c`);
+            }
+        }
+        return urlsBloco;
+    }
+    async getMaxPagesPichau(page: Page): Promise<number> {
+        try {
+            // Seleciona todos os links numéricos da paginação
+            const linksPaginas = await page.$$('.andes-pagination__button a.andes-pagination__link');
+            let maxPagina = 1;
+
+            for (const link of linksPaginas) {
+                const texto = await link.innerText();
+                const numero = parseInt(texto.trim(), 10);
+                if (!isNaN(numero) && numero > maxPagina) {
+                    maxPagina = numero;
+                }
+            }
+            return maxPagina; // No seu HTML de exemplo, retornará 10
+        } catch {
+            return 1; // Fallback seguro se o seletor mudar
+        }
+    }
+
+}
+
+const utils = new secondaryFunction();
 
 export class AccesWeb {
 
+    //=======================
+    // Bloco Mercado Livre 
+    // ======================
     private static contadorML: number = 0
+    // 1- informática; 2- Pichau-ML 3- celulares e telefones; 4- oferta do dia + 1 e 2
+    private static URLs: string[][] = [
+        ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=3&promotion_type=lightning",],
+
+        utils.gerarBlocoPichau(1, 5), // Pichau (Páginas 1 a 5)
+
+        ["https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=3&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=4&promotion_type=lightning"],
+
+        ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat",
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1051&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=4&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=5&promotion_type=lightning"
+        ],
+    ]
 
     async AcessMercadoLivre(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
-        // 1- informática; 2- celulares e telefones; 3- oferta do dia + 1 e 2
-        const URLs: string[][] = [
-
-            ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=3&promotion_type=lightning"],
-
-
-            ["https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=3&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=4&promotion_type=lightning"],
-
-
-            ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat",
-                "https://www.mercadolivre.com.br/ofertas?category=MLB1051&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=4&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=5&promotion_type=lightning"]
-        ];
 
         const browser = await chromium.launch({
             headless: Env.HEADLESS, // false ele irá abrir a tela do chrome
@@ -56,16 +125,17 @@ export class AccesWeb {
         const page = await context.newPage();
         //const produtosEncontrados: MlProducts[] = [];
 
-        let urlCounter = URLs.length - 1
+        let urlCounter = AccesWeb.URLs.length - 1
 
-
-        if(AccesWeb.contadorML > urlCounter) AccesWeb.contadorML = 0
+        if (AccesWeb.contadorML > urlCounter) AccesWeb.contadorML = 0
 
         try {
-            const URLsGroup: string[] = URLs[AccesWeb.contadorML]!
+            let URLsGroup: string[] = AccesWeb.URLs[AccesWeb.contadorML]!
 
             // 🔄 O laço percorre as URLs dentro do Try principal
-            for (const URL of URLsGroup) { // Acessa o último grupo de URLs (oferta do dia + 1 e 2) para priorizar os produtos mais quentes
+            for (let i = 0; i < URLsGroup.length; i++) {
+                const URL = URLsGroup[i]!;
+
                 try {
                     console.log(`🌐 [Scraper] Acessando URL: ${URL.substring(0, 60)}...`);
 
@@ -74,9 +144,52 @@ export class AccesWeb {
 
                     await HUMAN_DELAY(3000, 6000)
 
+                    // 🚨 VALIDAÇÃO DE PÁGINA VAZIA COM FALLBACK DINÂMICO
+                    if (URL.includes("pichau")) {
+
+                        const isTheLastPageOfGroup = i === (URLsGroup.length - 1)
+
+                        if (isTheLastPageOfGroup) {
+                            const maxPagesPichau = await utils.getMaxPagesPichau(page)
+                            console.log(`🔍 [Pichau] Última página do bloco processada. Maior número visível no NAV: ${maxPagesPichau}`);
+
+                            const matchDesde = URL.match(/_Desde_(\d+)/);
+                            const offsetAtual = matchDesde ? parseInt(matchDesde[1]!, 10) : 1;
+                            const paginaAtualReal = matchDesde ? Math.floor((offsetAtual - 1) / 48) + 1 : 1;
+
+                            if (maxPagesPichau > paginaAtualReal) {
+                                // O próximo bloco começa na página seguinte à nossa última do bloco
+                                let paginaInicialDoProximoBloco = paginaAtualReal + 1;
+
+                                // Definimos o teto do próximo bloco (sempre pegando blocos pequenos de 5 em 5 para não estourar)
+                                let paginaFinalDoProximoBloco = paginaInicialDoProximoBloco + 4;
+
+                                // Se o próximo bloco de 5 passar do que o NAV está vendo agora, limitamos ao teto do NAV
+                                if (paginaFinalDoProximoBloco > maxPagesPichau) {
+                                    paginaFinalDoProximoBloco = maxPagesPichau;
+                                }
+
+                                console.log(`➕ [Fila Dinâmica] Nova janela detectada no NAV. Injetando Bloco Pichau (Páginas ${paginaInicialDoProximoBloco} até ${paginaFinalDoProximoBloco}) ao final da fila.`);
+
+                                // Injeta o próximo lote de 5 páginas na esteira
+                                AccesWeb.URLs.push(utils.gerarBlocoPichau(paginaInicialDoProximoBloco, paginaFinalDoProximoBloco));
+
+                                console.log(`📊 [Fila Dinâmica] Total de Grupos na classe agora: ${AccesWeb.URLs.length}`);
+                            }
+
+                        }
+
+                    }
+
                     // Mapeia os cards que aparecem nessa listagem específica
                     const cards = await page.$$('.poly-card');
                     console.log(`📦 Encontrados ${cards.length} cards nesta página.`);
+
+
+                    if (cards.length === 0) {
+                        console.log(`🛑 [Scraper] Página vazia detectada na URL atual.`)
+                        break; // Se não for Pichau, apenas quebra o laço normalmente
+                    }
 
                     const productsPage: MlProducts[] = [];
 
@@ -186,12 +299,13 @@ export class AccesWeb {
                             continue; // Se falhar um card, vai para o próximo card
                         }
 
-                        if (productsPage.length > 0) {
-                            console.log(`🚀 [Scraper] Página processada! Enviando ${productsPage.length} produtos para o Crawler em background...`);
+                    }//Fim do laço de cards
 
-                            // Chamamos a função sem dar await aqui dentro para liberar o laço
-                            onPageScraped?.(productsPage);
-                        }
+                    if (productsPage.length > 0) {
+                        console.log(`🚀 [Scraper] Página processada! Enviando ${productsPage.length} produtos para o Crawler em background...`);
+
+                        // Chamamos a função sem dar await aqui dentro para liberar o laço
+                        onPageScraped?.(productsPage);
                     }
 
                 } catch (errorUrl: any) {
@@ -212,6 +326,9 @@ export class AccesWeb {
         }
     }
 
+    // ================
+    // Bloco Amazon
+    // ================
     async AcessAmazon(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
         // 1- computadores e informática; 2- eletrônicos e tecnologia; 3- games e consoles
         const URLs: string[] = [
@@ -546,36 +663,4 @@ export class AccesWeb {
 
 }//Fim da classe
 
-class secondaryFunction {
-    verifyKeyWords(text: string): boolean {
-        const textLower = text.toLowerCase();
-        return keywords.some(keyword => textLower.includes(keyword.toLowerCase()));
-    }
-    verifyDiscount(originalPrice: number | null, currentPrice: number): boolean {
-        if (!originalPrice || originalPrice <= currentPrice) return false;
 
-        const percentualDesconto = ((originalPrice - currentPrice) / originalPrice) * 100;
-        return percentualDesconto >= descountMin;
-    }
-    verifyMaxPrice(price: number): boolean {
-        return price <= maxPrice;
-    }
-    verifyOriginalPrice(priceWithDescount: number, descountPercentage: string): number {
-
-        // 1. Limpa a string tirando símbolos e converte para número inteiro positivo
-        const discountNumber = parseInt(descountPercentage.replace(/[^0-9]/g, ''), 10);
-
-        // 2. Valida se o número é válido ou zerado (evita NaN e divisões por zero)
-        if (isNaN(discountNumber) || discountNumber <= 0 || discountNumber >= 100) {
-            return priceWithDescount;
-        }
-
-        // 3. 🔥 CORREÇÃO: Usa a variável limpa 'discountNumber' em vez da string original
-        const descount = 1 - (discountNumber / 100);
-
-        // 4. Retorna o preço original (arredondado para duas casas decimais para evitar dízimas do JS)
-        return parseFloat((priceWithDescount / descount).toFixed(2));
-    }
-}
-
-const utils = new secondaryFunction();

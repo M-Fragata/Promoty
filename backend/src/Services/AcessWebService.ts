@@ -127,7 +127,17 @@ export class AccesWeb {
 
         let urlCounter = AccesWeb.URLs.length - 1
 
-        if (AccesWeb.contadorML > urlCounter) AccesWeb.contadorML = 0
+        // 🚨 SE O CONTADOR VOLTAR PRO ZERO, RESETAMOS AS ABAS DINÂMICAS!
+        if (AccesWeb.contadorML > urlCounter) {
+            AccesWeb.contadorML = 0;
+
+            // Corta o array estático de volta para os 4 blocos originais de fábrica
+            // eliminando qualquer push de Pichau feito em ciclos passados.
+            if (AccesWeb.URLs.length > 4) {
+                AccesWeb.URLs.length = 4;
+                console.log("♻️ [Fila Dinâmica] Varredura completa reiniciada. Expurgando URLs antigas da memória!");
+            }
+        }
 
         try {
             let URLsGroup: string[] = AccesWeb.URLs[AccesWeb.contadorML]!
@@ -289,14 +299,25 @@ export class AccesWeb {
                                 if (installmentsElement) {
                                     let textInstallments = await installmentsElement.innerText();
 
-                                    // 🔥 TRATAMENTO DE STRING:
-                                    // O innerText pode trazer quebras de linha (\n) ou espaços extras entre o R$ e o valor.
-                                    // Esse replace transforma qualquer sequência de espaços/quebras em um único espaço em branco.
+                                    // 1. Transforma qualquer sequência de espaços/quebras em um único espaço em branco                                    
                                     textInstallments = textInstallments.replace(/\s+/g, ' ').trim();
 
+                                    // 2. 🔥 REMOVE ESPAÇOS ANTES/DEPOIS DA VÍRGULA E TROCA POR PONTO
+                                    // Ex: "34 , 22" vira "34.22"
+                                    textInstallments = textInstallments.replace(/\s*,\s*/g, '.');
+
+                                    // 3. Remove possíveis espaços entre o R$ e o número (Ex: "R$ 34.22" -> "R$34.22" se preferir, ou mantém 1 espaço)
+                                    // O Mercado Livre costuma quebrar o R$, vamos garantir que fique "R$ 34.22" com apenas um espaço regulamentar
+                                    textInstallments = textInstallments.replace(/R\$\s*/g, 'R$ ');
+
+                                    const countCifrao = (textInstallments.match(/R\$/g) || []).length;
+
                                     // Filtra para garantir que só vai levar se for "sem juros"
-                                    if (textInstallments.toLowerCase().includes("sem juros")) {
+                                    if (countCifrao === 1 && textInstallments.toLowerCase().includes("sem juros")) {
+                                        textInstallments = textInstallments.replace(/sem juros/i, 's/ juros');
                                         installments = textInstallments; // Resultado limpo: "7x R$ 22,86 sem juros"
+                                    } else {
+                                        installments = null;
                                     }
                                 }
                             } catch (error) {

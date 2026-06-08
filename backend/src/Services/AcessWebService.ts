@@ -98,7 +98,7 @@ export class AccesWeb {
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=3&promotion_type=lightning",],
         
         utils.gerarBlocoPichau(1, 5), // Pichau (Páginas 1 a 5)
-        
+
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=3&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=4&promotion_type=lightning"],
 
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat",
@@ -366,7 +366,7 @@ export class AccesWeb {
                         }
 
                     }//Fim do laço de cards
-console.log(productsPage)
+
                     if (productsPage.length > 0) {
                         console.log(`🚀 [Scraper] Página processada! Enviando ${productsPage.length} produtos para o Crawler em background...`);
 

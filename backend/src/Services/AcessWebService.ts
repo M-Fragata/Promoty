@@ -96,17 +96,17 @@ export class AccesWeb {
     //Adicionar link da reddragon -> https://lista.mercadolivre.com.br/loja/redragon/_Discount_20-100?tracking_id=d0be4182-3fea-462e-b178-9182aafd8d71#applied_filter_id%3Ddiscount%26applied_filter_name%3DDescontos%26applied_filter_order%3D5%26applied_value_id%3D20-100%26applied_value_name%3DMais+de+20%25+OFF%26applied_value_order%3D4%26applied_value_results%3D38%26is_custom%3Dfalse
     private static URLs: string[][] = [
 
-        utils.gerarBlocoPichau(1, 5), // Pichau (Páginas 1 a 5)
-        /*
+        //utils.gerarBlocoPichau(1, 5), // Pichau (Páginas 1 a 5)
+
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=3&promotion_type=lightning",],
-        
+
 
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=3&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=4&promotion_type=lightning"],
 
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat",
             "https://www.mercadolivre.com.br/ofertas?category=MLB1051&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=4&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=5&promotion_type=lightning"
         ],
-        */
+
     ]
 
     async AcessMercadoLivre(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
@@ -125,155 +125,6 @@ export class AccesWeb {
             locale: 'pt-BR',
             timezoneId: 'America/Sao_Paulo',
         });
-
-        const cookies = [
-            {
-                "name": "_pin_unauth",
-                "value": "dWlkPU1UQXlOVFkyTldZdE9UaGlaaTAwTnpKa0xXSXhNMll0TVdGaFlXVTJaamt6WmpCbA",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "_tt_enable_cookie",
-                "value": "1",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "_ttp",
-                "value": "01JRJ9SB28C1DNQ8NBW86XWPXV_.tt.2",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "orguseridp",
-                "value": "1253264243",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "orgnickp",
-                "value": "FRAGATAMATHEUS20221202070510",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "orguserid",
-                "value": "H0Zh9THZtTZTH",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "_ga_NDJFKMJ2PD",
-                "value": "GS2.1.s1748873287$o10$g0$t1748873287$j60$l0$h0",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "__rtbh.uid",
-                "value": "%7B%22eventType%22%3A%22uid%22%2C%22id%22%3A%221253264243%22%2C%22expiryDate%22%3A%222026-11-25T15%3A50%3A55.168Z%22%7D",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "__rtbh.lid",
-                "value": "%7B%22eventType%22%3A%22lid%22%2C%22id%22%3A%22lmU7t0wfkVFNYr9i1n29%22%2C%22expiryDate%22%3A%222026-11-25T15%3A50%3A55.170Z%22%7D",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "_derived_epik",
-                "value": "dj0yJnU9ZGxuMXNrTHVqU2lmekpSY1ZYRThsTVU0S1llelRRVlgmbj11SEFVanR4OGtkblFEb2d4M3V1RWtRJm09NCZ0PUFBQUFBR2tsMEdBJnJtPTQmcnQ9QUFBQUFHa2wwR0Emc3A9Mg",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "ttcsid_C9SJ5SBC77UADFMAH8T0",
-                "value": "1764085615072::Ns2FaWCmP7YNlMUhxWqr.12.1764086025034.0",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "_uetvid",
-                "value": "39ee255016c811f08028fdcc447317db",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "cto_bundle",
-                "value": "x1v9iF91QkF4RkFEWTR0JTJGS0s3SmIlMkIxRFJ4bnJuZnB6OGRMRzhZS0dJJTJCOXdBN2RZU3IlMkZuWklvM0FzWG9PV3Y2MlA1OE1BSVgzQlZUbHpGRk9KclM0aElQdVlXVWd5N21XbEdzT3FhSWhkemJLTnB0ZE5yM25ueXAzTzFVdk5MdmNpZzlrWE42WEZWZXZrWGpuMWlhVENTY21tVENCNGJyM0tYTmN5dmd0UkNKb0NpMlRsQ0VmVXdKSjhFNVpRdE4xSThTVGlIJTJGMHhrTiUyQm55ZHd3STNVYUxrQlhnJTNEJTNE",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "ttcsid",
-                "value": "1764092508183::Wgeg6yCHxUwrtCnb7y_2.13.1764092511444.0",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "ttcsid_CFVSC2JC77U0ARCJTCJ0",
-                "value": "1764092508184::AyTU-_AcWteeA1SG-cKw.4.1764092511445.0",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "cookiesPreferencesLoggedFallback",
-                "value": "%7B%22userId%22%3A1253264243%2C%22categories%22%3A%7B%22advertising%22%3Atrue%2C%22functionality%22%3Atrue%2C%22performance%22%3Atrue%2C%22traceability%22%3Atrue%7D%7D",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "cookiesPreferencesNotLogged",
-                "value": "%7B%22categories%22%3A%7B%22advertising%22%3Atrue%2C%22functionality%22%3Atrue%2C%22performance%22%3Atrue%2C%22traceability%22%3Atrue%7D%7D",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "ml_cart-quantity",
-                "value": "0",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "_d2id",
-                "value": "dfbf3279-7a63-452e-b80c-0860680360eb",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "_mldataSessionId",
-                "value": "8ff1fe44-fce6-43f7-a568-156ca56e804e",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "cookiesPreferencesLogged",
-                "value": "%7B%22userId%22%3A1253264243%2C%22categories%22%3A%7B%22advertising%22%3Atrue%2C%22functionality%22%3Atrue%2C%22performance%22%3Atrue%2C%22traceability%22%3Atrue%7D%7D",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "hide-cookie-banner",
-                "value": "1253264243-COOKIE_PREFERENCES_ALREADY_SET",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "_hjSessionUser_720738",
-                "value": "eyJpZCI6ImE2MGY5YWNjLTNkYjQtNTNjNy05MDI5LTAxMjc1YzViM2YzYyIsImNyZWF0ZWQiOjE3ODA5NTAzMzAzMzksImV4aXN0aW5nIjpmYWxzZX0=",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            },
-            {
-                "name": "_hjSession_720738",
-                "value": "eyJpZCI6IjUwYTQyOTk4LTZiNGItNDIyOC05ODk4LTFlZDNjNWI5ZDRlZiIsImMiOjE3ODA5NTAzMzAzNDIsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MH0=",
-                "domain": ".mercadolivre.com.br",
-                "path": "/"
-            }
-        ]
-        
-        await context.addCookies(cookies)
 
         const page = await context.newPage();
         //const produtosEncontrados: MlProducts[] = [];

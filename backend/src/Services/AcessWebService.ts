@@ -94,10 +94,11 @@ export class AccesWeb {
     private static contadorML: number = 0
     // 1- informática; 2- Pichau-ML 3- celulares e telefones; 4- oferta do dia + 1 e 2
     private static URLs: string[][] = [
-        utils.gerarBlocoPichau(1, 5), // Pichau (Páginas 1 a 5)
-
+        
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=3&promotion_type=lightning",],
-
+        
+        utils.gerarBlocoPichau(1, 5), // Pichau (Páginas 1 a 5)
+        
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=3&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=4&promotion_type=lightning"],
 
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat",
@@ -189,7 +190,7 @@ export class AccesWeb {
 
                                 //Verificando URL's presentes
                                 console.log("URL's de agora", AccesWeb.URLs)
-                                
+
                                 console.log(`📊 [Fila Dinâmica] Total de Grupos na classe agora: ${AccesWeb.URLs.length}`);
                             }
 
@@ -218,20 +219,17 @@ export class AccesWeb {
                             const linkOriginal = await linkElement.getAttribute('href');
                             if (!linkOriginal) continue;
 
-                            let id: string = ""
+                            let id: string = "falhou_sem_wid"
 
-                            const splitUrl = linkOriginal.split("?")
-                            if (splitUrl[1]) {
-                                const parameters = splitUrl[1].split("&")
-                                const parametersWithWid = parameters.find((p) => p.startsWith("wid="))
-                                if (parametersWithWid) {
-                                    const ProductId = parametersWithWid.split("=")[1]
-                                    id = ProductId ? ProductId : "falhou2"
-                                } else {
-                                    id = "falhou_sem_wid"
-                                }
+                            const matchWid = linkOriginal.match(/[?&#]wid=([^&#]+)/);
+                            if (matchWid && matchWid[1]) {
+                                id = matchWid[1];
                             } else {
-                                id = "falhou1"
+                                // Fallback: Se não achar wid=, tenta pegar o código numérico padrão do Mercado Livre na URL (ex: MLB123456)
+                                const matchMlb = linkOriginal.match(/(MLB[-_]?\d+)/i);
+                                if (matchMlb && matchMlb[1]) {
+                                    id = matchMlb[1];
+                                }
                             }
 
                             // 2. CAPTURA TÍTULO
@@ -253,9 +251,28 @@ export class AccesWeb {
                             const price = parseFloat(precoTexto.replace(/[^\d]/g, ''));
 
                             // 5. CAPTURA PREÇO ANTIGO (Se houver)
-                            const precoOriginalElement = await card.$('.andes-money-amount--previous .andes-money-amount__fraction');
-                            const precoOriginalTexto = precoOriginalElement ? await precoOriginalElement.innerText() : null;
-                            const originalPrice = precoOriginalTexto ? parseFloat(precoOriginalTexto.replace(/[^\d]/g, '')) : null;
+                            const precoOrigFractionEl = await card.$('.andes-money-amount--previous .andes-money-amount__fraction');
+                            const precoOrigCentsEl = await card.$('.andes-money-amount--previous .andes-money-amount__cents');
+
+                            let originalPrice: number | null = null;
+
+                            if (precoOrigFractionEl) {
+                                // 1. Pega o texto da fração e remove pontos de milhar e qualquer sujeira, deixando só números
+                                const rawFraction = await precoOrigFractionEl.innerText();
+                                const cleanFraction = rawFraction.replace(/[^\d]/g, '');
+
+                                // 2. Pega os centavos se existirem, remove sujeiras (como vírgulas residuais). Se não existir, vira '00'
+                                let cleanCents = '00';
+                                if (precoOrigCentsEl) {
+                                    const rawCents = await precoOrigCentsEl.innerText();
+                                    cleanCents = rawCents.replace(/[^\d]/g, '');
+                                }
+
+                                // 3. Junta tudo criando o float decimal perfeito (ex: "1199" + "." + "00" -> 1199.00)
+                                originalPrice = parseFloat(`${cleanFraction}.${cleanCents}`);
+                            }
+
+                            if (originalPrice === null) continue;
 
                             // Verifica se o produto tem desconto mínimo e preço máximo
                             if (!utils.verifyDiscount(originalPrice, price) || !utils.verifyMaxPrice(price)) continue;
@@ -349,7 +366,7 @@ export class AccesWeb {
                         }
 
                     }//Fim do laço de cards
-
+console.log(productsPage)
                     if (productsPage.length > 0) {
                         console.log(`🚀 [Scraper] Página processada! Enviando ${productsPage.length} produtos para o Crawler em background...`);
 

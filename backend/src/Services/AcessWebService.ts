@@ -93,17 +93,20 @@ export class AccesWeb {
     // ======================
     private static contadorML: number = 0
     // 1- informática; 2- Pichau-ML 3- celulares e telefones; 4- oferta do dia + 1 e 2
+    //Adicionar link da reddragon -> https://lista.mercadolivre.com.br/loja/redragon/_Discount_20-100?tracking_id=d0be4182-3fea-462e-b178-9182aafd8d71#applied_filter_id%3Ddiscount%26applied_filter_name%3DDescontos%26applied_filter_order%3D5%26applied_value_id%3D20-100%26applied_value_name%3DMais+de+20%25+OFF%26applied_value_order%3D4%26applied_value_results%3D38%26is_custom%3Dfalse
     private static URLs: string[][] = [
         
+        utils.gerarBlocoPichau(1, 5), // Pichau (Páginas 1 a 5)
+        /*
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=3&promotion_type=lightning",],
         
-        utils.gerarBlocoPichau(1, 5), // Pichau (Páginas 1 a 5)
 
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=3&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=4&promotion_type=lightning"],
 
         ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat",
             "https://www.mercadolivre.com.br/ofertas?category=MLB1051&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=4&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=5&promotion_type=lightning"
         ],
+        */
     ]
 
     async AcessMercadoLivre(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
@@ -205,6 +208,7 @@ export class AccesWeb {
 
                     if (cards.length === 0) {
                         console.log(`🛑 [Scraper] Página vazia detectada na URL atual.`)
+                        await page.screenshot({ path: `logs/erro-mercadolivre-${Date.now()}.png`, fullPage: true });
                         break; // Se não for Pichau, apenas quebra o laço normalmente
                     }
 

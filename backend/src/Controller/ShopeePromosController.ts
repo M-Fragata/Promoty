@@ -22,6 +22,7 @@ export class ShopeePromosController {
                     query: `query {
                         productOfferV2(productCatId: ${catId}, limit: 10, sortType: 1) {
                             nodes {
+                                itemId
                                 productName
                                 priceMin
                                 priceMax
@@ -29,7 +30,6 @@ export class ShopeePromosController {
                                 productLink
                                 imageUrl
                                 commissionRate
-                                shopName
                                 priceDiscountRate
                             }
                         }

@@ -31,6 +31,10 @@ class secondaryFunction {
         const percentualDesconto = ((originalPrice - currentPrice) / originalPrice) * 100;
         return percentualDesconto >= descountMin;
     }
+    GetDiscount(originalPrice: number, currentPrice: number): String {
+        const percentualDesconto = ((originalPrice - currentPrice) / originalPrice) * 100;
+        return `${percentualDesconto.toFixed(0)}% OFF`;
+    }
     verifyMaxPrice(price: number): boolean {
         return price <= maxPrice;
     }
@@ -423,6 +427,7 @@ export class AccesWeb {
             "https://www.amazon.com.br/s?i=electronics&rh=n%3A16209063011%2Cp_n_deal_type%3A23565492011&dc&ds=v1%3AM7qKaAQFjtAAj0anALEbfRkWNv96M0a9N9Z4wPaYslI&page=1&qid=1781002007&rnid=23565491011&ref=sr_nr_p_n_deal_type_3",]
 
     ]
+    private static urlDynamic: string[] = [] //URL dinamica
 
     async AcessAmazon(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
         const browser = await chromium.launch({
@@ -451,45 +456,48 @@ export class AccesWeb {
         try {
 
             // Bloqueio de recursos desnecessários (Performance)
-
-            //await page.route('**/*', (route) => {
-            /*  if (['stylesheet', 'font', 'image'].includes(route.request().resourceType())) {
-                  route.abort();
-              } else {
-                  route.continue();
-              }
-          });*/
+            await page.route('**/*', (route) => {
+                if (['stylesheet', 'font', 'image'].includes(route.request().resourceType())) {
+                    route.abort();
+                } else {
+                    route.continue();
+                }
+            });
 
             let URLsGroup: string[] = AccesWeb.URLsAmazon[AccesWeb.contadorAmazon]!
 
             for (let i = 0; i < URLsGroup.length; i++) {
-                const URL = URLsGroup[i]!;
 
-                //Url dinamica
-                const urlDynamic: string[] = []
-                urlDynamic.push(URL.replace("page=1", `page=${AccesWeb.contadorAmazon + 1}`))
-                if (urlDynamic.length === URLsGroup.length) {
-                    AccesWeb.URLsAmazon.push(urlDynamic)
-                    urlDynamic.shift()
+                const URLAmazon = URLsGroup[i]!;
+                const urlObj = new URL(URLAmazon)
+                urlObj.searchParams.set('page', (AccesWeb.contadorAmazon + 2).toString())
+
+                AccesWeb.urlDynamic.push(urlObj.toString())
+
+                if (AccesWeb.urlDynamic.length === URLsGroup.length) {
+                    AccesWeb.URLsAmazon.push(AccesWeb.urlDynamic)
+                    AccesWeb.urlDynamic.shift()
                 }
 
                 try {
-                    await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+                    await page.goto(URLAmazon, { waitUntil: 'domcontentloaded', timeout: 30000 });
                     await HUMAN_DELAY(3000, 6000);
 
                     const cards = await page.$$('.s-result-item[data-asin]');
                     console.log(`📦 [Amazon] Encontrados ${cards.length} produtos.`);
-                    /*
-                                        const isCaptcha = await page.$('input[name="field-keywords"]'); // Exemplo genérico de proteção Amazon
-                                        if (isCaptcha) {
-                                            console.warn("⚠️ Captcha detectado! Parando para evitar banimento...");
-                                            return; // Para o robô totalmente em vez de avançar para a próxima URL erroneamente
-                                        }
-                    */
+
                     if (cards.length === 0) {
-                        console.log(`📦 Fim dos produtos. Avançando para a próxima categoria.`);
+
+                        const captcha = await page.locator('img#d')
+                        if (captcha) {
+                            console.warn("⚠️ Captcha (Cachorro) detectado! Pulando esta URL específica...");
+                            // O 'continue' vai pular o restante do código dentro deste loop
+                            // e vai para a próxima URL que estiver no array 'urlDynamic'
+                            continue;
+                        }
                         AccesWeb.contadorAmazon++;
-                        return; // Sai do método para o próximo ciclo
+                        console.log(`📦 Fim dos produtos. Avançando para a próxima categoria.`);
+                        continue; // Sai do método para o próximo ciclo
                     }
 
                     const productsPage: MlProducts[] = [];
@@ -524,36 +532,47 @@ export class AccesWeb {
                                     originalPrice = formatPrice(rawOriginal);
                                 }
                             }
+                            if (!originalPrice) continue
+                            // Badge
 
-                            // Badge e Parcelamento
-                            const badgeEl = await card.$('.rio-badge-label');
-                            const badge = badgeEl ? await badgeEl.innerText() : null;
+                            // Verifica se o produto tem desconto mínimo e preço máximo
+                            if (!utils.verifyDiscount(originalPrice, cleanPrice) || !utils.verifyMaxPrice(originalPrice)) continue;
 
+                            let badge: String | null = utils.GetDiscount(originalPrice, cleanPrice)
+                            if (!badge) badge = null
+
+                            //Parcelamento
                             let installments: string | null = null;
                             try {
                                 // Na Amazon, o preço e o parcelamento vivem dentro do price-recipe
                                 const recipeElement = await card.$('div[data-cy="price-recipe"]');
 
                                 if (recipeElement) {
-                                    // 1. Pega o texto limpo de todo o bloco (os spans serão lidos sequencialmente)
-                                    const fullText = await recipeElement.innerText();
+                                    // 1. Limpeza: substitui quebras de linha e múltiplos espaços por um espaço simples
+                                    let fullText = (await recipeElement.innerText()).replace(/\s+/g, ' ').trim();
 
-                                    // 2. Regex para capturar os 3 grupos: (em até Xx de) (R$ valor) (sem juros)
-                                    // O .*? entre os grupos garante que ele ignore espaços ou quebras de linha entre os spans
-                                    const match = fullText.match(/(em até \d+x de)\s+(R\$[\d,.]+)\s+(sem juros)/i);
-                                    console.log("Texto de parcelamento full:", fullText)
+                                    // 2. Regex robusto: 
+                                    // (em até \d+x de\s+R\$\s*[\d,]+) -> Captura o bloco "em até Xx de R$ XX,XX"
+                                    // .*?                             -> Ignora qualquer sujeira/preço repetido que venha depois
+                                    // sem juros                       -> Garante que só pegamos parcelas sem juros
+                                    const match = fullText.match(/(em até \d+x de\s+R\$\s*[\d,]+).*?sem juros/i);
+
                                     if (match) {
-                                        // match[1] = "em até 12x de"
-                                        // match[2] = "R$ 93,33"
-                                        // match[3] = "sem juros"
+                                        // match[1] é algo como "em até 3x de R$ 33.29"
+                                        let installmentPart = match[1];
 
-                                        // 3. Formatação:
-                                        let parcelas = match[1].split("até ")[2]; // Mantém como está
-                                        let valor = match[2].replace(',', '.'); // Troca vírgula por ponto (R$ 93.33)
-                                        let condicao = "s/ juros"; // Seu padrão abreviado
+                                        // 1. Limpeza e Formatação
+                                        // O 'g' no final da regex significa "global" (remove todas as ocorrências)
+                                        // O 'i' significa "case insensitive"
+                                        installmentPart = installmentPart!
+                                            .replace(/em até | de/gi, "") // Remove "em até " e " de "
+                                            .replace(',', '.');           // Garante que é ponto decimal
 
-                                        // Resultado final: "em até 12x de R$ 93.33 s/ juros"
-                                        installments = `${parcelas} ${valor} ${condicao}`;
+                                        // 4. Monta o formato final
+                                        installments = `${installmentPart} s/ juros`;
+
+                                    } else {
+                                        installments = null;
                                     }
                                 }
                             } catch (error) {
@@ -584,11 +603,11 @@ export class AccesWeb {
                     console.error(`❌ Erro na URL Amazon: ${URL}`, err);
                 }
             }
+
         } catch (error) {
             console.error("❌ Erro catastrófico na Amazon:", error);
         } finally {
             await browser.close();
-            console.log("Urls geradas dinamicamente", AccesWeb.URLsAmazon)
             AccesWeb.contadorAmazon++
             if (AccesWeb.URLsAmazon.length > 50) {
                 // Mantém apenas os últimos 50 registros para não estourar a memória

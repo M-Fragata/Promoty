@@ -479,13 +479,13 @@ export class AccesWeb {
 
                     const cards = await page.$$('.s-result-item[data-asin]');
                     console.log(`📦 [Amazon] Encontrados ${cards.length} produtos.`);
-/*
-                    const isCaptcha = await page.$('input[name="field-keywords"]'); // Exemplo genérico de proteção Amazon
-                    if (isCaptcha) {
-                        console.warn("⚠️ Captcha detectado! Parando para evitar banimento...");
-                        return; // Para o robô totalmente em vez de avançar para a próxima URL erroneamente
-                    }
-*/
+                    /*
+                                        const isCaptcha = await page.$('input[name="field-keywords"]'); // Exemplo genérico de proteção Amazon
+                                        if (isCaptcha) {
+                                            console.warn("⚠️ Captcha detectado! Parando para evitar banimento...");
+                                            return; // Para o robô totalmente em vez de avançar para a próxima URL erroneamente
+                                        }
+                    */
                     if (cards.length === 0) {
                         console.log(`📦 Fim dos produtos. Avançando para a próxima categoria.`);
                         AccesWeb.contadorAmazon++;
@@ -541,7 +541,7 @@ export class AccesWeb {
                                     // 2. Regex para capturar os 3 grupos: (em até Xx de) (R$ valor) (sem juros)
                                     // O .*? entre os grupos garante que ele ignore espaços ou quebras de linha entre os spans
                                     const match = fullText.match(/(em até \d+x de)\s+(R\$[\d,.]+)\s+(sem juros)/i);
-console.log("Texto de parcelamento full:", fullText)
+                                    console.log("Texto de parcelamento full:", fullText)
                                     if (match) {
                                         // match[1] = "em até 12x de"
                                         // match[2] = "R$ 93,33"
@@ -588,7 +588,7 @@ console.log("Texto de parcelamento full:", fullText)
             console.error("❌ Erro catastrófico na Amazon:", error);
         } finally {
             await browser.close();
-            console.log("Urls geradas dinamicamente",AccesWeb.URLsAmazon)
+            console.log("Urls geradas dinamicamente", AccesWeb.URLsAmazon)
             AccesWeb.contadorAmazon++
             if (AccesWeb.URLsAmazon.length > 50) {
                 // Mantém apenas os últimos 50 registros para não estourar a memória

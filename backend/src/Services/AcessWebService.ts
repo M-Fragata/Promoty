@@ -419,197 +419,182 @@ export class AccesWeb {
     private static contadorAmazon: number = 0
 
     private static URLsAmazon: string[][] = [
-        ["https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&qid=1780962721&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_1",
-            "https://www.amazon.com.br/s?rh=n%3A16209063011%2Cp_n_deal_type%3A23565493011&dc&qid=1780962621&rnid=23565491011&ref=sr_nr_p_n_deal_type_3",],
-        ["https://www.amazon.com.br/s?i=electronics&rh=n%3A16209063011%2Cp_n_deal_type%3A23565493011&dc&page=2&qid=1780962741&rnid=23565491011&xpid=aLPtmOJgRieH5&ref=sr_pg_2", "https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=2&qid=1780962765&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_2"],
-        ["https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=3&qid=1780962768&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_3", "https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=3&qid=1780962802&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_3"]
-    ]
-    async AcessAmazon(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
+        ["https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=1&qid=1780962721&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_1",
+            "https://www.amazon.com.br/s?i=electronics&rh=n%3A16209063011%2Cp_n_deal_type%3A23565492011&dc&ds=v1%3AM7qKaAQFjtAAj0anALEbfRkWNv96M0a9N9Z4wPaYslI&page=1&qid=1781002007&rnid=23565491011&ref=sr_nr_p_n_deal_type_3",]
 
+    ]
+
+    async AcessAmazon(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
         const browser = await chromium.launch({
             headless: Env.HEADLESS,
             slowMo: 100,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
 
-        const userAgentRandom = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] ?? USER_AGENTS[0]
+        const userAgentRandom = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] ?? USER_AGENTS[0];
 
         const context = await browser.newContext({
             userAgent: userAgentRandom as string,
-            viewport: { width: 1366, height: 768 }, // Resolução padrão de notebook comum
+            viewport: { width: 1366, height: 768 },
             locale: 'pt-BR',
             timezoneId: 'America/Sao_Paulo',
         });
 
         const page = await context.newPage();
-        //const produtosEncontrados: MlProducts[] = [];
-        let urlCounter = AccesWeb.URLsAmazon.length - 1
+        let urlCounter = AccesWeb.URLsAmazon.length - 1;
 
-        // 🚨 SE O CONTADOR VOLTAR PRO ZERO, RESETAMOS AS ABAS DINÂMICAS!
         if (AccesWeb.contadorAmazon > urlCounter) {
             AccesWeb.contadorAmazon = 0;
-
-            // Corta o array estático de volta para os 4 blocos originais de fábrica
-            // eliminando qualquer push de Pichau feito em ciclos passados.
-            if (AccesWeb.URLsAmazon.length > 4) {
-                AccesWeb.URLsAmazon.length = 4;
-                console.log("♻️ [Fila Dinâmica] Varredura completa reiniciada. Expurgando URLs antigas da memória!");
-            }
+            if (AccesWeb.URLsAmazon.length > 1) AccesWeb.URLsAmazon.length = 1;
         }
 
         try {
+
+            // Bloqueio de recursos desnecessários (Performance)
+
+            //await page.route('**/*', (route) => {
+            /*  if (['stylesheet', 'font', 'image'].includes(route.request().resourceType())) {
+                  route.abort();
+              } else {
+                  route.continue();
+              }
+          });*/
+
             let URLsGroup: string[] = AccesWeb.URLsAmazon[AccesWeb.contadorAmazon]!
 
-            // 🔄 O laço percorre as URLs dentro do Try principal
             for (let i = 0; i < URLsGroup.length; i++) {
                 const URL = URLsGroup[i]!;
-                try {
-                    console.log(`🌐 [Amazon Scraper] Acessando URL de Departamento...`);
 
+                //Url dinamica
+                const urlDynamic: string[] = []
+                urlDynamic.push(URL.replace("page=1", `page=${AccesWeb.contadorAmazon + 1}`))
+                if (urlDynamic.length === URLsGroup.length) {
+                    AccesWeb.URLsAmazon.push(urlDynamic)
+                    urlDynamic.shift()
+                }
+
+                try {
                     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
                     await HUMAN_DELAY(3000, 6000);
 
-                    await page.evaluate((dist) => window.scrollBy(0, dist), 1500);
-                    await page.waitForTimeout(1500);
-
-                    // Espera inicial pelo contêiner de lista do Virtuoso
-                    await page.waitForSelector('div[data-testid="virtuoso-item-list"]', { timeout: 15000 }).catch(() => null);
+                    const cards = await page.$$('.s-result-item[data-asin]');
+                    console.log(`📦 [Amazon] Encontrados ${cards.length} produtos.`);
+/*
+                    const isCaptcha = await page.$('input[name="field-keywords"]'); // Exemplo genérico de proteção Amazon
+                    if (isCaptcha) {
+                        console.warn("⚠️ Captcha detectado! Parando para evitar banimento...");
+                        return; // Para o robô totalmente em vez de avançar para a próxima URL erroneamente
+                    }
+*/
+                    if (cards.length === 0) {
+                        console.log(`📦 Fim dos produtos. Avançando para a próxima categoria.`);
+                        AccesWeb.contadorAmazon++;
+                        return; // Sai do método para o próximo ciclo
+                    }
 
                     const productsPage: MlProducts[] = [];
-                    const linksCapturados = new Set<string>();
 
-                    // Lógica de Scroll Incremental para burlar a destruição de elementos do Virtuoso
-                    let totalHeight = 0;
-                    const distance = 450; // Rola aproximadamente uma tela por vez
-                    const maxScrollSafe = 15000; // Trava para evitar loops em páginas infinitas
-                    let rodadasSemNovosProdutos = 0;
+                    for (const card of cards) {
+                        try {
+                            const id = await card.getAttribute('data-asin');
+                            if (!id) continue;
 
-                    console.log(`⏳ Iniciando varredura dinâmica por scroll...`);
+                            // Título
+                            const titleEl = await card.$('h2');
+                            const title = (await titleEl?.innerText()) || "";
+                            if (!utils.verifyKeyWords(title)) continue;
 
-                    while (totalHeight < maxScrollSafe && rodadasSemNovosProdutos < 2) {
-                        // Executa a extração dos dados crus diretamente no contexto do navegador
-                        const rawProducts = await page.evaluate(() => {
-                            const cards = Array.from(document.querySelectorAll('div[data-testid="product-card"]'));
+                            // Preços (Amazon geralmente tem: [Atual, Original])
+                            const priceEls = await card.$$('.a-price .a-offscreen');
 
-                            return cards.map(card => {
-                                const linkElement = card.querySelector('a[data-testid="product-card-link"]');
-                                const linkOriginal = linkElement ? (linkElement as HTMLAnchorElement).href : null;
-                                const asin = card.getAttribute('data-asin');
+                            // Função auxiliar inline para garantir a padronização
+                            const formatPrice = (text: string): number => {
+                                const val = parseFloat(text.replace(/[^\d,]/g, '').replace(',', '.'));
+                                return isNaN(val) ? 0 : Number(val.toFixed(2));
+                            };
 
-                                const titleElement = card.querySelector('.ProductCard-module__title_awabIOxk6xfKvxKcdKDH .a-truncate-full');
-                                const title = titleElement ? (titleElement as HTMLElement).innerText : 'Produto sem título';
+                            const rawPrice = priceEls[0] ? await priceEls[0].innerText() : "0";
+                            const cleanPrice = formatPrice(rawPrice);
 
-                                const imgElement = card.querySelector('.ProductCardImage-module__image_SU6C7KYJpko3vQ2fK7Kf');
-                                const imageUrl = imgElement ? imgElement.getAttribute('src') : null;
-
-                                const precoElement = card.querySelector('.ProductCard-module__priceToPay_olAgJzVNGyj2javg2pAe .a-offscreen');
-                                const precoTexto = precoElement ? (precoElement as HTMLElement).innerText : null;
-
-                                const precoOriginalElement = card.querySelector('.ProductCard-module__wrapPrice__sMO92NjAjHmGPn3jnIH .a-text-price .a-offscreen');
-                                const precoOriginalTexto = precoOriginalElement ? (precoOriginalElement as HTMLElement).innerText : null;
-
-                                // Tratamento de badges internos do contêiner dui-badge
-                                let badgeText: string | null = null;
-                                const badgeContainer = card.querySelector('div[data-component="dui-badge"]');
-                                if (badgeContainer) {
-                                    const spans = Array.from(badgeContainer.querySelectorAll('span.a-size-mini'));
-                                    const textos = spans.map(s => (s as HTMLElement).innerText.trim()).filter(Boolean);
-                                    if (textos.length > 0) badgeText = textos.join(' • ');
+                            let originalPrice: number | null = null;
+                            if (priceEls.length > 1) {
+                                const rawOriginal = await priceEls[1]!.innerText();
+                                // Verifica se rawOriginal não é vazio/null antes de processar
+                                if (rawOriginal) {
+                                    originalPrice = formatPrice(rawOriginal);
                                 }
-
-                                return {
-                                    asin,
-                                    linkOriginal,
-                                    title,
-                                    imageUrl,
-                                    precoTexto,
-                                    precoOriginalTexto,
-                                    badgeText
-                                };
-                            });
-                        });
-
-                        let novosProdutosNestaRolada = 0;
-
-                        // Processa os dados extraídos no contexto do Node.js utilizando suas funções utilitárias
-                        for (const item of rawProducts) {
-                            try {
-                                if (!item.linkOriginal || !item.asin || !item.precoTexto) continue;
-                                if (linksCapturados.has(item.linkOriginal)) continue;
-
-                                const price = parseFloat(item.precoTexto.replace(/[^\d]/g, '')) / 100;
-
-                                let originalPrice: number | null = null;
-                                if (item.precoOriginalTexto) {
-                                    originalPrice = parseFloat(item.precoOriginalTexto.replace(/[^\d]/g, '')) / 100;
-                                }
-
-                                // Validações do seu backend
-                                if (!utils.verifyDiscount(originalPrice, price) || !utils.verifyMaxPrice(price) || !utils.verifyKeyWords(item.title)) {
-                                    console.log(`🤔 [Scraper] Produto ignorado: ${item.title}, "Motivo: Desconto, keyword ou preço máximo"`);
-                                    continue;
-                                }
-
-                                linksCapturados.add(item.linkOriginal);
-                                novosProdutosNestaRolada++;
-
-                                productsPage.push({
-                                    id: item.asin.trim(),
-                                    title: item.title.trim(),
-                                    price,
-                                    originalPrice,
-                                    coupon: null,
-                                    badge: item.badgeText,
-                                    imageUrl: item.imageUrl,
-                                    link: item.linkOriginal,
-                                    installments: null,
-                                    store: 'Amazon'
-                                });
-
-                            } catch (e) {
-                                // Ignora falhas em cards individuais para não quebrar o fluxo
                             }
-                        }
 
-                        if (novosProdutosNestaRolada === 0) {
-                            console.log(`🤔 [Scraper] Rolada atual não trouxe produtos inéditos. Contador: ${rodadasSemNovosProdutos + 1}/2`);
-                            rodadasSemNovosProdutos++;
-                        } else {
-                            console.log(`Produtos encontrados nesta rodada de scroll: ${novosProdutosNestaRolada}`);
-                            rodadasSemNovosProdutos = 0; // Reseta o contador se ainda está achando coisas inéditas
-                        }
-                        // Rola a tela e aguarda um tempo curtinho para o React renderizar a nova fileira virtualizada
-                        await page.evaluate((dist) => window.scrollBy(0, dist), distance);
-                        totalHeight += distance;
-                        await page.waitForTimeout(2500);
+                            // Badge e Parcelamento
+                            const badgeEl = await card.$('.rio-badge-label');
+                            const badge = badgeEl ? await badgeEl.innerText() : null;
 
-                        // Se o scroll alcançou o fim absoluto do contêiner físico
-                        if (totalHeight >= maxScrollSafe) break;
+                            let installments: string | null = null;
+                            try {
+                                // Na Amazon, o preço e o parcelamento vivem dentro do price-recipe
+                                const recipeElement = await card.$('div[data-cy="price-recipe"]');
+
+                                if (recipeElement) {
+                                    // 1. Pega o texto limpo de todo o bloco (os spans serão lidos sequencialmente)
+                                    const fullText = await recipeElement.innerText();
+
+                                    // 2. Regex para capturar os 3 grupos: (em até Xx de) (R$ valor) (sem juros)
+                                    // O .*? entre os grupos garante que ele ignore espaços ou quebras de linha entre os spans
+                                    const match = fullText.match(/(em até \d+x de)\s+(R\$[\d,.]+)\s+(sem juros)/i);
+console.log("Texto de parcelamento full:", fullText)
+                                    if (match) {
+                                        // match[1] = "em até 12x de"
+                                        // match[2] = "R$ 93,33"
+                                        // match[3] = "sem juros"
+
+                                        // 3. Formatação:
+                                        let parcelas = match[1].split("até ")[2]; // Mantém como está
+                                        let valor = match[2].replace(',', '.'); // Troca vírgula por ponto (R$ 93.33)
+                                        let condicao = "s/ juros"; // Seu padrão abreviado
+
+                                        // Resultado final: "em até 12x de R$ 93.33 s/ juros"
+                                        installments = `${parcelas} ${valor} ${condicao}`;
+                                    }
+                                }
+                            } catch (error) {
+                                installments = null;
+                            }
+
+                            productsPage.push({
+                                id: id,
+                                title: title.trim(),
+                                price: isNaN(cleanPrice) ? 0 : cleanPrice,
+                                originalPrice: isNaN(originalPrice || 0) ? null : originalPrice,
+                                coupon: null, // Amazon cupons geralmente aparecem como badge ou text
+                                badge: badge,
+                                imageUrl: await (await card.$('img.s-image'))?.getAttribute('src') || null,
+                                link: 'https://www.amazon.com.br' + (await (await card.$('a.a-link-normal'))?.getAttribute('href') || ""),
+                                store: 'Amazon',
+                                installments: installments
+                            });
+
+                        } catch (e) { continue; }
                     }
 
-                    console.log(`📦 Encontrados e validados ${productsPage.length} cards exclusivos nesta página da Amazon.`);
-
-                    // Se terminou de rodar o scroll da página e achou produtos válidos, envia pro callback
-                    if (productsPage.length > 0 && onPageScraped) {
-                        console.log(`🚀 [Scraper] Página processada por completo! Enviando ${productsPage.length} produtos para o Crawler...`);
-                        onPageScraped(productsPage);
+                    if (productsPage.length > 0) {
+                        onPageScraped?.(productsPage);
                     }
 
-                } catch (errorUrl: any) {
-                    await page.screenshot({ path: `logs/erro-amazon-${Date.now()}.png`, fullPage: true });
-                    console.error(`❌ Erro ao acessar departamento da Amazon:`, errorUrl.message);
+                } catch (err) {
+                    console.error(`❌ Erro na URL Amazon: ${URL}`, err);
                 }
             }
-
         } catch (error) {
-            await page.screenshot({ path: `logs/erro-amazon-${Date.now()}.png`, fullPage: true });
-            console.error("❌ Erro geral no processamento das páginas da Amazon:", error);
+            console.error("❌ Erro catastrófico na Amazon:", error);
         } finally {
-            console.log("🔒 [Amazon Scraper] Fechando navegador de forma segura...");
             await browser.close();
+            console.log("Urls geradas dinamicamente",AccesWeb.URLsAmazon)
             AccesWeb.contadorAmazon++
+            if (AccesWeb.URLsAmazon.length > 50) {
+                // Mantém apenas os últimos 50 registros para não estourar a memória
+                AccesWeb.URLsAmazon = AccesWeb.URLsAmazon.slice(-50);
+            }
         }
-
     }
 
     async AcessShopee(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {

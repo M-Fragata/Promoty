@@ -1,12 +1,12 @@
 export interface MlProducts {
-    id: string;
-    title: string;
+    id: String;
+    title: String;
     price: number;
     originalPrice: number | null;
-    coupon: string | null;
-    badge: string | null;
-    imageUrl: string | null;
-    link: string;
-    store: string;
-    installments: string | null
+    coupon: String | null;
+    badge: String | null;
+    imageUrl: String | null;
+    link: String;
+    store: String;
+    installments: String | null
 }

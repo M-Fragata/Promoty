@@ -25,7 +25,7 @@ async function executarRobo() {
 
                 try {
                     // Dando await aqui, garantimos que o lote foi entregue à API local 
-                    
+                    /*
                     const response = await fetch("http://localhost:3333/ofertas/mercadolivre", {
                         method: "POST",
                         headers: { "Content-type": "application/json" },
@@ -35,9 +35,12 @@ async function executarRobo() {
                     if (!response.ok) {
                         throw new Error(`${response.status} - ${response.statusText}`);
                     }
+                        */
                     console.log(`✅ [Crawler] Lote de ${produtosParciais.length} produtos processado com sucesso!`);
                     
                    console.log("Enviaria para a API mas eu comentei o fetch")
+                   console.log(produtosParciais)
+                   console.log("------------")
                 } catch (err: any) {
                     console.error("❌ [Crawler] Erro ao enviar lote parcial para a API:", err.message);
                 }

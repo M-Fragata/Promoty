@@ -13,7 +13,7 @@ const groupURL = "https://chat.whatsapp.com/DVuVPqJ2DwZ4oZUU1maZIi"
 
 export class PromosController {
 
-    async messageFormat(product: MlProducts) {
+    async messageFormat(product: any) {
 
         const lines: string[] = []
 
@@ -41,29 +41,29 @@ export class PromosController {
 
         lines.push('')
 
-        if(product.installments){
+        if (product.installments) {
             lines.push(`💳 ${product.installments}`)
         }
-/*
-        // 2. Alerta de Cupom (Se houver)
-        if (product.coupon) {
-            // Remove quebras de linha (\n, \r) e espaços duplicados trazidos pelo scraper
-            const cupomLimpo = product.coupon
-                .replace(/[\r\n]+/g, ' ')
-                .replace(/\s+/g, ' ')
-                .trim();
-
-            if (cupomLimpo) {
-                // Se a string já contiver a palavra "Cupom", não duplicamos o texto
-                if (cupomLimpo.toLowerCase().includes('cupom')) {
-                    lines.push(`🎟️ *${cupomLimpo}*`);
-                } else {
-                    lines.push(`🎟️ *Cupom:* \`${cupomLimpo}\``);
+        /*
+                // 2. Alerta de Cupom (Se houver)
+                if (product.coupon) {
+                    // Remove quebras de linha (\n, \r) e espaços duplicados trazidos pelo scraper
+                    const cupomLimpo = product.coupon
+                        .replace(/[\r\n]+/g, ' ')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+        
+                    if (cupomLimpo) {
+                        // Se a string já contiver a palavra "Cupom", não duplicamos o texto
+                        if (cupomLimpo.toLowerCase().includes('cupom')) {
+                            lines.push(`🎟️ *${cupomLimpo}*`);
+                        } else {
+                            lines.push(`🎟️ *Cupom:* \`${cupomLimpo}\``);
+                        }
+                        lines.push(''); // Linha em branco para separar do preço
+                    }
                 }
-                lines.push(''); // Linha em branco para separar do preço
-            }
-        }
-*/
+        */
         lines.push('');
 
         // 4. Link de Destino (Onde a mágica acontece)
@@ -252,7 +252,7 @@ export class PromosController {
 
     processProductsAmazon = async (req: Request, res: Response) => {
         try {
-            const products: MlProducts[] = req.body;
+            const products = req.body;
 
             if (!Array.isArray(products)) {
                 return res.status(400).json({ error: "O corpo da requisição deve ser um array de produtos." });

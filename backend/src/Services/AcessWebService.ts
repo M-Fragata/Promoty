@@ -153,6 +153,22 @@ export class AccesWeb {
                 try {
                     console.log(`🌐 [Scraper] Acessando URL: ${URL.substring(0, 60)}...`);
 
+                    // 🔥 GARANTE QUE AS ROTAS DA URL ANTERIOR FORAM LIMPAS
+                    await page.unroute('**/*');
+
+                    // 1. Cria a regra de bloqueio (o Playwright intercepta via page.route)
+                    await page.route('**/*', (route) => {
+                        const request = route.request();
+                        const resourceType = request.resourceType();
+
+                        // Bloqueia folhas de estilo, fontes e imagens para economizar banda
+                        if (['stylesheet', 'font', 'image'].includes(resourceType)) {
+                            route.abort();
+                        } else {
+                            route.fallback(); // O 'fallback' no Playwright é o equivalente ao 'continue'
+                        }
+                    });
+
                     // O robô navega exatamente para a URL com os filtros que você escolheu
                     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
 
@@ -383,6 +399,7 @@ export class AccesWeb {
                     await page.screenshot({ path: `logs/erro-mercadolivre-${Date.now()}.png`, fullPage: true });
                     console.error(`❌ Erro ao acessar a URL filtrada do Mercado Livre:`, errorUrl.message);
                 }
+
             } // 🔄 Fim do laço for
 
         } catch (error) {
@@ -399,13 +416,15 @@ export class AccesWeb {
     // ================
     // Bloco Amazon
     // ================
+    private static contadorAmazon: number = 0
+
+    private static URLsAmazon: string[][] = [
+        ["https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&qid=1780962721&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_1",
+            "https://www.amazon.com.br/s?rh=n%3A16209063011%2Cp_n_deal_type%3A23565493011&dc&qid=1780962621&rnid=23565491011&ref=sr_nr_p_n_deal_type_3",],
+        ["https://www.amazon.com.br/s?i=electronics&rh=n%3A16209063011%2Cp_n_deal_type%3A23565493011&dc&page=2&qid=1780962741&rnid=23565491011&xpid=aLPtmOJgRieH5&ref=sr_pg_2", "https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=2&qid=1780962765&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_2"],
+        ["https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=3&qid=1780962768&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_3", "https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=3&qid=1780962802&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_3"]
+    ]
     async AcessAmazon(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
-        // 1- computadores e informática; 2- eletrônicos e tecnologia; 3- games e consoles
-        const URLs: string[] = [
-            "https://www.amazon.com.br/events/ofertasmensais?ref_=nav_cs_gb&discounts-widget=%2522%257B%255C%2522state%255C%2522%253A%257B%255C%2522refinementFilters%255C%2522%253A%257B%255C%2522departments%255C%2522%253A%255B%255C%252216339927011%255C%2522%255D%257D%252C%255C%2522rangeRefinementFilters%255C%2522%253A%257B%255C%2522percentOff%255C%2522%253A%257B%255C%2522min%255C%2522%253A20%252C%255C%2522max%255C%2522%253A70%257D%252C%255C%2522price%255C%2522%253A%257B%255C%2522min%255C%2522%253A0%252C%255C%2522max%255C%2522%253A4100%257D%257D%257D%252C%255C%2522version%255C%2522%253A1%257D%2522",
-            "https://www.amazon.com.br/events/ofertasmensais?ref_=nav_cs_gb&discounts-widget=%2522%257B%255C%2522state%255C%2522%253A%257B%255C%2522refinementFilters%255C%2522%253A%257B%255C%2522departments%255C%2522%253A%255B%255C%252216209063011%255C%2522%255D%257D%252C%255C%2522rangeRefinementFilters%255C%2522%253A%257B%255C%2522percentOff%255C%2522%253A%257B%255C%2522min%255C%2522%253A20%252C%255C%2522max%255C%2522%253A80%257D%252C%255C%2522price%255C%2522%253A%257B%255C%2522min%255C%2522%253A0%252C%255C%2522max%255C%2522%253A4200%257D%257D%257D%252C%255C%2522version%255C%2522%253A1%257D%2522",
-            "https://www.amazon.com.br/events/ofertasmensais?ref_=nav_cs_gb&discounts-widget=%2522%257B%255C%2522state%255C%2522%253A%257B%255C%2522refinementFilters%255C%2522%253A%257B%255C%2522departments%255C%2522%253A%255B%255C%25227791986011%255C%2522%255D%257D%252C%255C%2522rangeRefinementFilters%255C%2522%253A%257B%255C%2522percentOff%255C%2522%253A%257B%255C%2522min%255C%2522%253A25%252C%255C%2522max%255C%2522%253A90%257D%257D%257D%252C%255C%2522version%255C%2522%253A1%257D%2522"
-        ];
 
         const browser = await chromium.launch({
             headless: Env.HEADLESS,
@@ -424,11 +443,29 @@ export class AccesWeb {
 
         const page = await context.newPage();
         //const produtosEncontrados: MlProducts[] = [];
+        let urlCounter = AccesWeb.URLsAmazon.length - 1
+
+        // 🚨 SE O CONTADOR VOLTAR PRO ZERO, RESETAMOS AS ABAS DINÂMICAS!
+        if (AccesWeb.contadorAmazon > urlCounter) {
+            AccesWeb.contadorAmazon = 0;
+
+            // Corta o array estático de volta para os 4 blocos originais de fábrica
+            // eliminando qualquer push de Pichau feito em ciclos passados.
+            if (AccesWeb.URLsAmazon.length > 4) {
+                AccesWeb.URLsAmazon.length = 4;
+                console.log("♻️ [Fila Dinâmica] Varredura completa reiniciada. Expurgando URLs antigas da memória!");
+            }
+        }
 
         try {
-            for (const URL of URLs) {
+            let URLsGroup: string[] = AccesWeb.URLsAmazon[AccesWeb.contadorAmazon]!
+
+            // 🔄 O laço percorre as URLs dentro do Try principal
+            for (let i = 0; i < URLsGroup.length; i++) {
+                const URL = URLsGroup[i]!;
                 try {
                     console.log(`🌐 [Amazon Scraper] Acessando URL de Departamento...`);
+
                     await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
                     await HUMAN_DELAY(3000, 6000);
 
@@ -570,6 +607,7 @@ export class AccesWeb {
         } finally {
             console.log("🔒 [Amazon Scraper] Fechando navegador de forma segura...");
             await browser.close();
+            AccesWeb.contadorAmazon++
         }
 
     }

@@ -8,6 +8,7 @@
     "dev": "tsx src/server.ts",
     "crawler": "tsx src/scripts/crawler.ts",
     "mercadolivre": "tsx src/scripts/mercadolivre.ts",
+    "amazon": "tsx src/scripts/amazon.ts",
     "shopee": "tsx src/scripts/shopee.ts",
     "build": "tsc"
   },

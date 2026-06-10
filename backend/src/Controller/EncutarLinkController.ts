@@ -14,7 +14,7 @@ export async function EncurtaLinkController(longUrl: string, customSlug?: string
         const requestBody: any = {
             target: longUrl
         };
-console.log("🔗 Encurtando link:", longUrl, "com slug customizado:", customSlug);
+        console.log("🔗 Encurtando link:", longUrl, "com slug customizado:", customSlug);
         // Se o slug customizado foi enviado, injetamos no parâmetro "custom" que o Kutt espera
         if (customSlug) {
             requestBody.custom = customSlug;

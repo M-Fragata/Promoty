@@ -6,6 +6,7 @@ import { Env } from "../utils/Envirolment.js";
 import { EncurtaLinkController } from "./EncutarLinkController.js";
 
 import { type MlProducts } from "../types/MLPRODUCTS.js"
+import { url } from "inspector";
 
 const MARGEM_TOLERANCIA = 0.04 //Margem de tolerância: 4% acima do menor preço histórico
 
@@ -43,6 +44,7 @@ export class PromosController {
 
         if (product.installments) {
             lines.push(`💳 ${product.installments}`)
+            lines.push('');
         }
         /*
                 // 2. Alerta de Cupom (Se houver)
@@ -64,7 +66,6 @@ export class PromosController {
                     }
                 }
         */
-        lines.push('');
 
         // 4. Link de Destino (Onde a mágica acontece)
         const urlOriginal = product.link;
@@ -107,8 +108,9 @@ export class PromosController {
             urlObj.searchParams.set('tag', Env.AMAZON_TAG);
         }
 
-        const customSlug = GetCustomSlug(product.title);
-        const urlEncurt = await EncurtaLinkController(urlObj.toString(), customSlug);
+        let urlEncurt = urlObj.toString()
+
+        if (!urlObj.hostname.toLowerCase().includes("shopee")) urlEncurt = await EncurtaLinkController(urlObj.toString());
 
         // Encurtamos essa URL customizada (vamos falar disso abaixo)
         lines.push(`*Link com desconto:*`);
@@ -378,28 +380,133 @@ export class PromosController {
             return res.status(500).json({ error: "Erro interno ao processar ofertas da Amazon." });
         }
     }
+
+    processProductsShopee = async (req: Request, res: Response) => {
+        try {
+            const products = req.body;
+
+            if (!Array.isArray(products)) {
+                return res.status(400).json({ error: "O corpo da requisição deve ser um array de produtos." });
+            }
+
+            for (const prod of products) {
+                try {
+                    // 1. Busca se esse ID de promoção já existe no banco
+                    const produtoExistente = await prisma.productsMl.findUnique({
+                        where: { id: prod.id }
+                    });
+
+                    if (!produtoExistente) {
+                        // 🚀 CENÁRIO A: Produto/Promoção nova! 
+                        // Salva no banco e dispara para o WhatsApp
+                        await prisma.productsMl.create({ data: prod });
+
+                        console.log(`📣 [NOVA OFERTA SHOPEE] ${prod.title} por R$ ${prod.price} - Enviando para o WhatsApp...`);
+
+                        // Formata a mensagem para enviar
+                        const { caption, image } = await this.messageFormat(prod);
+
+                        // Envia de forma assíncrona protegida
+                        await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
+
+                    } else {
+
+                        const precoHistorico = produtoExistente.price
+                        const precoNovo = prod.price
+
+                        const precoLimiteMaximo = precoHistorico * (1 + MARGEM_TOLERANCIA)
+
+                        if (precoNovo < precoHistorico) {
+
+                            console.log(`📉 [SHOPEE - BAIXOU REAL] ${prod.title} caiu de R$ ${precoHistorico} para R$ ${precoNovo}!`);
+
+                            // Forçamos o badge a destacar o novo menor preço histórico
+                            prod.badge = `🔥 MENOR PREÇO HISTÓRICO! • ${prod.badge || ''}`;
+
+                            await prisma.productsMl.update({
+                                where: { id: prod.id },
+                                data: {
+                                    price: precoNovo, // Atualiza para o novo recorde no banco
+                                    originalPrice: prod.originalPrice,
+                                    coupon: prod.coupon,
+                                    badge: prod.badge,
+                                    link: prod.link
+                                }
+                            });
+
+                            const { caption, image } = await this.messageFormat(prod);
+                            await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
+
+                        } else if (precoNovo <= precoLimiteMaximo) {
+                            // ⏰ Define o tempo de Cooldown (Ex: 24 horas atrás)
+                            const tempoCooldown = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+                            // Checa se a última atualização do produto no banco aconteceu HÁ MAIS de 24 horas
+                            if (produtoExistente.updatedAt < tempoCooldown) {
+
+                                console.log(`⭐ [SHOPEE - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 24h, reenviando...`);
+
+                                prod.badge = `✨ Preço Excelente! • ${prod.badge || ''}`;
+
+                                await prisma.productsMl.update({
+                                    where: { id: prod.id },
+                                    data: {
+                                        originalPrice: prod.originalPrice,
+                                        coupon: prod.coupon,
+                                        badge: prod.badge,
+                                        link: prod.link
+                                        // O Prisma atualiza o 'updatedAt' automaticamente para 'now()' aqui, resetando o relógio de 24h!
+                                    }
+                                });
+
+                                const { caption, image } = await this.messageFormat(prod);
+                                await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
+
+                            } else {
+                                // 🤫 O preço continua igual e está dentro das 24h desde o último envio.
+                                console.log(`🤫 [SHOPEE - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nas últimas 24h. Apenas atualizando dados.`);
+
+                                await prisma.productsMl.update({
+                                    where: { id: prod.id },
+                                    data: {
+                                        originalPrice: prod.originalPrice,
+                                        coupon: prod.coupon,
+                                        badge: prod.badge,
+                                        link: prod.link
+                                    }
+                                });
+                                // NÃO envia para o WhatsApp!
+                            }
+                        } else {
+
+                            console.log(`🔺 [SHOPEE - FLUTUAÇÃO] ${prod.title} está por R$ ${precoNovo}, mas o menor histórico é R$ ${precoHistorico} (Limite: R$ ${precoLimiteMaximo.toFixed(2)}). Apenas atualizando banco.`);
+
+                            await prisma.productsMl.update({
+                                where: { id: prod.id },
+                                data: {
+                                    originalPrice: prod.originalPrice,
+                                    coupon: prod.coupon,
+                                    badge: prod.badge,
+                                    link: prod.link
+                                }
+                            });
+                        }
+
+                    }
+
+                } catch (itemError: any) {
+                    // Se der erro em um produto da Amazon, continua o loop de forma segura
+                    console.error(`❌ [Erro Item Shopee] Falha ao processar o produto ID: ${prod.id}. Erro:`, itemError.message);
+                }
+            }
+
+            // Responde ao robô que o processamento terminou com sucesso
+            return res.status(200).json({ success: true, message: "Produtos da Shopee processados." });
+
+        } catch (error: any) {
+            console.error("💥 [Erro Crítico Shopee] Falha geral no processProductsShopee:", error);
+            return res.status(500).json({ error: "Erro interno ao processar ofertas da Shopee." });
+        }
+    }
 }
 
-function GetCustomSlug(title: string): string {
-    // 1. Deixa em minúsculas e remove acentos
-    const textoTratado = title
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
-
-    // 2. Transforma hifens, barras ou caracteres especiais em espaços simples para isolar as palavras puro texto
-    const textoLimpo = textoTratado
-        .replace(/[^a-z0-9\s]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-
-    // 3. Divide estritamente por espaços e captura as 5 primeiras palavras reais
-    const palavras = textoLimpo.split(" ").filter(p => p.length > 0);
-    const primeirasPalavras = palavras.slice(0, 5);
-
-    // 4. Junta tudo com hífen
-    const slugFinal = primeirasPalavras.join("-");
-
-    // 5. Garantia total anti-rejeição: remove hifens que possam ter sobrado nas pontas
-    return slugFinal.replace(/^-+|-+$/g, "");
-}

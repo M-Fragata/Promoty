@@ -8,5 +8,9 @@ const shopeePromoController = new ShopeePromosController()
 
 offersRoutes.post('/mercadolivre', promosController.processProductsML);
 offersRoutes.post('/amazon', promosController.processProductsAmazon);
-offersRoutes.post('/shopee', shopeePromoController.GetProducts)
+offersRoutes.post('/shopee', promosController.processProductsShopee)
+
+
+//Chamada na API da shopee
 offersRoutes.post('/shopee/info', shopeePromoController.GetInfo)
+offersRoutes.get('/shopee/shop', shopeePromoController.GetPichauShop)

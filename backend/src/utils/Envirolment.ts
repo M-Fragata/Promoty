@@ -23,7 +23,9 @@ const EnvSchema = z.object({
         z.boolean()
     ).default(true),//padrão produção
     SHOPEE_API_ID: z.string(),
-    SHOPEE_API_PASSWORD: z.string()
+    SHOPEE_API_PASSWORD: z.string(),
+    TELEGRAM_CHAT_ID: z.string(),
+    TELEGRAM_TOKEN: z.string()
 })
 
 const Envirol = EnvSchema.safeParse(process.env);

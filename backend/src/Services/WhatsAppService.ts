@@ -137,8 +137,8 @@ export class WhatsAppService {
             // Se ainda existirem itens na fila, aplica o respiro obrigatório anti-ban
             if (this.queue.length > 0) {
 
-                const min = 7000
-                const max = 12000
+                const min = 14000
+                const max = 20000
                 const DELAY_BETWEEN_MESSAGES = Math.floor(Math.random() * (max - min + 1)) + min;
 
                 console.log(`🎲 [Fila WPP] Cadência humana ativada: aguardando ${(DELAY_BETWEEN_MESSAGES / 1000).toFixed(1)}s antes do próximo post. Restam ${this.queue.length} itens.`)

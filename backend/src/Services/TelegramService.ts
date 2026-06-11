@@ -8,6 +8,7 @@ interface PrintProps {
     produtosLength: number;
     tempoExecucao: number;
     status: string;
+    url: string
 }
 
 interface TelegramProps {
@@ -16,6 +17,7 @@ interface TelegramProps {
     produtosLength: number;
     tempoExecucao: number;
     status: string;
+    url: string
 }
 
 // 2. Fila simples para não travar o bot
@@ -48,10 +50,10 @@ export async function TakePrintScreenService({ page, ...rest }: PrintProps) {
 }
 
 // 4. Serviço de Telegram (Envio)
-async function SendTelegramMessageService({ screenShot, store, produtosLength, tempoExecucao, status }: TelegramProps) {
+async function SendTelegramMessageService({ screenShot, store, produtosLength, tempoExecucao, status, url }: TelegramProps) {
     try {
         const mensagem = `*🤖 RELATÓRIO DO RÔBO [${store}]*\n\n` +
-            `✅ *Status:* ${status}\n` +
+            `✅ *Status:* ${status}\n no acesso da URL: ${url}` +
             `📦 *Produtos processados:* ${produtosLength}\n` +
             `⏱️ *Tempo de execução:* ${tempoExecucao}s\n` +
             `📅 *Data:* ${new Date().toLocaleDateString("pt-BR")} às ${new Date().toLocaleTimeString("pt-BR")}`;

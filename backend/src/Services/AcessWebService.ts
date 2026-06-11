@@ -3,6 +3,7 @@ import { type Page } from 'playwright'
 import stealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { type MlProducts } from "../types/MLPRODUCTS.js";
 import { Env } from '../utils/Envirolment.js';
+import { TakePrintScreenService } from './TelegramService.js';
 
 chromium.use(stealthPlugin());
 
@@ -153,6 +154,7 @@ export class AccesWeb {
             // 🔄 O laço percorre as URLs dentro do Try principal
             for (let i = 0; i < URLsGroup.length; i++) {
                 const URL = URLsGroup[i]!;
+                const startTime = Date.now() //timer
 
                 try {
                     console.log(`🌐 [Scraper] Acessando URL: ${URL.substring(0, 60)}...`);
@@ -228,7 +230,15 @@ export class AccesWeb {
 
                     if (cards.length === 0) {
                         console.log(`🛑 [Scraper] Página vazia detectada na URL atual.`);
-                        await page.screenshot({ path: `logs/erro-mercadolivre-${Date.now()}.png`, fullPage: true });
+                        const duration = (Date.now() - startTime) / 1000
+                        await TakePrintScreenService({
+                            page: page,
+                            store: "Mercado Livre",
+                            produtosLength: 0,
+                            tempoExecucao: duration,
+                            status: "Falha",
+                            url: URL
+                        })
                         break;
                     }
 
@@ -394,21 +404,39 @@ export class AccesWeb {
                     if (productsPage.length > 0) {
                         console.log(`🚀 [Scraper] Página processada! Enviando ${productsPage.length} produtos para o Crawler em background...`);
 
+                        const duration = (Date.now() - startTime) / 1000
+
+                        await TakePrintScreenService({
+                            page: page,
+                            store: "Mercado Livre",
+                            produtosLength: productsPage.length,
+                            tempoExecucao: duration,
+                            status: "Sucesso",
+                            url: URL
+                        })
+
                         // Chamamos a função sem dar await aqui dentro para liberar o laço
                         onPageScraped?.(productsPage);
                     }
 
                 } catch (errorUrl: any) {
                     // Trata o erro de uma página específica (ex: timeout) e deixa o laço ir para a próxima URL
-                    await page.screenshot({ path: `logs/erro-mercadolivre-${Date.now()}.png`, fullPage: true });
+                    const duration = (Date.now() - startTime) / 1000
+                    await TakePrintScreenService({
+                        page: page,
+                        store: "Mercado Livre",
+                        produtosLength: 0,
+                        tempoExecucao: duration,
+                        status: "Falha",
+                        url: URL
+                    })
                     console.error(`❌ Erro ao acessar a URL filtrada do Mercado Livre:`, errorUrl.message);
                 }
 
             } // 🔄 Fim do laço for
 
         } catch (error) {
-            await page.screenshot({ path: `logs/erro-mercadolivre-${Date.now()}.png`, fullPage: true });
-            console.error("❌ Erro catastrófico geral no processamento das páginas:", error);
+            console.error("❌ Erro grave no laço principal do Mercado Livre:", error);
         } finally {
             // O bloco finally fecha o navegador uma única vez ao término de todas as iterações ou em caso de quebra do try principal
             console.log("🔒 [Scraper] Finalizando sessões e fechando o navegador de forma segura...");
@@ -454,7 +482,6 @@ export class AccesWeb {
         }
 
         try {
-
             // Bloqueio de recursos desnecessários (Performance)
             await page.route('**/*', (route) => {
                 if (['stylesheet', 'font', 'image'].includes(route.request().resourceType())) {
@@ -468,6 +495,8 @@ export class AccesWeb {
 
             for (let i = 0; i < URLsGroup.length; i++) {
 
+                const startTime = Date.now()
+
                 const URLAmazon = URLsGroup[i]!;
                 const urlObj = new URL(URLAmazon)
                 urlObj.searchParams.set('page', (AccesWeb.contadorAmazon + 2).toString())
@@ -475,7 +504,15 @@ export class AccesWeb {
                 AccesWeb.urlDynamic.push(urlObj.toString())
 
                 if (AccesWeb.urlDynamic.length === URLsGroup.length) {
-                    AccesWeb.URLsAmazon.push(AccesWeb.urlDynamic)
+                    AccesWeb.URLsAmazon.push([...AccesWeb.urlDynamic])
+                    await TakePrintScreenService({
+                        page: page,
+                        produtosLength: AccesWeb.URLsAmazon.length,
+                        store: "Amazon",
+                        status: "Novo Array de URL Gerado",
+                        tempoExecucao: 0,
+                        url: `${AccesWeb.urlDynamic[0]} e ${AccesWeb.urlDynamic[1]}`
+                    })
                     AccesWeb.urlDynamic.shift()
                 }
 
@@ -487,16 +524,34 @@ export class AccesWeb {
                     console.log(`📦 [Amazon] Encontrados ${cards.length} produtos.`);
 
                     if (cards.length === 0) {
+                        const duration = (Date.now() - startTime) / 1000
 
                         const captcha = await page.locator('img#d')
                         if (captcha) {
                             console.warn("⚠️ Captcha (Cachorro) detectado! Pulando esta URL específica...");
-                            // O 'continue' vai pular o restante do código dentro deste loop
-                            // e vai para a próxima URL que estiver no array 'urlDynamic'
+
+                            await TakePrintScreenService({
+                                page: page,
+                                produtosLength: 0,
+                                store: "Amazon",
+                                status: "Falha - Captcha",
+                                tempoExecucao: duration,
+                                url: URLAmazon
+                            })
                             continue;
                         }
                         AccesWeb.contadorAmazon++;
                         console.log(`📦 Fim dos produtos. Avançando para a próxima categoria.`);
+
+                        await TakePrintScreenService({
+                            page: page,
+                            produtosLength: 0,
+                            store: "Amazon",
+                            status: "Fim dos produtos",
+                            tempoExecucao: duration,
+                            url: URLAmazon
+                        })
+
                         continue; // Sai do método para o próximo ciclo
                     }
 
@@ -592,11 +647,24 @@ export class AccesWeb {
                                 installments: installments
                             });
 
-                        } catch (e) { continue; }
+                        } catch (e) {
+                            continue;
+                        }
                     }
 
                     if (productsPage.length > 0) {
                         onPageScraped?.(productsPage);
+
+                        const duration = (Date.now() - startTime) / 1000
+                        await TakePrintScreenService({
+                            page: page,
+                            produtosLength: productsPage.length,
+                            store: "Amazon",
+                            status: "Sucesso",
+                            tempoExecucao: duration,
+                            url: URLAmazon
+                        })
+
                     }
 
                 } catch (err) {
@@ -607,6 +675,7 @@ export class AccesWeb {
         } catch (error) {
             console.error("❌ Erro catastrófico na Amazon:", error);
         } finally {
+
             await browser.close();
             AccesWeb.contadorAmazon++
             if (AccesWeb.URLsAmazon.length > 50) {

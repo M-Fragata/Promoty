@@ -110,7 +110,7 @@ export class PromosController {
 
         let urlEncurt = urlObj.toString()
 
-        if (!urlObj.hostname.toLowerCase().includes("shopee")) urlEncurt = await EncurtaLinkController(urlObj.toString());
+        if (urlObj.hostname.toLowerCase().includes("mercadolivre")) urlEncurt = await EncurtaLinkController(urlObj.toString());
 
         // Encurtamos essa URL customizada (vamos falar disso abaixo)
         lines.push(`*Link com desconto:*`);
@@ -165,7 +165,6 @@ export class PromosController {
                             // 📉 Sub-cenário B1: Bateu um novo recorde absoluto de menor preço!
                             console.log(`📉 [ML - BAIXOU REAL] ${prod.title} caiu de R$ ${precoHistorico} para R$ ${precoNovo}!`);
 
-
                             prod.badge = `🔥 MENOR PREÇO HISTÓRICO! • ${prod.badge || ''}`;
 
                             await prisma.productsMl.update({
@@ -185,10 +184,10 @@ export class PromosController {
                         } else if (precoNovo <= precoLimiteMaximo) {
                             // ⭐ Sub-cenário B2: Está dentro da margem de 4% (Preço Excelente)
                             // Aplicamos o Cooldown de 24 horas usando o updatedAt para evitar o spam de loops idênticos
-                            const tempoCooldown = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                            const tempoCooldown = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
 
                             if (produtoExistente.updatedAt < tempoCooldown) {
-                                console.log(`⭐ [ML - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo}. Já se passaram 24h, reenviando...`);
+                                console.log(`⭐ [ML - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo}. Já se passou 5 dias, reenviando...`);
 
                                 prod.badge = `✨ Preço Excelente! • ${prod.badge || ''}`;
 
@@ -208,7 +207,7 @@ export class PromosController {
                                 await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
                             } else {
                                 // 🤫 Continua na promoção pelo mesmo preço dentro da janela de 24h
-                                console.log(`🤫 [ML - SILENCIADO] ${prod.title} continua por R$ ${precoNovo} dentro das 24h. Apenas atualizando banco.`);
+                                console.log(`🤫 [ML - SILENCIADO] ${prod.title} continua por R$ ${precoNovo} dentro dos 5 dias. Apenas atualizando banco.`);
 
                                 await prisma.productsMl.update({
                                     where: { id: prod.id },
@@ -260,7 +259,6 @@ export class PromosController {
                 return res.status(400).json({ error: "O corpo da requisição deve ser um array de produtos." });
             }
 
-
             for (const prod of products) {
                 try {
                     // 1. Busca se esse ID de promoção já existe no banco
@@ -311,12 +309,12 @@ export class PromosController {
 
                         } else if (precoNovo <= precoLimiteMaximo) {
                             // ⏰ Define o tempo de Cooldown (Ex: 24 horas atrás)
-                            const tempoCooldown = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                            const tempoCooldown = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
 
                             // Checa se a última atualização do produto no banco aconteceu HÁ MAIS de 24 horas
                             if (produtoExistente.updatedAt < tempoCooldown) {
 
-                                console.log(`⭐ [AMAZON - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 24h, reenviando...`);
+                                console.log(`⭐ [AMAZON - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 5 dias, reenviando...`);
 
                                 prod.badge = `✨ Preço Excelente! • ${prod.badge || ''}`;
 
@@ -336,7 +334,7 @@ export class PromosController {
 
                             } else {
                                 // 🤫 O preço continua igual e está dentro das 24h desde o último envio.
-                                console.log(`🤫 [AMAZON - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nas últimas 24h. Apenas atualizando dados.`);
+                                console.log(`🤫 [AMAZON - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nos últimos 5 dias. Apenas atualizando dados.`);
 
                                 await prisma.productsMl.update({
                                     where: { id: prod.id },

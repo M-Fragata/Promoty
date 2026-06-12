@@ -318,7 +318,6 @@ export class PromosController {
                             if (produtoExistente.updatedAt < tempoCooldown) {
 
                                 console.log(`⭐ [AMAZON - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 5 dias, reenviando...`);
-                                console.log(`⭐ [AMAZON - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 24h, reenviando...`);
 
                                 prod.badge = `✨ Preço Excelente! • ${prod.badge || ''}`;
 
@@ -339,8 +338,7 @@ export class PromosController {
                             } else {
                                 // 🤫 O preço continua igual e está dentro das 24h desde o último envio.
                                 console.log(`🤫 [AMAZON - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nos últimos 5 dias. Apenas atualizando dados.`);
-                                console.log(`🤫 [AMAZON - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nas últimas 24h. Apenas atualizando dados.`);
-
+                               
                                 await prisma.productsMl.update({
                                     where: { id: prod.id },
                                     data: {

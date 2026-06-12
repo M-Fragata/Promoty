@@ -232,7 +232,6 @@ export class AccesWeb {
                     const cards = await page.$$('.poly-card');
                     console.log(`📦 Encontrados ${cards.length} cards nesta página.`);
 
-
                     if (cards.length === 0) {
                         console.log(`🛑 [Scraper] Página vazia detectada na URL atual.`);
                         const duration = (Date.now() - startTime) / 1000
@@ -244,7 +243,7 @@ export class AccesWeb {
                             status: "Falha",
                             url: URL
                         })
-                        break;
+                        continue;
                     }
 
                     const productsPage: MlProducts[] = [];
@@ -274,8 +273,7 @@ export class AccesWeb {
                             // 2. CAPTURA TÍTULO
                             const title = await linkElement.innerText();
                             //Verifica se o titulo contains the key words
-                            if (!utils.verifyKeyWords(title)) continue
-
+                            if (!utils.verifyKeyWords(title) || utils.verifyBanWords(title)) continue
 
                             // 3. CAPTURA IMAGEM
                             const imgElement = await card.$('.poly-card__portada img');
@@ -520,7 +518,7 @@ export class AccesWeb {
                         tempoExecucao: 0,
                         url: `${AccesWeb.urlDynamic[0]} e ${AccesWeb.urlDynamic[1]}`
                     })
-                    AccesWeb.urlDynamic.shift()
+                    AccesWeb.urlDynamic.splice(0, AccesWeb.urlDynamic.length)
                 }
 
                 try {
@@ -545,6 +543,7 @@ export class AccesWeb {
                                 tempoExecucao: duration,
                                 url: URLAmazon
                             })
+
                             continue;
                         }
                         AccesWeb.contadorAmazon++;

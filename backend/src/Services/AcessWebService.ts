@@ -18,6 +18,7 @@ const HUMAN_DELAY = (min = 2000, max = 5000) => new Promise(resolve => setTimeou
 
 // Váriaveis globais
 const keywords: string[] = ["notebook", "celular", "smartphone", "monitor", "placa de vídeo", "ssd", "hd", "fone", "headset", "teclado", "mouse", "webcam", "caixa de som bluetooth", "smartwatch", "tablet", "processador", "memória ram", "gabinete gamer", "cooler", "fonte para pc", "impressora", "roteador", "tv", "videogame", "console", "jogo de videogame", "cadeira gamer", "cadeira ergonomica", "cadeira de escritório", "mesa gamer", "power bank", "cabo usb", "carregador portátil", "suporte para notebook", "microfone", "webcam", "filtro de linha", "no-break", "pen drive", "cartão de memória", "nvme", "water cooler"]
+const banwords: string[] = ["capa", "capinha", "pés", "ipad", "mulher", "feminino", "cabo smartwatch", "ferramenta", "tela para"] // Implementar palavras indesejáveis
 const descountMin: number = 35
 const maxPrice: number = 3000
 
@@ -25,6 +26,10 @@ class secondaryFunction {
     verifyKeyWords(text: string): boolean {
         const textLower = text.toLowerCase();
         return keywords.some(keyword => textLower.includes(keyword.toLowerCase()));
+    }
+    verifyBanWords(text: string): boolean {
+        const textLower = text.toLowerCase();
+        return banwords.some(banword => textLower.includes(banword.toLowerCase()));
     }
     verifyDiscount(originalPrice: number | null, currentPrice: number): boolean {
         if (!originalPrice || originalPrice <= currentPrice) return false;
@@ -436,7 +441,8 @@ export class AccesWeb {
             } // 🔄 Fim do laço for
 
         } catch (error) {
-            console.error("❌ Erro grave no laço principal do Mercado Livre:", error);
+            await page.screenshot({ path: `logs/erro-mercadolivre-${Date.now()}.png`, fullPage: true });
+            console.error("❌ Erro catastrófico geral no processamento das páginas:", error);
         } finally {
             // O bloco finally fecha o navegador uma única vez ao término de todas as iterações ou em caso de quebra do try principal
             console.log("🔒 [Scraper] Finalizando sessões e fechando o navegador de forma segura...");
@@ -482,6 +488,7 @@ export class AccesWeb {
         }
 
         try {
+
             // Bloqueio de recursos desnecessários (Performance)
             await page.route('**/*', (route) => {
                 if (['stylesheet', 'font', 'image'].includes(route.request().resourceType())) {
@@ -565,7 +572,7 @@ export class AccesWeb {
                             // Título
                             const titleEl = await card.$('h2');
                             const title = (await titleEl?.innerText()) || "";
-                            if (!utils.verifyKeyWords(title)) continue;
+                            if (!utils.verifyKeyWords(title) || utils.verifyBanWords(title)) continue
 
                             // Preços (Amazon geralmente tem: [Atual, Original])
                             const priceEls = await card.$$('.a-price .a-offscreen');
@@ -647,9 +654,7 @@ export class AccesWeb {
                                 installments: installments
                             });
 
-                        } catch (e) {
-                            continue;
-                        }
+                        } catch (e) { continue; }
                     }
 
                     if (productsPage.length > 0) {
@@ -675,171 +680,11 @@ export class AccesWeb {
         } catch (error) {
             console.error("❌ Erro catastrófico na Amazon:", error);
         } finally {
-
             await browser.close();
             AccesWeb.contadorAmazon++
             if (AccesWeb.URLsAmazon.length > 50) {
                 // Mantém apenas os últimos 50 registros para não estourar a memória
                 AccesWeb.URLsAmazon = AccesWeb.URLsAmazon.slice(-50);
-            }
-        }
-    }
-
-    async AcessShopee(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
-
-        const URLs: string[] = [
-            "https://shopee.com.br/Computadores-e-Acess%C3%B3rios-cat.11059977?page=0&sortBy=sales",
-            "https://shopee.com.br/flash_sale?categoryId=18&promotionId=275866672377856"
-        ];
-
-        let browser: any = null;
-
-        try {
-            browser = await chromium.launch({
-                headless: Env.HEADLESS,
-                slowMo: 100,
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
-            });
-
-            const userAgentRandom = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] ?? USER_AGENTS[0];
-
-            const context = await browser.newContext({
-                userAgent: userAgentRandom as string,
-                viewport: { width: 1366, height: 768 },
-                locale: 'pt-BR',
-                timezoneId: 'America/Sao_Paulo',
-            });
-
-            const page = await context.newPage();
-
-            // Mantemos a lista global caso queira acumular tudo de todas as páginas
-            const produtosEncontrados: MlProducts[] = [];
-
-            for (const URL of URLs) {
-                try {
-                    console.log(`🌐 [Shopee Scraper] Navegando para: ${URL}`);
-                    await page.goto(URL, { waitUntil: 'load', timeout: 60000 });
-
-                    // Uma pequena pausa para garantir a renderização dos cards injetados por JS
-                    await page.waitForTimeout(3000);
-
-                    // 1. Captura a lista de todos os cards da página atual
-                    const cards = await page.$$('.t13OEo');
-                    console.log(`📦 [Shopee Scraper] Encontrados ${cards.length} cards potenciais nesta página.`);
-
-                    // Criamos uma lista temporária apenas para a página atual para controlar o callback por lote
-                    const produtosDaPagina: MlProducts[] = [];
-
-                    for (const card of cards) {
-                        try {
-                            // ==========================================
-                            // 1. CAPTURA E VALIDA TÍTULO
-                            // ==========================================
-                            const titleElement = await card.$('.EAIlz5');
-                            if (!titleElement) continue;
-                            const title = await titleElement.innerText();
-
-                            if (!utils.verifyKeyWords(title)) continue;
-
-                            // ==========================================
-                            // 2. CAPTURA E VALIDA PREÇO ATUAL (COM DESCONTO)
-                            // ==========================================
-                            const priceElement = await card.$('.v8KtmX .iwH3_q');
-                            if (!priceElement) continue;
-
-                            const priceText = await priceElement.innerText();
-                            const currentPrice = parseFloat(priceText.replace(/\./g, '').replace(',', '.'));
-
-                            if (!utils.verifyMaxPrice(currentPrice)) continue;
-
-                            // ==========================================
-                            // 3. CAPTURA PORCENTAGEM E CALCULA PREÇO ORIGINAL
-                            // ==========================================
-                            const discountElement = await card.$('.EKx6p6');
-                            let discountText = '';
-                            if (discountElement) {
-                                discountText = await discountElement.innerText();
-                            }
-
-                            const originalPrice = utils.verifyOriginalPrice(currentPrice, discountText);
-                            if (originalPrice === currentPrice) continue;
-
-                            if (!utils.verifyDiscount(originalPrice, currentPrice)) {
-                                console.log(`🤫 [SHOPEE - REJEITADO] ${title.substring(0, 25)}... Desconto abaixo do mínimo.`);
-                                continue;
-                            }
-
-                            // ==========================================
-                            // 4. CAPTURA LINK E EXTRAI O PRODUCT ID
-                            // ==========================================
-                            const linkElement = await card.$('a');
-                            if (!linkElement) continue;
-                            const href = await linkElement.getAttribute('href');
-
-                            if (!href) continue;
-                            const fullLink = `https://shopee.com.br${href}`;
-
-                            const idMatch = href.match(/i\.\d+\.(\d+)/);
-                            const productId = idMatch ? idMatch[1] : `shopee-${Date.now()}`;
-
-                            // ==========================================
-                            // 5. CAPTURA A IMAGEM DO PRODUTO
-                            // ==========================================
-                            const imgElement = await card.$('.kwL5yd');
-                            let imageUrl = '';
-                            if (imgElement) {
-                                const style = await imgElement.getAttribute('style');
-                                const urlMatch = style?.match(/url\("(.+?)"\)/);
-                                if (urlMatch && urlMatch[1]) {
-                                    imageUrl = urlMatch[1].replace('_tn', '');
-                                }
-                            }
-
-                            // ==========================================
-                            // 🌟 PRODUTO APROVADO COM SUCESSO!
-                            // ==========================================
-                            const discountNumber = parseInt(discountText.replace(/[^0-9]/g, ''), 10);
-                            const produtoFinal: MlProducts = {
-                                id: productId,
-                                title,
-                                price: currentPrice,
-                                coupon: null,
-                                originalPrice,
-                                badge: discountNumber.toString() + '% OFF',
-                                link: fullLink,
-                                imageUrl,
-                                installments: null,
-                                store: "Shopee"
-                            };
-
-                            console.log(`💎 [PRODUTO OURO APROVADO]: ${title}`);
-                            produtosDaPagina.push(produtoFinal);
-                            produtosEncontrados.push(produtoFinal);
-
-                        } catch (cardError) {
-                            console.error('❌ Erro ao processar card específico da Shopee:', cardError);
-                            continue;
-                        }
-                    } // Fim do laço de cards
-
-                    // Dispara o lote específico que acabou de ser coletado nesta URL
-                    /*if (onPageScraped && produtosDaPagina.length > 0) {
-                        onPageScraped(produtosDaPagina);
-                    }*/
-
-                } catch (pageError) {
-                    console.error(`❌ Erro ao processar a URL da vez (${URL}):`, pageError);
-                    continue; // Avança para a próxima URL sem estourar o robô
-                }
-            } // Fim do laço de URLs
-
-        } catch (globalError) {
-            console.error('💥 Erro fatal no inicializador do Scraper da Shopee:', globalError);
-        } finally {
-            // 🔥 AQUI SIM! O browser só fecha quando TODAS as URLs terminarem de rodar.
-            if (browser) {
-                console.log("🔒 [Shopee Scraper] Todas as páginas processadas. Fechando navegador de forma segura...");
-                await browser.close();
             }
         }
     }

@@ -110,6 +110,7 @@ export class PromosController {
 
         let urlEncurt = urlObj.toString()
 
+        //Formata URL apenas do mercado livre
         if (urlObj.hostname.toLowerCase().includes("mercadolivre")) urlEncurt = await EncurtaLinkController(urlObj.toString());
 
         // Encurtamos essa URL customizada (vamos falar disso abaixo)
@@ -164,6 +165,7 @@ export class PromosController {
                         if (precoNovo < precoHistorico) {
                             // 📉 Sub-cenário B1: Bateu um novo recorde absoluto de menor preço!
                             console.log(`📉 [ML - BAIXOU REAL] ${prod.title} caiu de R$ ${precoHistorico} para R$ ${precoNovo}!`);
+
 
                             prod.badge = `🔥 MENOR PREÇO HISTÓRICO! • ${prod.badge || ''}`;
 
@@ -259,6 +261,7 @@ export class PromosController {
                 return res.status(400).json({ error: "O corpo da requisição deve ser um array de produtos." });
             }
 
+
             for (const prod of products) {
                 try {
                     // 1. Busca se esse ID de promoção já existe no banco
@@ -315,6 +318,7 @@ export class PromosController {
                             if (produtoExistente.updatedAt < tempoCooldown) {
 
                                 console.log(`⭐ [AMAZON - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 5 dias, reenviando...`);
+                                console.log(`⭐ [AMAZON - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 24h, reenviando...`);
 
                                 prod.badge = `✨ Preço Excelente! • ${prod.badge || ''}`;
 
@@ -335,6 +339,7 @@ export class PromosController {
                             } else {
                                 // 🤫 O preço continua igual e está dentro das 24h desde o último envio.
                                 console.log(`🤫 [AMAZON - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nos últimos 5 dias. Apenas atualizando dados.`);
+                                console.log(`🤫 [AMAZON - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nas últimas 24h. Apenas atualizando dados.`);
 
                                 await prisma.productsMl.update({
                                     where: { id: prod.id },

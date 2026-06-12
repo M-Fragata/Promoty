@@ -294,7 +294,7 @@ export class AccesWeb {
                             // 2. CAPTURA TÍTULO
                             const title = await linkElement.innerText();
                             //Verifica se o titulo contains the key words
-                            if (!utils.verifyKeyWords(title) || utils.verifyBanWords(title)) continue
+                            if (!utils.verifyKeyWords(title) || utils.verifyBanWords(title) || !utils.checkLimitedWords(title)) continue
 
                             // 3. CAPTURA IMAGEM
                             const imgElement = await card.$('.poly-card__portada img');
@@ -594,7 +594,7 @@ export class AccesWeb {
                             // Título
                             const titleEl = await card.$('h2');
                             const title = (await titleEl?.innerText()) || "";
-                            if (!utils.verifyKeyWords(title) || utils.verifyBanWords(title)) continue
+                            if (!utils.verifyKeyWords(title) || utils.verifyBanWords(title) || !utils.checkLimitedWords(title)) continue
 
                             // Preços (Amazon geralmente tem: [Atual, Original])
                             const priceEls = await card.$$('.a-price .a-offscreen');

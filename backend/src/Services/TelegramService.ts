@@ -40,8 +40,16 @@ export async function TakePrintScreenService({ page, ...rest }: PrintProps) {
     try {
         const screenShot = await page.screenshot({ type: 'png', fullPage: true });
 
+        const data = {
+            store: String(rest.store),
+            status: String(rest.status),
+            produtosLength: Number(rest.produtosLength),
+            tempoExecucao: Number(rest.tempoExecucao),
+            url: String(rest.url)
+        }
+
         // Enfileira a tarefa sem dar await (Fire and Forget)
-        telegramQueue.push(async () => SendTelegramMessageService({ screenShot, ...rest }));
+        telegramQueue.push(async () => SendTelegramMessageService({ screenShot, ...data }));
         processQueue(); // Inicia o processamento da fila
 
     } catch (error) {

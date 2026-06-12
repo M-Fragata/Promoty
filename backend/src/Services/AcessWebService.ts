@@ -19,8 +19,11 @@ const HUMAN_DELAY = (min = 2000, max = 5000) => new Promise(resolve => setTimeou
 // Váriaveis globais
 const keywords: string[] = ["notebook", "celular", "smartphone", "monitor", "placa de vídeo", "ssd", "hd", "fone", "headset", "teclado", "mouse", "webcam", "caixa de som bluetooth", "smartwatch", "tablet", "processador", "memória ram", "gabinete gamer", "cooler", "fonte para pc", "impressora", "roteador", "tv", "videogame", "console", "jogo de videogame", "cadeira gamer", "cadeira ergonomica", "cadeira de escritório", "mesa gamer", "power bank", "cabo usb", "carregador portátil", "suporte para notebook", "microfone", "webcam", "filtro de linha", "no-break", "pen drive", "cartão de memória", "nvme", "water cooler"]
 const banwords: string[] = ["capa", "capinha", "pés", "ipad", "mulher", "feminino", "cabo smartwatch", "ferramenta", "tela para"] // Implementar palavras indesejáveis
+const limitedWords: string[] = ["Carregador", "smartwatch", "power bank"]
 const descountMin: number = 35
 const maxPrice: number = 3000
+
+let wordsAlreadyUsed = new Set<string>()
 
 class secondaryFunction {
     verifyKeyWords(text: string): boolean {
@@ -30,6 +33,22 @@ class secondaryFunction {
     verifyBanWords(text: string): boolean {
         const textLower = text.toLowerCase();
         return banwords.some(banword => textLower.includes(banword.toLowerCase()));
+    }
+    checkLimitedWords(text: string): boolean {
+        const textLower = text.toLowerCase();
+
+        const limitedWord = limitedWords.find(lw => textLower.includes(lw.toLowerCase()))
+
+        if (!limitedWord) return true //Caso não seja uma palavra limitada retorna true
+
+        if (wordsAlreadyUsed.has(limitedWord)) return false
+
+        wordsAlreadyUsed.add(limitedWord) //adicionando na memoria para bloquear no próximo scraper
+
+        return true // palavra limitada primeira vez irá passar
+    }
+    resetWordsAlreadyUsed() {
+        wordsAlreadyUsed.clear()
     }
     verifyDiscount(originalPrice: number | null, currentPrice: number): boolean {
         if (!originalPrice || originalPrice <= currentPrice) return false;
@@ -158,6 +177,8 @@ export class AccesWeb {
 
             // 🔄 O laço percorre as URLs dentro do Try principal
             for (let i = 0; i < URLsGroup.length; i++) {
+                utils.resetWordsAlreadyUsed()//Resetar quantidade de palavras já usadas
+
                 const URL = URLsGroup[i]!;
                 const startTime = Date.now() //timer
 
@@ -499,6 +520,8 @@ export class AccesWeb {
             let URLsGroup: string[] = AccesWeb.URLsAmazon[AccesWeb.contadorAmazon]!
 
             for (let i = 0; i < URLsGroup.length; i++) {
+
+                utils.resetWordsAlreadyUsed()//Resetar quantidade de palavras já usadas
 
                 const startTime = Date.now()
 

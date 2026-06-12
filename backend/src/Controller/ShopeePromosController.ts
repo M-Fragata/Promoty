@@ -13,36 +13,40 @@ interface Produto {
     priceDiscountRate: number
 }
 
-export class ShopeePromosController {
-
-    // Lojas oficiais shopee
-    // https://shopee.com.br/eshop.loja 627750190
-    // https://shopee.com.br/pichau
-
-    async GetProducts(req: Request, res: Response) {
-        // Categorias de Hardware que definimos
-        const CATEGORY = {
+/*        const CATEGORY = {
             PERIFERICOS: [101996, 101973, 101998],
             HARDWARE: [101950, 101951, 101952, 101955],
             ARMAZENAMENTO: [101961, 101962]
         };
+            // Lojas oficiais shopee
+    // https://shopee.com.br/eshop.loja 627750190
+    // https://shopee.com.br/pichau
+        */
 
-        const allFilteredProducts: any[] = [];
+export class ShopeePromosController {
 
-        // Keywords para filtro secundário (garante que é gamer/tech)
-        const keywords: string[] = ["notebook", "celular", "smartphone", "monitor", "placa de vídeo", "ssd", "hd", "fone", "headset", "teclado", "mouse", "webcam", "caixa de som bluetooth", "smartwatch", "tablet", "processador", "memória ram", "gabinete gamer", "cooler", "fonte para pc", "impressora", "roteador", "tv", "videogame", "console", "jogo de videogame", "cadeira gamer", "cadeira ergonomica", "cadeira de escritório", "mesa gamer", "power bank", "cabo usb", "carregador portátil", "suporte para notebook", "microfone", "webcam", "filtro de linha", "no-break", "pen drive", "cartão de memória", "nvme", "water cooler"]
+    async GetProducts(req: Request, res: Response) {
+
+        // Keywords para filtro (garante que é gamer/tech)
+        const keywords: string[] = [
+            "Teclado Mecanico",
+            "SSD NVMe M2",
+            "Mouse Gamer",
+            "Memoria RAM DDR4",
+            "Headset Gamer"
+        ]
+
+        const produtos: any[] = []
 
         try {
-            for (const [CategoryName, catIds] of Object.entries(CATEGORY)) {
-                console.log(`🔍 Buscando no nicho: ${CategoryName}`);
 
-                for (const categoryID of catIds) {
+            for (const keyword of keywords) {
 
-                    const timeStamp = Math.floor(Date.now() / 1000);
+                const timeStamp = Math.floor(Date.now() / 1000);
 
-                    const payload = {
-                        query: `query {
-                        productOfferV2(productCatId: ${categoryID}, limit: 20, sortType: 1) {
+                const payload = {
+                    query: `query {
+                        productOfferV2(keywords: "${keyword}", limit: 20, sortType: 1) {
                             nodes {
                                 itemId
                                 productName
@@ -56,47 +60,59 @@ export class ShopeePromosController {
                             }
                         }
                     }`
-                    };
+                };
 
-                    const payloadString = JSON.stringify(payload);
-                    const signatureFactor = Env.SHOPEE_API_ID + timeStamp + payloadString + Env.SHOPEE_API_PASSWORD;
-                    const signature = crypto.createHash('sha256').update(signatureFactor).digest('hex');
+                const payloadString = JSON.stringify(payload);
+                const signatureFactor = Env.SHOPEE_API_ID + timeStamp + payloadString + Env.SHOPEE_API_PASSWORD;
+                const signature = crypto.createHash('sha256').update(signatureFactor).digest('hex');
 
-                    const response = await fetch('https://open-api.affiliate.shopee.com.br/graphql', {
-                        method: "POST",
-                        headers: {
-                            "Content-type": "application/json",
-                            "Authorization": `SHA256 Credential=${Env.SHOPEE_API_ID}, Timestamp=${timeStamp}, Signature=${signature}`
-                        },
-                        body: payloadString
-                    });
+                const response = await fetch('https://open-api.affiliate.shopee.com.br/graphql', {
+                    method: "POST",
+                    headers: {
+                        "Content-type": "application/json",
+                        "Authorization": `SHA256 Credential=${Env.SHOPEE_API_ID}, Timestamp=${timeStamp}, Signature=${signature}`
+                    },
+                    body: payloadString
+                });
 
-                    if (response.ok) {
-                        const result = await response.json();
-                        if (result.data?.productOfferV2?.nodes) {
-                            const produtos = result.data.productOfferV2.nodes;
-
-                            // Filtragem local
-                            const filtrados = produtos.filter((p: any) => {
-                                const nome = p.productName.toLowerCase();
-                                return keywords.some(k => nome.includes(k));
-                            });
-
-                            allFilteredProducts.push(...filtrados);
-                            console.log(`✅ Categoria ${categoryID}: Encontrados ${filtrados.length} itens relevantes.`);
-                        }
-                    } else {
-                        console.error(`❌ Erro na categoria ${categoryID}:`, await response.text());
-                    }
-                    // Pausa de 2 segundos entre chamadas para não estourar limite da API
-                    await sleep(2000);
+                if (!response.ok) {
+                    console.error(`⚠️ [Shopee API] Erro no fetch da keyword [${keyword}]: Status ${response.status}`);
+                    continue;
                 }
 
-                return res.json({
-                    total: allFilteredProducts.length,
-                    produtos: allFilteredProducts
-                });
+                const result = await response.json();
+
+                const data = result.data?.productOfferV2?.nodes || []
+
+                const produtosShopee = await data.map((produto: Produto) => {
+
+                    const priceNumber = Number(produto.priceMin);
+                    const priceOrginalNumber = priceNumber / (1 - produto.priceDiscountRate / 100);
+
+                    return {
+                        id: produto.itemId.toString(),
+                        title: produto.productName,
+                        price: parseFloat(priceNumber.toFixed(2)),
+                        originalPrice: parseFloat(priceOrginalNumber.toFixed(2)),
+                        coupon: null,
+                        badge: (`${produto.priceDiscountRate}% OFF`),
+                        imageUrl: produto.imageUrl,
+                        link: produto.offerLink,
+                        store: "Shopee",
+                        installments: null
+                    }
+                })
+
+                produtos.push(...produtosShopee)
+
+                // Pausa de 2 segundos entre chamadas para não estourar limite da API
+                await sleep(2000);
             }
+
+            // 😎 Só responde quando processar TODAS as palavras-chave
+            console.log(`✅ [Shopee API] Total de ${produtos.length} produtos minerados com sucesso.`);
+            return res.json(produtos)
+
         } catch (error: any) {
             console.error("Erro crítico no loop:", error);
             return res.status(500).json({ error: "Erro interno no servidor" });

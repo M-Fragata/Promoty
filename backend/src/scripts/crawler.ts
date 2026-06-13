@@ -31,6 +31,11 @@ async function executarRobo() {
 
         console.log(`\n🔔 [Novo Ciclo] Iniciando tarefa ${indiceTarefaAtual + 1} de ${tarefas.length}...`);
 
+        if (!tarefaDaVez) {
+            console.error(`❌ Erro: Nenhuma tarefa encontrada no índice ${indiceTarefaAtual}`);
+            continue;
+        }
+
         // Executa a raspagem da rede atual (aguarda finalizar a navegação/chamada base)
         await tarefaDaVez();
 

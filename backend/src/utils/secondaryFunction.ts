@@ -91,9 +91,9 @@ export class SecondaryFunction {
 
 // Váriaveis globais
 const keywords: string[] = ["notebook", "celular", "smartphone", "monitor", "placa de vídeo", "ssd", "hd", "fone", "headset", "teclado", "mouse", "webcam", "caixa de som bluetooth", "smartwatch", "tablet", "processador", "memória ram", "gabinete gamer", "cooler", "fonte para pc", "impressora", "roteador", "tv", "videogame", "console", "jogo de videogame", "cadeira gamer", "cadeira ergonomica", "cadeira de escritório", "mesa gamer", "power bank", "cabo usb", "carregador portátil", "suporte para notebook", "microfone", "webcam", "filtro de linha", "no-break", "pen drive", "cartão de memória", "nvme", "water cooler"]
-const banwords: string[] = ["capa", "capinha", "pés", "ipad", "mulher", "feminino", "cabo smartwatch", "ferramenta", "tela para", "pelicula", "película", "filament", "filamento", "ring light", "corda", "cordão", "cordao", "limpador", "removedor","remoção", "extração","case", "suporte de celular", "suporte celular", "fashion", "suporte tablet", "infantil", "rato"] // Implementar palavras indesejáveis
+const banwords: string[] = ["capa", "capinha", "pés", "ipad", "mulher", "feminino", "cabo smartwatch", "ferramenta", "tela para", "pelicula", "película", "filament", "filamento", "ring light", "corda", "cordão", "cordao", "limpador", "removedor","remoção", "extração","case", "suporte de celular", "suporte celular", "fashion", "suporte tablet", "infantil", "rato", "bebedouros", "bebedouro", "conversor", "lapela"] // Implementar palavras indesejáveis
 const limitedWords: string[] = ["Carregador", "smartwatch", "power bank"]
 const descountMin: number = 35
-const maxPrice: number = 3000
+const maxPrice: number = 4000
 
 let wordsAlreadyUsed = new Set<string>()

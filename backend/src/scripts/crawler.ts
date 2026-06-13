@@ -3,111 +3,172 @@ import { AccesWeb } from '../Services/AcessWebService.js';
 const delay = (minutos: number) => new Promise(resolve => setTimeout(resolve, minutos * 60 * 1000))
 
 const TimeBetweenRuns = 30; //30minutos
+const scraper = new AccesWeb();
 
 async function executarRobo() {
-    console.log("🤖 Iniciando bateria de promoções para Amazon e Mercado Livre...\n");
+    console.log("🤖 Motor de monitoramento iniciado em modo de esteira alternada...\n");
 
-    const scraper = new AccesWeb();
+    // Definição das tarefas que serão alternadas a cada ciclo de 30 minutos
+    const tarefas = [
+        executShopeeKeywords,
+        executAmazon,
+        executShopeeOficial,
+        executMercadoLivre
+    ];
+
+    let indiceTarefaAtual = 0;
+
     while (true) {
-
-        // 🚨 CHECAGEM DA MADRUGADA:
         // Se NÃO for horário comercial/diurno, entra em modo de espera
         if (!isHorarioComercial()) {
-            console.log(`😴 [Modo Hibernação] Horário de madrugada detectado. Pulando varreduras... [${new Date().toLocaleTimeString('pt-BR')}]`);
-
-            // Espera 30 minutos em silêncio e volta para o topo do while testar a hora de novo
+            console.log(`😴 [Modo Hibernação] Horário de madrugada detectado. Pulando ciclo... [${new Date().toLocaleTimeString('pt-BR')}]`);
             await delay(TimeBetweenRuns);
-            continue; // 👈 Ignora tudo abaixo e volta para o topo do loop
+            continue;
         }
 
-        // ==========================================
-        // 🟠 BLOCO TESTE: AMAZON
-        // ==========================================
-        try {
-            console.log("🌐 [Amazon] Iniciando varredura com fluxo assíncrono...");
-            const tempoInicioML = Date.now();
+        // Pega a função da vez baseada no índice atual
+        const tarefaDaVez = tarefas[indiceTarefaAtual];
 
-            // Chamamos o método passando a função de callback
-            // O await aqui serve APENAS para esperar o Playwright terminar de navegar nas 4 páginas,
-            // mas o processamento das ofertas vai acontecendo em paralelo!
-            await scraper.AcessAmazon((produtosParciais) => {
+        console.log(`\n🔔 [Novo Ciclo] Iniciando tarefa ${indiceTarefaAtual + 1} de ${tarefas.length}...`);
 
-                // 🔥 ISTO RODA EM SEGUNDO PLANO (Fire and Forget)
-                // Toda vez que o scraper acha uma página, esse bloco é disparado imediatamente
-                console.log(`⚡ [Crawler Background] Lote de ${produtosParciais.length} recebido! Enviando para API local...`);
+        // Executa a raspagem da rede atual (aguarda finalizar a navegação/chamada base)
+        await tarefaDaVez();
 
-                fetch("http://localhost:3333/ofertas/amazon", {
-                    method: "POST",
-                    headers: { "Content-type": "application/json" },
-                    body: JSON.stringify(produtosParciais)
-                })
-                    .then(async (response) => {
-                        if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`);
-                        console.log(`✅ [Crawler Background] Lote de ${produtosParciais.length} produtos processado pela API com sucesso!`);
-                    })
-                    .catch((err) => {
-                        console.error("❌ [Crawler Background] Erro ao enviar lote parcial para a API:", err.message);
-                    });
+        // Incrementa o índice para a próxima rodada (e reseta para 0 se chegar ao fim do array)
+        indiceTarefaAtual = (indiceTarefaAtual + 1) % tarefas.length;
 
-            });
-
-            const tempoFimML = Date.now();
-            const tempoTotalML = ((tempoFimML - tempoInicioML) / 1000).toFixed(2);
-            console.log(`⏱️ [Amazon] Navegador finalizou todas as URLs em ${tempoTotalML} segundos!`);
-
-        } catch (error) {
-            console.error("❌ [Amazon] Falha crítica no teste principal:", error);
-        }
-
-        console.log(`⏳ Aguardando ${TimeBetweenRuns} minutos de intervalo de segurança... [${new Date().toLocaleTimeString('pt-BR')}]`);
+        // Aguarda os 30 minutos planejados ANTES de ir para a próxima rede da lista
+        console.log(`⏳ Tarefa concluída. Aguardando ${TimeBetweenRuns} minutos para a próxima rede... [Próxima chamada às: ${new Date(Date.now() + TimeBetweenRuns * 60 * 1000).toLocaleTimeString('pt-BR')}]`);
         await delay(TimeBetweenRuns);
-
-        // ==========================================
-        // 🔵 BLOCO TESTE: MERCADO LIVRE
-        // ==========================================
-        try {
-            console.log("🌐 [Mercado Livre] Iniciando varredura com fluxo assíncrono...");
-            const tempoInicioML = Date.now();
-
-            // Chamamos o método passando a função de callback
-            // O await aqui serve APENAS para esperar o Playwright terminar de navegar nas 4 páginas,
-            // mas o processamento das ofertas vai acontecendo em paralelo!
-            await scraper.AcessMercadoLivre((produtosParciais) => {
-
-                // 🔥 ISTO RODA EM SEGUNDO PLANO (Fire and Forget)
-                // Toda vez que o scraper acha uma página, esse bloco é disparado imediatamente
-                console.log(`⚡ [Crawler Background] Lote de ${produtosParciais.length} recebido! Enviando para API local...`);
-
-                fetch("http://localhost:3333/ofertas/mercadolivre", {
-                    method: "POST",
-                    headers: { "Content-type": "application/json" },
-                    body: JSON.stringify(produtosParciais)
-                })
-                    .then(async (response) => {
-                        if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`);
-                        console.log(`✅ [Crawler Background] Lote de ${produtosParciais.length} produtos processado pela API com sucesso!`);
-                    })
-                    .catch((err) => {
-                        console.error("❌ [Crawler Background] Erro ao enviar lote parcial para a API:", err.message);
-                    });
-
-            });
-
-            const tempoFimML = Date.now();
-            const tempoTotalML = ((tempoFimML - tempoInicioML) / 1000).toFixed(2);
-            console.log(`⏱️ [Mercado Livre] Navegador finalizou todas as URLs em ${tempoTotalML} segundos!`);
-
-        } catch (error) {
-            console.error("❌ [Mercado Livre] Falha crítica no teste principal:", error);
-        }
-
-        console.log(`⏳ Aguardando ${TimeBetweenRuns} minutos de intervalo de segurança...`, Date.now());
-        await delay(TimeBetweenRuns);
-
-        console.log("\n🏁 Bateria de testes finalizada.");
     }
 }
 
+// 🟠 TAREFA 1: SHOPEE KEYWORDS
+async function executShopeeKeywords() {
+    try {
+        console.log("🔍 [Bot] Iniciando varredura de produtos na Shopee...");
+
+        const response = await fetch("http://localhost:3333/ofertas/shopee/products", {
+            method: "GET",
+            headers: { "Content-type": "application/json" }
+        });
+
+        if (!response.ok) {
+            // Se a API responder com 404, 500, etc., captura o erro aqui
+            const errorData = await response.json().catch(() => ({}));
+            console.error(`⚠️ [Shopee - keywords] A API da Shopee retornou um status de erro: ${response.status}`, errorData);
+        } else {
+            console.log("✨ [Shopee - keywords] Requisição da Shopee processada e enviada para a fila de transmissão!");
+        }
+
+    } catch (error: any) {
+        // Captura erros se o servidor local estiver desligado ou a rede cair
+        console.error("❌ [Shopee - keywords] Falha crítica no teste principal:", error.message);
+    }
+}
+
+// 🟡 TAREFA 2: AMAZON CRAWLER
+async function executAmazon() {
+    try {
+        console.log("🌐 [Amazon] Iniciando varredura com fluxo assíncrono...");
+        const tempoInicioML = Date.now();
+
+        // Chamamos o método passando a função de callback
+        // O await aqui serve APENAS para esperar o Playwright terminar de navegar nas 4 páginas,
+        // mas o processamento das ofertas vai acontecendo em paralelo!
+        await scraper.AcessAmazon((produtosParciais) => {
+
+            // 🔥 ISTO RODA EM SEGUNDO PLANO (Fire and Forget)
+            // Toda vez que o scraper acha uma página, esse bloco é disparado imediatamente
+            console.log(`⚡ [Crawler Background] Lote de ${produtosParciais.length} recebido! Enviando para API local...`);
+
+            fetch("http://localhost:3333/ofertas/amazon", {
+                method: "POST",
+                headers: { "Content-type": "application/json" },
+                body: JSON.stringify(produtosParciais)
+            })
+                .then(async (response) => {
+                    if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`);
+                    console.log(`✅ [Crawler Background] Lote de ${produtosParciais.length} produtos processado pela API com sucesso!`);
+                })
+                .catch((err) => {
+                    console.error("❌ [Crawler Background] Erro ao enviar lote parcial para a API:", err.message);
+                });
+
+        });
+
+        const tempoFimML = Date.now();
+        const tempoTotalML = ((tempoFimML - tempoInicioML) / 1000).toFixed(2);
+        console.log(`⏱️ [Amazon] Navegador finalizou todas as URLs em ${tempoTotalML} segundos!`);
+
+    } catch (error: any) {
+        console.error("❌ [Amazon] Falha crítica no teste principal:", error.message);
+    }
+}
+
+// 🟠 TAREFA 3: SHOPEE LOJAS OFICIAIS (PICHAU)
+async function executShopeeOficial() {
+    try {
+        console.log("🔍 [Bot] Iniciando varredura de produtos na Shopee...");
+
+        const response = await fetch("http://localhost:3333/ofertas/shopee/shop", {
+            method: "GET",
+            headers: { "Content-type": "application/json" }
+        });
+
+        if (!response.ok) {
+            // Se a API responder com 404, 500, etc., captura o erro aqui
+            const errorData = await response.json().catch(() => ({}));
+            console.error(`⚠️ [Shopee - oficial] A API da Shopee retornou um status de erro: ${response.status}`, errorData);
+        } else {
+            console.log("✨ [Shopee - oficial] Requisição da Shopee processada e enviada para a fila de transmissão!");
+        }
+    } catch (error: any) {
+        // Captura erros se o servidor local estiver desligado ou a rede cair
+        console.error("❌ [Shopee - oficial] Falha crítica no teste principal:", error.message);
+    }
+}
+
+// 🔵 TAREFA 4: MERCADO LIVRE CRAWLER
+async function executMercadoLivre() {
+    try {
+        console.log("🌐 [Mercado Livre] Iniciando varredura com fluxo assíncrono...");
+        const tempoInicioML = Date.now();
+
+        // Chamamos o método passando a função de callback
+        // O await aqui serve APENAS para esperar o Playwright terminar de navegar nas 4 páginas,
+        // mas o processamento das ofertas vai acontecendo em paralelo!
+        await scraper.AcessMercadoLivre((produtosParciais) => {
+
+            // 🔥 ISTO RODA EM SEGUNDO PLANO (Fire and Forget)
+            // Toda vez que o scraper acha uma página, esse bloco é disparado imediatamente
+            console.log(`⚡ [Crawler Background] Lote de ${produtosParciais.length} recebido! Enviando para API local...`);
+
+            fetch("http://localhost:3333/ofertas/mercadolivre", {
+                method: "POST",
+                headers: { "Content-type": "application/json" },
+                body: JSON.stringify(produtosParciais)
+            })
+                .then(async (response) => {
+                    if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`);
+                    console.log(`✅ [Crawler Background] Lote de ${produtosParciais.length} produtos processado pela API com sucesso!`);
+                })
+                .catch((err) => {
+                    console.error("❌ [Crawler Background] Erro ao enviar lote parcial para a API:", err.message);
+                });
+
+        });
+
+        const tempoFimML = Date.now();
+        const tempoTotalML = ((tempoFimML - tempoInicioML) / 1000).toFixed(2);
+        console.log(`⏱️ [Mercado Livre] Navegador finalizou todas as URLs em ${tempoTotalML} segundos!`);
+
+    } catch (error) {
+        console.error("❌ [Mercado Livre] Falha crítica no teste principal:", error);
+    }
+}
+
+// Função auxiliar
 function isHorarioComercial(): boolean {
     const now = new Date();
     const hours = now.getHours();
@@ -117,4 +178,5 @@ function isHorarioComercial(): boolean {
     return true
 }
 
+//Chamada para iniciar o script
 executarRobo();

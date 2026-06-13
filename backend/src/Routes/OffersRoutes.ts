@@ -12,5 +12,5 @@ offersRoutes.post('/shopee', promosController.processProductsShopee)
 
 
 //Chamada na API da shopee
-offersRoutes.post('/shopee/products', shopeePromoController.GetProducts)
+offersRoutes.get('/shopee/products', shopeePromoController.GetProducts)
 offersRoutes.get('/shopee/shop', shopeePromoController.GetPichauShop)

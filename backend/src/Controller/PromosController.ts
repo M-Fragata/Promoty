@@ -5,9 +5,6 @@ import { Env } from "../utils/Envirolment.js";
 
 import { EncurtaLinkController } from "./EncutarLinkController.js";
 
-import { type MlProducts } from "../types/MLPRODUCTS.js"
-import { url } from "inspector";
-
 const MARGEM_TOLERANCIA = 0.04 //Margem de tolerância: 4% acima do menor preço histórico
 
 const groupURL = "https://chat.whatsapp.com/DVuVPqJ2DwZ4oZUU1maZIi"
@@ -338,7 +335,7 @@ export class PromosController {
                             } else {
                                 // 🤫 O preço continua igual e está dentro das 24h desde o último envio.
                                 console.log(`🤫 [AMAZON - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nos últimos 5 dias. Apenas atualizando dados.`);
-                               
+
                                 await prisma.productsMl.update({
                                     where: { id: prod.id },
                                     data: {
@@ -382,13 +379,10 @@ export class PromosController {
         }
     }
 
-    processProductsShopee = async (req: Request, res: Response) => {
+    processProductsShopee = async (products: any) => {
         try {
-            const products = req.body;
 
-            if (!Array.isArray(products)) {
-                return res.status(400).json({ error: "O corpo da requisição deve ser um array de produtos." });
-            }
+            if (!Array.isArray(products)) return // Só para garantir
 
             for (const prod of products) {
                 try {
@@ -439,8 +433,8 @@ export class PromosController {
                             await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
 
                         } else if (precoNovo <= precoLimiteMaximo) {
-                            // ⏰ Define o tempo de Cooldown (Ex: 24 horas atrás)
-                            const tempoCooldown = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                            // ⏰ Define o tempo de Cooldown (Ex: 5 dias trás)
+                            const tempoCooldown = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
 
                             // Checa se a última atualização do produto no banco aconteceu HÁ MAIS de 24 horas
                             if (produtoExistente.updatedAt < tempoCooldown) {
@@ -464,7 +458,7 @@ export class PromosController {
                                 await whatsAppService.sendMessage(Env.WHATSAPP_GROUP_JID, caption, image, prod.id);
 
                             } else {
-                                // 🤫 O preço continua igual e está dentro das 24h desde o último envio.
+                                // 🤫 O preço continua igual e está dentro dos 5 dias desde o último envio.
                                 console.log(`🤫 [SHOPEE - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nas últimas 24h. Apenas atualizando dados.`);
 
                                 await prisma.productsMl.update({
@@ -501,12 +495,8 @@ export class PromosController {
                 }
             }
 
-            // Responde ao robô que o processamento terminou com sucesso
-            return res.status(200).json({ success: true, message: "Produtos da Shopee processados." });
-
         } catch (error: any) {
-            console.error("💥 [Erro Crítico Shopee] Falha geral no processProductsShopee:", error);
-            return res.status(500).json({ error: "Erro interno ao processar ofertas da Shopee." });
+            return console.error("💥 [Erro Crítico Shopee] Falha geral no processProductsShopee:", error);
         }
     }
 }

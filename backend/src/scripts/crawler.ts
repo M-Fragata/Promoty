@@ -9,11 +9,12 @@ async function executarRobo() {
     console.log("🤖 Motor de monitoramento iniciado em modo de esteira alternada...\n");
 
     // Definição das tarefas que serão alternadas a cada ciclo de 30 minutos
-    const tarefas = [
-        executShopeeKeywords,
-        executAmazon,
-        executShopeeOficial,
-        executMercadoLivre
+    const tarefas: Array<() => any> = [
+        executShopeeTerabyte,   // 1º Shopee (API Rápida - Loja Oficial Terabyte)
+        executMercadoLivre,     // 2º Mercado Livre (Playwright - Fluxo Assíncrono)
+        executShopeeKeywords,   // 3º Shopee (API Rápida - Termos Gerais)
+        executShopeePichau,     // 4º Shopee (API Rápida - Loja Oficial Pichau)
+        executAmazon,           // 5º Amazon (Playwright - Fluxo Assíncrono)
     ];
 
     let indiceTarefaAtual = 0;
@@ -112,11 +113,11 @@ async function executAmazon() {
 }
 
 // 🟠 TAREFA 3: SHOPEE LOJAS OFICIAIS (PICHAU)
-async function executShopeeOficial() {
+async function executShopeePichau() {
     try {
         console.log("🔍 [Bot] Iniciando varredura de produtos na Shopee...");
 
-        const response = await fetch("http://localhost:3333/ofertas/shopee/shop", {
+        const response = await fetch("http://localhost:3333/ofertas/shopee/pichau", {
             method: "GET",
             headers: { "Content-type": "application/json" }
         });
@@ -124,13 +125,13 @@ async function executShopeeOficial() {
         if (!response.ok) {
             // Se a API responder com 404, 500, etc., captura o erro aqui
             const errorData = await response.json().catch(() => ({}));
-            console.error(`⚠️ [Shopee - oficial] A API da Shopee retornou um status de erro: ${response.status}`, errorData);
+            console.error(`⚠️ [Shopee - Pichau] A API da Shopee retornou um status de erro: ${response.status}`, errorData);
         } else {
-            console.log("✨ [Shopee - oficial] Requisição da Shopee processada e enviada para a fila de transmissão!");
+            console.log("✨ [Shopee - Pichau] Requisição da Shopee processada e enviada para a fila de transmissão!");
         }
     } catch (error: any) {
         // Captura erros se o servidor local estiver desligado ou a rede cair
-        console.error("❌ [Shopee - oficial] Falha crítica no teste principal:", error.message);
+        console.error("❌ [Shopee - Pichau] Falha crítica no teste principal:", error.message);
     }
 }
 
@@ -170,6 +171,29 @@ async function executMercadoLivre() {
 
     } catch (error) {
         console.error("❌ [Mercado Livre] Falha crítica no teste principal:", error);
+    }
+}
+
+// 🔵 TAREFA 5: MERCADO LIVRE CRAWLER
+async function executShopeeTerabyte() {
+    try {
+        console.log("🔍 [Bot] Iniciando varredura de produtos na Shopee...");
+
+        const response = await fetch("http://localhost:3333/ofertas/shopee/terabyte", {
+            method: "GET",
+            headers: { "Content-type": "application/json" }
+        });
+
+        if (!response.ok) {
+            // Se a API responder com 404, 500, etc., captura o erro aqui
+            const errorData = await response.json().catch(() => ({}));
+            console.error(`⚠️ [Shopee - Terabyte] A API da Shopee retornou um status de erro: ${response.status}`, errorData);
+        } else {
+            console.log("✨ [Shopee - Terabyte] Requisição da Shopee processada e enviada para a fila de transmissão!");
+        }
+    } catch (error: any) {
+        // Captura erros se o servidor local estiver desligado ou a rede cair
+        console.error("❌ [Shopee - Terabyte] Falha crítica no teste principal:", error.message);
     }
 }
 

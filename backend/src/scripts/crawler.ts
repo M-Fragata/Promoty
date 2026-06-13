@@ -177,7 +177,7 @@ async function executMercadoLivre() {
 // 🔵 TAREFA 5: MERCADO LIVRE CRAWLER
 async function executShopeeTerabyte() {
     try {
-        console.log("🔍 [Bot] Iniciando varredura de produtos na Shopee...");
+        console.log("🔍 [Bot] Iniciando varredura de produtos na Terabyte Shopee...");
 
         const response = await fetch("http://localhost:3333/ofertas/shopee/terabyte", {
             method: "GET",

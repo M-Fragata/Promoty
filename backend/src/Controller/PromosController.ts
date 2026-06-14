@@ -434,12 +434,12 @@ export class PromosController {
 
                         } else if (precoNovo <= precoLimiteMaximo) {
                             // ⏰ Define o tempo de Cooldown (Ex: 5 dias trás)
-                            const tempoCooldown = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
+                            const tempoCooldown = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
 
                             // Checa se a última atualização do produto no banco aconteceu HÁ MAIS de 24 horas
                             if (produtoExistente.updatedAt < tempoCooldown) {
 
-                                console.log(`⭐ [SHOPEE - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 24h, reenviando...`);
+                                console.log(`⭐ [SHOPEE - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 3 dias, reenviando...`);
 
                                 prod.badge = `✨ Preço Excelente! • ${prod.badge || ''}`;
 
@@ -459,7 +459,7 @@ export class PromosController {
 
                             } else {
                                 // 🤫 O preço continua igual e está dentro dos 5 dias desde o último envio.
-                                console.log(`🤫 [SHOPEE - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nas últimas 24h. Apenas atualizando dados.`);
+                                console.log(`🤫 [SHOPEE - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nos últimos 3. Apenas atualizando dados.`);
 
                                 await prisma.productsMl.update({
                                     where: { id: prod.id },

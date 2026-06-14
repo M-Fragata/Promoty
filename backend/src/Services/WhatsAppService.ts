@@ -24,9 +24,9 @@ export class WhatsAppService {
     private authFolder = path.resolve(__dirname, '../../auth_info_baileys');
 
 
-    // Propriedades da fila
-    private queue: ProductQueue[] = [];
-    private isProcessingQueue = false;
+    // Propriedades da fila - fila independente por JID
+    private queues: Map<string, ProductQueue[]> = new Map();
+    private processingMap: Map<string, boolean> = new Map();
 
     private processedIdsInCurrentCycle = new Set<string>();
 
@@ -98,58 +98,58 @@ export class WhatsAppService {
                 }, 120000); // 2 minutos
             }
 
-            console.log(`📥 [Fila WhatsApp] Novo item adicionado. Posição atual: ${this.queue.length + 1}`);
+            // Fila independente por JID (grupo)
+            if (!this.queues.has(jid)) {
+                this.queues.set(jid, []);
+                this.processingMap.set(jid, false);
+            }
 
-            // 🔥 CORREÇÃO: Adicione o productId aqui dentro do objeto da fila!
-            // Usamos String(productId) para garantir que ele salve sempre como string na fila se a interface pedir string
-            this.queue.push({
+            const fila = this.queues.get(jid)!;
+            fila.push({
                 jid,
                 text,
                 imageUrl,
-                productId: productId ? String(productId) : '', // Evita quebra caso venha vazio
+                productId: productId ? String(productId) : '',
                 resolve
             });
 
-            this.processQueue();
+            console.log(`📥 [Fila WhatsApp - ${jid.substring(0, 10)}...] Novo item adicionado. Posição: ${fila.length}`);
+
+            this.processQueue(jid);
         });
     }
 
-    private async processQueue() {
+    private async processQueue(jid: string) {
+        const fila = this.queues.get(jid);
+        if (!fila) return;
 
-        //Se a fila já estiver trabalhando em uma mensagem, este disparo apenas retorna e espera o ciclo acabar
-        if (this.isProcessingQueue) return;
-        // Se a fila estiver vazia, encerra o motor
-        if (this.queue.length === 0) return;
+        if (this.processingMap.get(jid)) return;
+        if (fila.length === 0) return;
 
-        this.isProcessingQueue = true;
+        this.processingMap.set(jid, true);
 
-        const currentItem = this.queue.shift();
+        const currentItem = fila.shift();
 
         if (currentItem) {
-            const { jid, text, imageUrl, resolve } = currentItem;
+            const { jid: targetJid, text, imageUrl, resolve } = currentItem;
 
-            // Executa o envio real utilizando o método privado interno
-            const success = await this.executeRealSend(jid, text, imageUrl);
-
-            // Devolve a resposta de sucesso ou falha para o Controller original que estava aguardando
+            const success = await this.executeRealSend(targetJid, text, imageUrl);
             resolve(success);
 
-            // Se ainda existirem itens na fila, aplica o respiro obrigatório anti-ban
-            if (this.queue.length > 0) {
-
+            const remaining = fila.length;
+            if (remaining > 0) {
                 const min = 14000
                 const max = 20000
                 const DELAY_BETWEEN_MESSAGES = Math.floor(Math.random() * (max - min + 1)) + min;
 
-                console.log(`🎲 [Fila WPP] Cadência humana ativada: aguardando ${(DELAY_BETWEEN_MESSAGES / 1000).toFixed(1)}s antes do próximo post. Restam ${this.queue.length} itens.`)
+                console.log(`🎲 [Fila WPP - ${targetJid.substring(0, 10)}...] Cadência humana: ${(DELAY_BETWEEN_MESSAGES / 1000).toFixed(1)}s. Restam ${remaining} itens.`)
 
                 await new Promise(res => setTimeout(res, DELAY_BETWEEN_MESSAGES));
             }
         }
 
-        // Libera a trava e chama o motor novamente de forma recursiva para processar o próximo item da lista
-        this.isProcessingQueue = false;
-        this.processQueue();
+        this.processingMap.set(jid, false);
+        this.processQueue(jid);
     }
 
     private async executeRealSend(jid: string, text: string, imageUrl?: string | null): Promise<boolean> {

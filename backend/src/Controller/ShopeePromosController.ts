@@ -4,6 +4,8 @@ import crypto from "node:crypto"
 
 import { SecondaryFunction } from "../utils/secondaryFunction.js"
 import { PromosController } from "./PromosController.js"
+import { getActiveNiches } from "../config/index.js"
+
 const shopeeController = new PromosController()
 const utils = new SecondaryFunction()
 
@@ -24,69 +26,48 @@ export class ShopeePromosController {
     private static counterPagePichau: number = 1
     private static counterPageTerabyte: number = 1
 
+    private static getAllShopeeKeywordGroups(): string[][] {
+        const niches = getActiveNiches();
+
+        const techGroups = niches.find(n => n.id === "tech")?.shopeeKeywordGroups ?? [];
+        const casaGroups = niches.find(n => n.id === "casa-moda-feminina")?.shopeeKeywordGroups ?? [];
+
+        const maxLen = Math.max(techGroups.length, casaGroups.length);
+        const mixed: string[][] = [];
+
+        for (let i = 0; i < maxLen; i++) {
+            const group: string[] = [];
+
+            // Se techGroups[i] for undefined, o ?? [] garante um array vazio iterável pro spread
+            if (i < techGroups.length) {
+                group.push(...(techGroups[i] ?? []));
+            }
+
+            // O mesmo vale para o grupo de casa
+            if (i < casaGroups.length) {
+                group.push(...(casaGroups[i] ?? []));
+            }
+
+            mixed.push(group);
+        }
+
+        return mixed;
+    }
+
+    private static productMatchesAnyNiche(productName: string, priceDiscountRate: number, priceNumber: number): boolean {
+        const niches = getActiveNiches();
+        return niches.some(niche =>
+            priceDiscountRate >= niche.minDiscount &&
+            utils.verifyKeyWords(productName, niche) &&
+            !utils.verifyBanWords(productName, niche) &&
+            utils.checkLimitedWords(productName, niche) &&
+            utils.verifyMaxPrice(priceNumber, niche)
+        );
+    }
+
     async GetProducts(req: Request, res: Response) {
 
-        // Keywords para filtro (garante que é gamer/tech)
-        const keywords: string[][] = [
-            // Grupo 1: Periféricos de Entrada Principais
-            [
-                "teclado",
-                "mouse"
-            ],
-
-            // Grupo 2: Áudio e Comunicação
-            [
-                "fone",
-                "headset",
-                "microfone"
-            ],
-
-            // Grupo 3: Hardware - Armazenamento Rápido e Tradicional
-            [
-                "ssd",
-                "nvme",
-                "hd",
-                "pen drive"
-            ],
-
-            // Grupo 4: Hardware - Core (Componentes Principais)
-            [
-                "processador",
-                "memória ram",
-                "placa de vídeo"
-            ],
-
-            // Grupo 5: Hardware - Gabinete, Energia e Refrigeração
-            [
-                "gabinete gamer",
-                "fonte para pc",
-                "cooler",
-                "water cooler"
-            ],
-
-            // Grupo 6: Telas e Imagem
-            [
-                "monitor",
-                "tv",
-                "webcam"
-            ],
-
-            // Grupo 7: Dispositivos Portáteis Principais
-            [
-                "celular",
-                "smartphone",
-                "tablet",
-                "notebook"
-            ],
-
-            // Grupo 8: Ergonômicos e Linha Gamer (Móveis)
-            [
-                "cadeira gamer",
-                "cadeira ergonomica",
-                "cadeira de escritório",
-                "mesa gamer"
-            ]
-        ];
+        const keywords = ShopeePromosController.getAllShopeeKeywordGroups();
 
         try {
 
@@ -142,7 +123,7 @@ export class ShopeePromosController {
                     const priceNumber = Number(produto.priceMin);
                     const priceOrginalNumber = priceNumber / (1 - produto.priceDiscountRate / 100);
 
-                    if (produto.priceDiscountRate < 30 || !utils.verifyKeyWords(produto.productName) || utils.verifyBanWords(produto.productName) || !utils.checkLimitedWords(produto.productName)) return acc
+                    if (!ShopeePromosController.productMatchesAnyNiche(produto.productName, produto.priceDiscountRate, priceNumber)) return acc
 
                     acc.push({
                         id: produto.itemId.toString(),
@@ -163,10 +144,10 @@ export class ShopeePromosController {
                 produtos.push(...produtosShopee)
 
                 if (produtos.length > 0) {
-                    shopeeController.processProductsShopee(produtos);
-                    console.log(`🚀 [Shopee Pichau] Enviados ${produtos.length} produtos em oferta para processamento.`);
+                    //shopeeController.processProductsShopee(produtos);
+                    console.log(`🚀 [Shopee Keywords] Enviados ${produtos.length} produtos em oferta para processamento.`);
                 } else {
-                    console.log(`♻️ [Shopee Pichau] Varredura concluída, mas nenhuma oferta bateu os critérios de >30% OFF.`);
+                    console.log(`♻️ [Shopee Keywords] Varredura concluída, mas nenhuma oferta bateu os critérios de >30% OFF.`);
                 }
 
                 // Pausa de 2 segundos entre chamadas para não estourar limite da API
@@ -234,7 +215,7 @@ export class ShopeePromosController {
                 const priceNumber = Number(produto.priceMin);
                 const priceOrginalNumber = priceNumber / (1 - produto.priceDiscountRate / 100);
 
-                if (produto.priceDiscountRate < 30 || !utils.verifyKeyWords(produto.productName) || utils.verifyBanWords(produto.productName) || !utils.checkLimitedWords(produto.productName)) return acc
+                if (!ShopeePromosController.productMatchesAnyNiche(produto.productName, produto.priceDiscountRate, priceNumber)) return acc
 
                 acc.push({
                     id: produto.itemId.toString(),
@@ -325,7 +306,7 @@ export class ShopeePromosController {
                 const priceNumber = Number(produto.priceMin);
                 const priceOrginalNumber = priceNumber / (1 - produto.priceDiscountRate / 100);
 
-                if (produto.priceDiscountRate < 30 || !utils.verifyKeyWords(produto.productName) || utils.verifyBanWords(produto.productName) || !utils.checkLimitedWords(produto.productName)) return acc
+                if (!ShopeePromosController.productMatchesAnyNiche(produto.productName, produto.priceDiscountRate, priceNumber)) return acc
 
                 acc.push({
                     id: produto.itemId.toString(),
@@ -418,6 +399,7 @@ export class ShopeePromosController {
             return res.status(500).json({ error: "Erro interno" });
         }
     }
+
 }
 
 // Função utilitária para delay (Evita Rate Limit)

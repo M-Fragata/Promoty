@@ -501,6 +501,7 @@ export class AccesWeb {
                             const title = (await titleEl?.innerText()) || "";
                             if (!utils.verifyKeyWords(title) || utils.verifyBanWords(title) || !utils.checkLimitedWords(title)) continue
 
+
                             // Preços (Amazon geralmente tem: [Atual, Original])
                             const priceEls = await card.$$('.a-price .a-offscreen');
 

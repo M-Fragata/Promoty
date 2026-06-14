@@ -5,6 +5,7 @@ import { Env } from '../utils/Envirolment.js';
 import { TakePrintScreenService } from './TelegramService.js';
 
 import { SecondaryFunction } from "../utils/secondaryFunction.js"
+import { getActiveNiches } from "../config/index.js"
 
 chromium.use(stealthPlugin());
 
@@ -20,27 +21,77 @@ const HUMAN_DELAY = (min = 2000, max = 5000) => new Promise(resolve => setTimeou
 
 const utils = new SecondaryFunction();
 
+function titleMatchesAnyNiche(title: string): boolean {
+    const niches = getActiveNiches();
+    return niches.some(niche =>
+        utils.verifyKeyWords(title, niche) && !utils.verifyBanWords(title, niche)
+    );
+}
+
+function productMatchesAnyNiche(title: string, originalPrice: number | null, currentPrice: number): boolean {
+    if (!titleMatchesAnyNiche(title)) return false;
+    const niches = getActiveNiches();
+    return niches.some(niche =>
+        utils.checkLimitedWords(title, niche) &&
+        utils.verifyDiscount(originalPrice, currentPrice, niche) &&
+        utils.verifyMaxPrice(currentPrice, niche)
+    );
+}
+
+
 export class AccesWeb {
 
     //=======================
     // Bloco Mercado Livre 
     // ======================
+    private static readonly BASE_URL_GROUPS = 5
     private static contadorML: number = 0
-    // 1- informática; 2- Pichau-ML 3- celulares e telefones; 4- oferta do dia + 1 e 2
-    //Adicionar link da reddragon -> https://lista.mercadolivre.com.br/loja/redragon/_Discount_20-100?tracking_id=d0be4182-3fea-462e-b178-9182aafd8d71#applied_filter_id%3Ddiscount%26applied_filter_name%3DDescontos%26applied_filter_order%3D5%26applied_value_id%3D20-100%26applied_value_name%3DMais+de+20%25+OFF%26applied_value_order%3D4%26applied_value_results%3D38%26is_custom%3Dfalse
     private static URLs: string[][] = [
 
-        //utils.gerarBlocoPichau(1, 5), // Pichau (Páginas 1 a 5)
+        // ══════════════ ESTEIRA HÍBRIDA (2 Tech + 2 Casa/Moda/Beleza) ══════════════
 
-        ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=3&promotion_type=lightning",],
-
-
-        ["https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=1&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=2&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=3&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=4&promotion_type=lightning"],
-
-        ["https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat",
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1051&container_id=MLB779362-1&promotion_type=deal_of_the_day#filter_applied=category&filter_position=3&origin=qcat", "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=4&promotion_type=lightning", "https://www.mercadolivre.com.br/ofertas?category=MLB1051&page=5&promotion_type=lightning"
+        // Lote 0: 2 páginas de Info + 2 páginas de Casa/Decoração
+        [
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=1&promotion_type=lightning", // Tech: Info p1
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=2&promotion_type=lightning", // Tech: Info p2
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1579&page=1&promotion_type=lightning", // Novo: Casa p1
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1579&page=2&promotion_type=lightning", // Novo: Casa p2
         ],
 
+        // Lote 1: 2 páginas de Tech (Info/Cel) + 2 páginas de Moda/Calçados
+        [
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=3&promotion_type=lightning", // Tech: Info p3
+            "https://www.mercadolivre.com.br/ofertas?container_id=MLB779535-1&page=1",                  // Tech: Celulares p1
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1430&page=1&promotion_type=lightning", // Novo: Moda p1
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1430&page=2&promotion_type=lightning", // Novo: Moda p2
+        ],
+
+        // Lote 2: 2 páginas de Tech (Cel/TVs) + 2 páginas de Moda/Eletro-Portáteis
+        [
+            "https://www.mercadolivre.com.br/ofertas?container_id=MLB779535-1&page=2",                  // Tech: Celulares p2
+            "https://www.mercadolivre.com.br/ofertas?container_id=MLB779539-1&page=1",                  // Tech: TVs p1
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1430&page=3&promotion_type=lightning", // Novo: Moda p3
+            "https://www.mercadolivre.com.br/ofertas?category=MLB5726&page=1&promotion_type=lightning", // Novo: Eletro-Portáteis p1
+        ],
+
+        // Lote 3: 2 páginas de Tech (TVs/Info) + 2 páginas de Eletro/Beleza
+        [
+            "https://www.mercadolivre.com.br/ofertas?container_id=MLB779539-1&page=2",                  // Tech: TVs p2
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=4&promotion_type=lightning", // Tech: Info p4
+            "https://www.mercadolivre.com.br/ofertas?category=MLB5726&page=2&promotion_type=lightning", // Novo: Eletro-Portáteis p2
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1246&page=1&promotion_type=lightning", // Novo: Beleza/Skincare p1
+        ],
+
+        // Lote 4: Ofertas do Dia (2 Tech limpas + 2 Novo Nicho limpas)
+        [
+            // Tech: Ofertas do dia de Info e Celulares
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day",
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1051&container_id=MLB779362-1&promotion_type=deal_of_the_day",
+
+            // Novo Nicho: Ofertas do dia de Casa e Moda
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1579&container_id=MLB779362-1&promotion_type=deal_of_the_day",
+            "https://www.mercadolivre.com.br/ofertas?category=MLB1430&container_id=MLB779362-1&promotion_type=deal_of_the_day"
+        ],
     ]
 
     async AcessMercadoLivre(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
@@ -71,8 +122,8 @@ export class AccesWeb {
 
             // Corta o array estático de volta para os 4 blocos originais de fábrica
             // eliminando qualquer push de Pichau feito em ciclos passados.
-            if (AccesWeb.URLs.length > 4) {
-                AccesWeb.URLs.length = 4;
+            if (AccesWeb.URLs.length > AccesWeb.BASE_URL_GROUPS) {
+                AccesWeb.URLs.length = AccesWeb.BASE_URL_GROUPS;
                 console.log("♻️ [Fila Dinâmica] Varredura completa reiniciada. Expurgando URLs antigas da memória!");
             }
         }
@@ -198,8 +249,7 @@ export class AccesWeb {
 
                             // 2. CAPTURA TÍTULO
                             const title = await linkElement.innerText();
-                            //Verifica se o titulo contains the key words
-                            if (!utils.verifyKeyWords(title) || utils.verifyBanWords(title) || !utils.checkLimitedWords(title)) continue
+                            if (!titleMatchesAnyNiche(title) || !utils.checkLimitedWords(title)) continue
 
                             // 3. CAPTURA IMAGEM
                             const imgElement = await card.$('.poly-card__portada img');
@@ -237,8 +287,8 @@ export class AccesWeb {
 
                             if (originalPrice === null) continue;
 
-                            // Verifica se o produto tem desconto mínimo e preço máximo
-                            if (!utils.verifyDiscount(originalPrice, price) || !utils.verifyMaxPrice(price)) continue;
+                            // Verifica se o produto atende os critérios de pelo menos um nicho
+                            if (!productMatchesAnyNiche(title, originalPrice, price)) continue;
 
                             // 6. CAPTURA CUPOM (Se houver)
                             const cupomElement = await card.$('.poly-coupons__pill');
@@ -317,7 +367,7 @@ export class AccesWeb {
                                 price,
                                 originalPrice,
                                 coupon: coupon ? coupon.trim() : null,
-                                badge: mlBadge,
+                                badge: mlBadge ? mlBadge : `${(100 - (price / originalPrice) * 100).toFixed(0)}% OFF`,
                                 imageUrl,
                                 link: linkOriginal,
                                 installments,
@@ -379,7 +429,7 @@ export class AccesWeb {
     // Bloco Amazon
     // ================
     private static contadorAmazon: number = 0
-
+//https://www.amazon.com.br/s?k=celular&page=1
     private static URLsAmazon: string[][] = [
         ["https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=1&qid=1780962721&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_1",
             "https://www.amazon.com.br/s?i=electronics&rh=n%3A16209063011%2Cp_n_deal_type%3A23565492011&dc&ds=v1%3AM7qKaAQFjtAAj0anALEbfRkWNv96M0a9N9Z4wPaYslI&page=1&qid=1781002007&rnid=23565491011&ref=sr_nr_p_n_deal_type_3",]
@@ -499,7 +549,7 @@ export class AccesWeb {
                             // Título
                             const titleEl = await card.$('h2');
                             const title = (await titleEl?.innerText()) || "";
-                            if (!utils.verifyKeyWords(title) || utils.verifyBanWords(title) || !utils.checkLimitedWords(title)) continue
+                            if (!titleMatchesAnyNiche(title) || !utils.checkLimitedWords(title)) continue
 
 
                             // Preços (Amazon geralmente tem: [Atual, Original])
@@ -523,10 +573,9 @@ export class AccesWeb {
                                 }
                             }
                             if (!originalPrice) continue
-                            // Badge
 
-                            // Verifica se o produto tem desconto mínimo e preço máximo
-                            if (!utils.verifyDiscount(originalPrice, cleanPrice) || !utils.verifyMaxPrice(originalPrice)) continue;
+                            // Verifica se o produto atende os critérios de pelo menos um nicho
+                            if (!productMatchesAnyNiche(title, originalPrice, cleanPrice)) continue;
 
                             let badge: String | null = utils.GetDiscount(originalPrice, cleanPrice)
                             if (!badge) badge = null

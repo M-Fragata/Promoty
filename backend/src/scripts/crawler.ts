@@ -174,7 +174,7 @@ async function executMercadoLivre() {
     }
 }
 
-// 🔵 TAREFA 5: MERCADO LIVRE CRAWLER
+// 🟠 TAREFA 5: SHOPEE LOJAS OFICIAIS (TERABYTE)
 async function executShopeeTerabyte() {
     try {
         console.log("🔍 [Bot] Iniciando varredura de produtos na Terabyte Shopee...");

@@ -38,7 +38,7 @@ async function executarRobo() {
 
                     console.log(`✅ [Crawler] Lote de ${produtosParciais.length} produtos processado com sucesso!`);
 
-                    console.log("Enviaria para a API mas eu comentei o fetch")
+                    //console.log("Enviaria para a API mas eu comentei o fetch")
                     console.log(produtosParciais)
                     console.log("------------")
                 } catch (err: any) {

@@ -21,6 +21,8 @@ interface Produto {
 export class ShopeePromosController {
 
     private static counterShopee: number = 0
+    private static counterPagePichau: number = 1
+    private static counterPageTerabyte: number = 1
 
     async GetProducts(req: Request, res: Response) {
 
@@ -44,8 +46,7 @@ export class ShopeePromosController {
                 "ssd",
                 "nvme",
                 "hd",
-                "pen drive",
-                "cartão de memória"
+                "pen drive"
             ],
 
             // Grupo 4: Hardware - Core (Componentes Principais)
@@ -189,7 +190,7 @@ export class ShopeePromosController {
         const payload = {
             query: `query {
                     productOfferV2(
-                    shopId: ${shopID}, limit: 50, sortType: 1
+                    shopId: ${shopID}, limit: 15, page: ${ShopeePromosController.counterPagePichau} ,sortType: 1
                     ){
                         nodes {
                             itemId
@@ -257,7 +258,11 @@ export class ShopeePromosController {
                 console.log(`🚀 [Shopee Pichau] Enviados ${produtos.length} produtos em oferta para processamento.`);
             } else {
                 console.log(`♻️ [Shopee Pichau] Varredura concluída, mas nenhuma oferta bateu os critérios de >30% OFF.`);
+
+                ShopeePromosController.counterPagePichau = 1
             }
+
+            ShopeePromosController.counterPagePichau++
 
             await sleep(2000);
 
@@ -276,7 +281,7 @@ export class ShopeePromosController {
         const payload = {
             query: `query {
                     productOfferV2(
-                    shopId: ${shopID}, limit: 50, sortType: 1
+                    shopId: ${shopID}, limit: 15, page: ${ShopeePromosController.counterPageTerabyte}, sortType: 1
                     ){
                         nodes {
                             itemId
@@ -342,11 +347,15 @@ export class ShopeePromosController {
             if (produtos.length > 0) {
                 shopeeController.processProductsShopee(produtos);
 
-                console.log(`🚀 [Shopee Pichau] Enviados ${produtos.length} produtos em oferta para processamento.`);
+                console.log(`🚀 [Shopee Terabyte] Enviados ${produtos.length} produtos em oferta para processamento.`);
                 console.log(produtos)
             } else {
-                console.log(`♻️ [Shopee Pichau] Varredura concluída, mas nenhuma oferta bateu os critérios de >30% OFF.`);
+                console.log(`♻️ [Shopee Terabyte] Varredura concluída, mas nenhuma oferta bateu os critérios de >30% OFF.`);
+
+                ShopeePromosController.counterPageTerabyte = 1
             }
+
+            ShopeePromosController.counterPageTerabyte++
 
             await sleep(2000);
 

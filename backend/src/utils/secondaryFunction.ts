@@ -1,43 +1,58 @@
 import type { Page } from "playwright";
+import type { NicheConfig } from "../types/niche.js";
 
 
 export class SecondaryFunction {
-    verifyKeyWords(text: string): boolean {
+    verifyKeyWords(text: string, niche?: NicheConfig): boolean {
         const textLower = text.toLowerCase();
-        return keywords.some(keyword => textLower.includes(keyword.toLowerCase()));
+        const kw = niche?.keywords ?? keywords;
+        return kw.some(keyword => textLower.includes(keyword.toLowerCase()));
     }
-    verifyBanWords(text: string): boolean {
+    verifyBanWords(text: string, niche?: NicheConfig): boolean {
         const textLower = text.toLowerCase();
-        return banwords.some(banword => textLower.includes(banword.toLowerCase()));
+        const bw = niche?.banwords ?? banwords;
+        return bw.some(banword => textLower.includes(banword.toLowerCase()));
     }
-    checkLimitedWords(text: string): boolean {
+    checkLimitedWords(text: string, niche?: NicheConfig): boolean {
         const textLower = text.toLowerCase();
+        const lw = niche?.limitedWords ?? limitedWords;
 
-        const limitedWord = limitedWords.find(lw => textLower.includes(lw.toLowerCase()))
+        if (!lw || lw.length === 0) return true;
 
-        if (!limitedWord) return true //Caso não seja uma palavra limitada retorna true
+        const limitedWord = lw.find(w => textLower.includes(w.toLowerCase()))
+
+        if (!limitedWord) return true
 
         if (wordsAlreadyUsed.has(limitedWord)) return false
 
-        wordsAlreadyUsed.add(limitedWord) //adicionando na memoria para bloquear no próximo scraper
+        wordsAlreadyUsed.add(limitedWord)
 
-        return true // palavra limitada primeira vez irá passar
+        return true
     }
     resetWordsAlreadyUsed() {
         wordsAlreadyUsed.clear()
     }
-    verifyDiscount(originalPrice: number | null, currentPrice: number): boolean {
+    verifyDiscount(originalPrice: number | null, currentPrice: number, niche?: NicheConfig): boolean {
         if (!originalPrice || originalPrice <= currentPrice) return false;
 
         const percentualDesconto = ((originalPrice - currentPrice) / originalPrice) * 100;
-        return percentualDesconto >= descountMin;
+        const minDisc = niche?.minDiscount ?? descountMin;
+        return percentualDesconto >= minDisc;
     }
     GetDiscount(originalPrice: number, currentPrice: number): String {
         const percentualDesconto = ((originalPrice - currentPrice) / originalPrice) * 100;
         return `${percentualDesconto.toFixed(0)}% OFF`;
     }
-    verifyMaxPrice(price: number): boolean {
-        return price <= maxPrice;
+    verifyMaxPrice(price: number, niche?: NicheConfig): boolean {
+        const maxP = niche?.maxPrice ?? maxPrice;
+        return price <= maxP;
+    }
+    
+    matchesAnyNiche(title: string, niches: NicheConfig[]): boolean {
+        return niches.some(niche =>
+            this.verifyKeyWords(title, niche) &&
+            !this.verifyBanWords(title, niche)
+        );
     }
     verifyOriginalPrice(priceWithDescount: number, descountPercentage: string): number {
 

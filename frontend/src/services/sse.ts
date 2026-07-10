@@ -13,7 +13,7 @@ export function connectLiveSearch(
   query: string,
   callbacks: LiveSearchCallbacks
 ): () => void {
-  const url = `${import.meta.env.VITE_API_URL || 'http://localhost:3333'}/api/live-search?q=${encodeURIComponent(query)}`;
+  const url = `${import.meta.env.VITE_API_URL}/api/live-search?q=${encodeURIComponent(query)}`;
 
   const eventSource = new EventSource(url);
   let accumulatedProducts: MlProducts[] = [];

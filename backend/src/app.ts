@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import { Env } from './utils/Envirolment.js';
 
 import express from 'express';
 import cors from 'cors';
@@ -12,7 +11,7 @@ export const whatsAppService = new WhatsAppService();
 export const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:4173'],
+  origin: [Env.FRONTEND_URL],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));

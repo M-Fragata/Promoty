@@ -1,8 +1,10 @@
 import { z } from 'zod'
-import 'dotenv/config'
+import dotenv from 'dotenv';
+dotenv.config();
 
 const EnvSchema = z.object({
     PORT: z.string().default('3333'),
+    FRONTEND_URL: z.string(),
     AMAZON_TAG: z.string(),
     SHOPEE_ID: z.string().default(''),
     DATABASE_URL: z.string(),

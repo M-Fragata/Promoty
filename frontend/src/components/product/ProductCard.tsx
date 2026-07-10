@@ -40,7 +40,7 @@ export function ProductCard({ product }: ProductCardProps) {
         rel="noopener noreferrer"
         className={clsx(
           'mt-auto inline-flex items-center justify-center gap-2 w-full h-10 rounded-md text-label-bold font-semibold transition-colors duration-150',
-          'bg-brand text-brand-on hover:bg-brand-container hover:text-brand-on-container active:bg-primary shadow-sm',
+          'bg-text-primary text-card-bg hover:opacity-90 active:opacity-80 shadow-sm',
           'focus:outline-none focus:ring-2 focus:ring-brand/30 focus:ring-offset-2 focus:ring-offset-app-bg'
         )}
       >

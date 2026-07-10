@@ -7,9 +7,20 @@ export interface ApiResponse<T> {
   message?: string;
 }
 
-export interface DealsResponse extends ApiResponse<MlProducts[]> {}
+export interface PaginationInfo {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
 
-export interface SearchResponse extends ApiResponse<MlProducts[]> {}
+export interface DealsResponse extends ApiResponse<MlProducts[]> {
+  pagination?: PaginationInfo;
+}
+
+export interface SearchResponse extends ApiResponse<MlProducts[]> {
+  pagination?: PaginationInfo;
+}
 
 export interface LiveSearchEvent {
   type: 'product' | 'progress' | 'complete' | 'error';

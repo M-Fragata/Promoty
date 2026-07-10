@@ -1,18 +1,18 @@
 export const STORE_LABELS: Record<string, { label: string; color: string; icon: string }> = {
   'Mercado Livre': {
     label: 'Mercado Livre',
-    color: 'bg-yellow-600 text-white',
-    icon: '🟡',
+    color: 'bg-yellow-500 text-white',
+    icon: '',
   },
   'Amazon': {
     label: 'Amazon',
     color: 'bg-orange-500 text-white',
-    icon: '🟠',
+    icon: '',
   },
   'Shopee': {
     label: 'Shopee',
     color: 'bg-pink-500 text-white',
-    icon: '🩷',
+    icon: '',
   },
 };
 

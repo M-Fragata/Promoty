@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { PageShell } from '../components/layout/PageShell';
 import { Sidebar } from '../components/layout/Sidebar';
 import { SearchBar } from '../components/search/SearchBar';
@@ -9,7 +9,6 @@ import { CategoryChip } from '../components/ui/CategoryChip';
 import { SortSelect } from '../components/ui/SortSelect';
 import { Pagination } from '../components/ui/Pagination';
 import { useDeals } from '../hooks/useDeals';
-import { useLiveSearch } from '../hooks/useLiveSearch';
 import { useFilters } from '../hooks/useFilters';
 
 const CATEGORIES = [
@@ -23,6 +22,8 @@ const CATEGORIES = [
 ] as const;
 
 export function Home() {
+  const [searchQuery, setSearchQuery] = useState('');
+
   const {
     products,
     isLoading,
@@ -30,7 +31,7 @@ export function Home() {
     pagination,
     currentPage,
     goToPage,
-  } = useDeals();
+  } = useDeals(searchQuery);
 
   const { category, sortBy, filteredProducts, setCategory, setSortBy } =
     useFilters(products);
@@ -43,11 +44,9 @@ export function Home() {
     [goToPage]
   );
 
-  const handleSearch = useCallback(() => {
-    // SearchBar handles debounce internally
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
   }, []);
-
-  const { results: searchResults, isSearching } = useLiveSearch('');
 
   const sidebarContent = (
     <Sidebar
@@ -64,15 +63,13 @@ export function Home() {
       {/* Header area */}
       <div className="mb-6">
         <h2 className="text-headline-lg-mobile lg:text-headline-lg font-bold text-text-primary mb-4">
-          Ofertas do Dia
+          {searchQuery ? `Resultados para "${searchQuery}"` : 'Ofertas do Dia'}
         </h2>
 
         {/* Search + Sort */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <SearchBar
             onSearch={handleSearch}
-            suggestions={searchResults}
-            isSearching={isSearching}
             className="w-full sm:max-w-md"
           />
 

@@ -1,5 +1,7 @@
-import { ShoppingBag } from 'lucide-react';
+
 import { ThemeToggle } from './ThemeToggle';
+
+import logo from "../../assets/fragatalogo.png"
 
 export function Header() {
   return (
@@ -8,7 +10,7 @@ export function Header() {
         <div className="flex h-full items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <ShoppingBag className="w-6 h-6 text-brand" aria-hidden="true" />
+            <img className='w-6 h-6 rounded-xl transition: all 0.5s ease hover:scale-105 cursor-pointer' src={logo} alt="" />
             <h1 className="text-headline-md font-bold text-brand tracking-tight">
               Fragata
             </h1>

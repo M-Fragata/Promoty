@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../services/api';
 import type { MlProducts } from '../types/product';
 import type { PaginationInfo } from '../types/api';
@@ -19,18 +19,29 @@ const DEFAULT_PAGINATION: PaginationInfo = {
   totalPages: 0,
 };
 
-export function useDeals(): UseDealsReturn {
+export function useDeals(searchQuery: string = ''): UseDealsReturn {
   const [products, setProducts] = useState<MlProducts[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationInfo>(DEFAULT_PAGINATION);
 
-  const fetchDeals = useCallback(async (page: number) => {
+  // Reset to page 1 when search query changes
+  const prevQueryRef = useRef(searchQuery);
+  useEffect(() => {
+    if (prevQueryRef.current !== searchQuery) {
+      prevQueryRef.current = searchQuery;
+      setCurrentPage(1);
+    }
+  }, [searchQuery]);
+
+  const fetchData = useCallback(async (page: number, query: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await api.getDeals(page);
+      const result = query.trim()
+        ? await api.search(query, page)
+        : await api.getDeals(page);
       setProducts(result.products);
       setPagination(result.pagination);
     } catch (err) {
@@ -41,8 +52,8 @@ export function useDeals(): UseDealsReturn {
   }, []);
 
   useEffect(() => {
-    fetchDeals(currentPage);
-  }, [currentPage, fetchDeals]);
+    fetchData(currentPage, searchQuery);
+  }, [currentPage, searchQuery, fetchData]);
 
   const goToPage = useCallback((page: number) => {
     setCurrentPage(page);

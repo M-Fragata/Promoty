@@ -22,17 +22,18 @@ export function SearchBar({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Debounce — emit search after 300ms of no typing
+  // Debounce — emit search after 2 seconds of no typing
   useEffect(() => {
     if (!query.trim()) {
+      onSearch('');
       setIsOpen(false);
       return;
     }
 
     const timer = setTimeout(() => {
       onSearch(query.trim());
-      setIsOpen(true);
-    }, 300);
+      setIsOpen(false);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, [query, onSearch]);

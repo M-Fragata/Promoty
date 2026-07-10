@@ -113,6 +113,11 @@ html.dark {
   box-sizing: border-box;
 }
 
+html, body, #root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   margin: 0;
   font-family: var(--font-family-brand);

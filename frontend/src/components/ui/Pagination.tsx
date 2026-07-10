@@ -54,7 +54,7 @@ export function Pagination({
 
   return (
     <nav
-      className={clsx('flex items-center justify-center gap-2', className)}
+      className={clsx('flex items-center justify-center gap-2 overflow-x-auto', className)}
       aria-label="Paginação"
     >
       {/* Anterior */}

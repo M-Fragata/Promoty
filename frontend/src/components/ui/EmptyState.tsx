@@ -15,7 +15,7 @@ export function EmptyState({
   return (
     <div
       className={clsx(
-        'flex flex-col items-center justify-center gap-3 py-16 text-text-secondary',
+        'flex flex-col items-center justify-center gap-3 py-16 text-text-secondary max-w-full px-4',
         className
       )}
     >

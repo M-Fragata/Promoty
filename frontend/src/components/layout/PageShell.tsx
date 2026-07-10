@@ -13,7 +13,7 @@ export function PageShell({ children, sidebar }: PageShellProps) {
     <div className="min-h-screen bg-app-bg text-text-primary transition-colors duration-300">
       <Header />
 
-      <div className="flex">
+      <div className="flex overflow-hidden">
         {/* Sidebar — desktop only */}
         {sidebar && (
           <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:top-16 lg:bottom-0 lg:border-r lg:border-card-border lg:bg-card-bg lg:p-4 lg:overflow-y-auto">
@@ -24,7 +24,7 @@ export function PageShell({ children, sidebar }: PageShellProps) {
         {/* Main content */}
         <main
           className={clsx(
-            'flex-1 pt-16 pb-20 lg:pb-8',
+            'flex-1 min-w-0 pt-16 pb-20 lg:pb-8',
             sidebar ? 'lg:ml-64' : ''
           )}
         >

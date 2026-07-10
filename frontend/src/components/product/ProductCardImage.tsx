@@ -30,7 +30,7 @@ export function ProductCardImage({
       </div>
 
       {/* Store badge — aligns with card rounded corners */}
-      <div className="absolute -top-3 -left-3 z-10">
+      <div className="absolute -top-4 -left-4 z-10">
         <StoreTag store={store} />
       </div>
     </div>

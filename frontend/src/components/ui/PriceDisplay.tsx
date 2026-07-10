@@ -21,7 +21,7 @@ export function PriceDisplay({
   const showDiscountBadge = discount > 0 && discountLabel;
 
   return (
-    <div className={clsx('flex flex-col gap-0.5', className)}>
+    <div className={clsx('flex flex-col gap-3', className)}>
       {/* Original price + discount badge */}
       {discount > 0 && originalPrice && (
         <div className="flex items-center gap-2">

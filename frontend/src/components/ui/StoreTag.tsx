@@ -12,7 +12,7 @@ export function StoreTag({ store, className }: StoreTagProps) {
   return (
     <span
       className={clsx(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-label-sm font-semibold shadow-md border border-white/20',
+        'inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-label-sm font-semibold shadow-md border border-white/20',
         info.color,
         className
       )}

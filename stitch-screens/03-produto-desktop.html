@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Smartphone Mega Pro 5G - SmartSave</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#481b00",
+                      "secondary": "#006c49",
+                      "on-error-container": "#93000a",
+                      "on-surface-variant": "#45474c",
+                      "outline-variant": "#c5c6cd",
+                      "on-primary-fixed": "#111c2d",
+                      "on-secondary": "#ffffff",
+                      "error": "#ba1a1a",
+                      "outline": "#75777d",
+                      "on-tertiary-container": "#eb6905",
+                      "tertiary-fixed-dim": "#ffb690",
+                      "on-surface": "#191c1d",
+                      "surface-container-low": "#f3f4f5",
+                      "on-tertiary-fixed-variant": "#783200",
+                      "surface-variant": "#e1e3e4",
+                      "primary-fixed": "#d8e3fb",
+                      "primary-container": "#1e293b",
+                      "on-error": "#ffffff",
+                      "on-secondary-container": "#00714d",
+                      "error-container": "#ffdad6",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#f8f9fa",
+                      "primary-fixed-dim": "#bcc7de",
+                      "surface-dim": "#d9dadb",
+                      "on-tertiary-fixed": "#341100",
+                      "on-background": "#191c1d",
+                      "secondary-fixed": "#6ffbbe",
+                      "surface-tint": "#545f73",
+                      "inverse-on-surface": "#f0f1f2",
+                      "tertiary-fixed": "#ffdbca",
+                      "surface-container-highest": "#e1e3e4",
+                      "on-secondary-fixed-variant": "#005236",
+                      "on-primary-fixed-variant": "#3c475a",
+                      "surface-container-high": "#e7e8e9",
+                      "background": "#f8f9fa",
+                      "tertiary": "#280c00",
+                      "secondary-container": "#6cf8bb",
+                      "on-secondary-fixed": "#002113",
+                      "inverse-primary": "#bcc7de",
+                      "on-primary-container": "#8590a6",
+                      "surface": "#f8f9fa",
+                      "primary": "#091426",
+                      "inverse-surface": "#2e3132",
+                      "surface-container": "#edeeef",
+                      "secondary-fixed-dim": "#4edea3",
+                      "on-primary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-md": "12px",
+                      "stack-lg": "24px",
+                      "base": "8px",
+                      "container-padding-mobile": "16px",
+                      "stack-sm": "4px",
+                      "container-padding-desktop": "40px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "price-display": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg-mobile": [
+                              "Hanken Grotesk"
+                      ],
+                      "headline-lg": [
+                              "Hanken Grotesk"
+                      ],
+                      "label-bold": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-md": [
+                              "Hanken Grotesk"
+                      ],
+                      "label-sm": [
+                              "Hanken Grotesk"
+                      ],
+                      "body-lg": [
+                              "Hanken Grotesk"
+                      ]
+              },
+              "fontSize": {
+                      "price-display": [
+                              "22px",
+                              {
+                                      "lineHeight": "22px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-bold": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "26px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<header class="sticky top-0 w-full z-50 flex items-center justify-between px-container-padding-mobile md:px-container-padding-desktop py-base bg-surface/90 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary">SmartSave</span>
+</div>
+<div class="hidden md:flex flex-1 max-w-md mx-8">
+<div class="relative w-full">
+<input class="w-full pl-10 pr-4 py-2 border border-outline-variant rounded-full focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-surface transition-colors" placeholder="Buscar ofertas..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" data-icon="search">search</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="font-label-bold text-label-bold text-primary hover:bg-surface-container-low transition-colors px-4 py-2 rounded-full active:scale-95 duration-150 hidden md:block">
+                Filters
+            </button>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-bold">
+                U
+            </div>
+</div>
+</header>
+<div class="flex flex-1 max-w-[1280px] mx-auto w-full">
+<!-- SideNavBar -->
+<aside class="hidden lg:flex flex-col gap-stack-lg p-stack-lg sticky top-[72px] h-[calc(100vh-72px)] w-64 bg-surface border-r border-outline-variant/30 overflow-y-auto">
+<div>
+<h2 class="font-headline-md text-headline-md font-bold text-primary mb-1">Filter Results</h2>
+<p class="text-on-surface-variant text-sm mb-6">Refine by platform and price</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-lg font-bold hover:bg-surface-container-highest transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span class="font-label-bold text-label-bold">Stores</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg hover:bg-surface-container-highest transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="font-label-bold text-label-bold">Categories</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-lg hover:bg-surface-container-highest transition-all active:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-label-bold text-label-bold">Price Range</span>
+</a>
+</nav>
+<div class="mt-auto pt-4">
+<button class="w-full py-3 bg-primary text-on-primary rounded-lg font-label-bold text-label-bold hover:bg-primary/90 transition-colors">
+                    Apply Filters
+                </button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 p-container-padding-mobile md:p-container-padding-desktop overflow-y-auto">
+<!-- Hero Product Section -->
+<section class="flex flex-col md:flex-row gap-stack-lg bg-surface rounded-xl p-6 shadow-[0_4px_12px_rgba(0,0,0,0.04)] mb-stack-lg">
+<!-- Product Image -->
+<div class="w-full md:w-1/2 lg:w-2/5 aspect-square relative rounded-lg overflow-hidden bg-surface-container-lowest border border-outline-variant/20 flex items-center justify-center p-4">
+<img class="w-full h-full object-contain mix-blend-multiply" data-alt="A highly detailed, professional product photography shot of a sleek modern smartphone (Smartphone Mega Pro 5G). The phone is positioned at a slight angle to show off its ultra-thin bezels and premium metallic finish. The background is a clean, minimalist pure white studio setup with soft, diffused lighting that highlights the phone's smooth contours and vibrant screen display. High-key lighting, corporate minimalist aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnkhKHuLjk2uQCpPAsYB9aO8p2xcgJBScd3Eajz7bD7Dw6lYAcvqQ-XP8FXePG5Q_9bn6blzqr9Z1gKdmNQN8D0mHjRNHVYb6bsdupc_zwSzS0EZyn1htSzpEDNO5t6ua9awK7jIdn0ACTjZgoSukDuXQwfAz-bPnZ7zYh1a4dn8U6cahHhlvK7b3uFOCKMmIdBjitZ9tfVvhTRu_96qWOsGiq6puzIDrOPbO2yIeQBTvb-6lRuwWbTtXnLtUH2ThaoIJuWENtBNdJ"/>
+<div class="absolute top-4 right-4 bg-tertiary-container text-on-tertiary-container font-label-bold text-label-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="schedule" data-weight="fill" style="font-variation-settings: 'FILL' 1;">schedule</span>
+                        Oferta Relâmpago
+                    </div>
+</div>
+<!-- Product Details -->
+<div class="w-full md:w-1/2 lg:w-3/5 flex flex-col">
+<div class="mb-4">
+<span class="inline-block px-2 py-1 bg-surface-container-high text-on-surface-variant rounded text-xs font-semibold mb-3 uppercase tracking-wider">Smartphone</span>
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-2">Smartphone Mega Pro 5G - 256GB, Câmera Tripla 108MP, Bateria 5000mAh</h1>
+<div class="flex items-center gap-3 mt-2">
+<div class="flex items-center px-3 py-1 bg-surface-container-low border border-outline-variant/30 rounded-full">
+<span class="material-symbols-outlined text-on-surface-variant text-[18px] mr-1" data-icon="store">store</span>
+<span class="font-label-bold text-label-bold text-on-surface">Amazon</span>
+</div>
+<div class="flex items-center text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-[#F59E0B] text-[16px] mr-1" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-semibold">4.8</span>
+<span class="ml-1">(1.2k avaliações)</span>
+</div>
+</div>
+</div>
+<!-- Price Block -->
+<div class="bg-surface-container-lowest p-5 rounded-lg border border-outline-variant/20 mb-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-24 h-24 bg-secondary/10 rounded-bl-full -z-0"></div>
+<div class="relative z-10 flex flex-col">
+<div class="flex items-end gap-3 mb-1">
+<span class="text-on-surface-variant line-through text-body-md">R$ 2.950,00</span>
+<span class="bg-secondary text-on-secondary font-label-bold text-label-bold px-2 py-0.5 rounded flex items-center">
+<span class="material-symbols-outlined text-[14px] mr-1" data-icon="arrow_downward">arrow_downward</span>
+                                    35% OFF
+                                </span>
+</div>
+<div class="font-price-display text-price-display text-secondary text-4xl mb-1">R$ 1.899,00</div>
+<div class="text-on-surface-variant text-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="credit_card">credit_card</span>
+                                em até 10x de R$ 189,90 sem juros
+                            </div>
+</div>
+</div>
+<div class="mt-auto space-y-4">
+<p class="text-on-surface-variant font-body-md text-body-md line-clamp-3">
+                            O Smartphone Mega Pro 5G redefine o que é possível com conectividade ultrarrápida, uma tela imersiva OLED de 120Hz e um sistema de câmeras avançado. Perfeito para jogos, produtividade e fotografia profissional.
+                        </p>
+<div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-outline-variant/20">
+<button class="flex-1 bg-primary text-on-primary font-label-bold text-label-bold h-12 rounded-lg flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors shadow-sm active:scale-[0.98]">
+<span class="material-symbols-outlined" data-icon="shopping_cart" data-weight="fill" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+                                Ir para Loja
+                            </button>
+<button class="sm:w-12 h-12 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+</button>
+<button class="sm:w-12 h-12 flex items-center justify-center rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low transition-colors active:scale-[0.98]">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Ofertas Semelhantes Section -->
+<section>
+<div class="flex items-center justify-between mb-stack-md">
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Ofertas Semelhantes</h2>
+<a class="text-primary font-label-bold text-label-bold hover:underline flex items-center gap-1" href="#">
+                        Ver mais
+                        <span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-gutter">
+<!-- Product Card 1 -->
+<div class="bg-surface rounded-xl border border-outline-variant/20 overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow group flex flex-col h-full">
+<div class="relative aspect-square p-4 bg-surface-container-lowest flex items-center justify-center border-b border-outline-variant/10">
+<img class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300" data-alt="A minimalist product shot of premium wireless over-ear headphones in matte black, placed on a clean white surface. Soft studio lighting emphasizing the sleek design and comfortable ear cushions. Corporate professional e-commerce aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8GcdVYABOYaKqAOabCScOrweAe5ijCW8zTVAZS6pxudodl-RU2q4hh3Lp8bWSQhoNmmzHUF5WVGHi5p68AsG2QB8cTmKbxyvlDBP5116kC9QBE-ID0DuqVgyeLJuzG0X_BDJBNAA85rZMSzSZFPc4e19bZlfgjOrnkcUeET_r-jRQc2pNdLDXlGkpPXcl6N4o9KK6qvZ8kL_vX0YXJlqKIxiZaZAnKTsTMORjPvE-TRahXrsUoICkWg3HxYJ-s4STeiH-zdLPTP0e"/>
+<div class="absolute top-2 left-2 bg-secondary text-on-secondary font-label-sm text-label-sm px-2 py-0.5 rounded shadow-sm">
+                                -40%
+                            </div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="font-label-bold text-label-bold text-on-surface line-clamp-2 mb-2 group-hover:text-primary transition-colors">Fone de Ouvido Bluetooth Pro Noise Cancelling</h3>
+<div class="mt-auto">
+<div class="text-on-surface-variant line-through text-xs mb-0.5">R$ 899,00</div>
+<div class="font-price-display text-price-display text-secondary text-xl mb-3">R$ 539,00</div>
+<button class="w-full py-2 bg-primary-container text-on-primary-container font-label-bold text-label-bold rounded-lg hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1 active:scale-[0.98]">
+                                    Comprar
+                                </button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-surface rounded-xl border border-outline-variant/20 overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow group flex flex-col h-full">
+<div class="relative aspect-square p-4 bg-surface-container-lowest flex items-center justify-center border-b border-outline-variant/10">
+<img class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300" data-alt="A modern robot vacuum cleaner gliding across a light oak hardwood floor. The device is sleek and futuristic, finished in glossy white with subtle silver accents. Studio lighting creating a bright, clean, high-end home appliance visual style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHWGFRyYOSfegqMFNU0vFkdewAq9VOQAfgQ_brppV7Md0QRqJRObjTQ1sSLfcnrYJcTHhHED87-Y4VggIq9INAHKn_8HPEDVRKq64slWyEhCinrjoAX7YhNTRBWkcGWwR8jzS0SNcvBrSXIPf9Q0bcBtwpS-zimZeKXzd7DAPQSJmI2tdWNUYORg6COHif3xViUxd3tuxr_vY4mIt2bmggIYO5q4BJLp1kFad3gZ1ecdG6XF-b27mx-q04-kPXHjy_2P0TQirq5Bcr"/>
+<div class="absolute top-2 left-2 bg-secondary text-on-secondary font-label-sm text-label-sm px-2 py-0.5 rounded shadow-sm">
+                                -25%
+                            </div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="font-label-bold text-label-bold text-on-surface line-clamp-2 mb-2 group-hover:text-primary transition-colors">Aspirador Robô Inteligente Wi-Fi Mapeamento</h3>
+<div class="mt-auto">
+<div class="text-on-surface-variant line-through text-xs mb-0.5">R$ 1.999,00</div>
+<div class="font-price-display text-price-display text-secondary text-xl mb-3">R$ 1.499,00</div>
+<button class="w-full py-2 bg-primary-container text-on-primary-container font-label-bold text-label-bold rounded-lg hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1 active:scale-[0.98]">
+                                    Comprar
+                                </button>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-surface rounded-xl border border-outline-variant/20 overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow group flex flex-col h-full">
+<div class="relative aspect-square p-4 bg-surface-container-lowest flex items-center justify-center border-b border-outline-variant/10">
+<img class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300" data-alt="A high-end digital air fryer with a sleek digital touchscreen interface. The appliance is matte black and sits on a pristine white kitchen counter. Soft studio lighting highlights its modern, blocky design. Clean, minimalist e-commerce presentation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3DYtotADw2W7Sl3BX8-pcS0wXZ5gduB49fJua9dXo92T52n6yyF17ihxmPUv_mgOW49s0XavkQY-ZahsNBYbShz8PwrTqhApl11JUEicjYffI2_YBK-w0g3hvi4lm_4kOXSbVzdDE0703c9XXd-spkqGaFzZlYJJeGQnRZk3J4zwAOGwtqLCHOwCnoKUWxToYNocXcR2ph2wWWzWY63y_VqyiY7cQeiQxkrFKzmZHeDMYSopgG3bwGkO24vEIgRGzjjBzo0wjgn2w"/>
+<div class="absolute top-2 left-2 bg-secondary text-on-secondary font-label-sm text-label-sm px-2 py-0.5 rounded shadow-sm">
+                                -30%
+                            </div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="font-label-bold text-label-bold text-on-surface line-clamp-2 mb-2 group-hover:text-primary transition-colors">Fritadeira Air Fryer Digital 4L Painel Touch</h3>
+<div class="mt-auto">
+<div class="text-on-surface-variant line-through text-xs mb-0.5">R$ 549,00</div>
+<div class="font-price-display text-price-display text-secondary text-xl mb-3">R$ 384,00</div>
+<button class="w-full py-2 bg-primary-container text-on-primary-container font-label-bold text-label-bold rounded-lg hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1 active:scale-[0.98]">
+                                    Comprar
+                                </button>
+</div>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="bg-surface rounded-xl border border-outline-variant/20 overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow group flex flex-col h-full">
+<div class="relative aspect-square p-4 bg-surface-container-lowest flex items-center justify-center border-b border-outline-variant/10">
+<img class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300" data-alt="A premium smartwatch with a vibrant OLED display showing a fitness tracking interface, paired with a sleek metallic mesh band. Set against a pure white background with soft, diffused lighting to emphasize the polished metal case. Clean e-commerce aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsQJXfLOpWhteekq1HH-0kq0WYVHI_lxK4cJuRAEVbqq9dNdfkVMLadEqmGp7ndJuLXCjVlrcPKT1K-OIQqjDw8FzDV3VacF7CMl56FyXUpTAHx0rUkQ42EYlXkFQR0WzYPxCdxFCztHvIGxKykzcP159Zwu3ILAE4BwOd6oWiDrBAJTOpEQYDrlhRhCEAxw1g3QzM9sC3yu_ZBtEfQA2Y724SJtlz2BCEl9jixNJWlbCSq7FlsgDLTVDAND3vKenpe9tk7oIi6SFZ"/>
+<div class="absolute top-2 left-2 bg-secondary text-on-secondary font-label-sm text-label-sm px-2 py-0.5 rounded shadow-sm">
+                                -15%
+                            </div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="font-label-bold text-label-bold text-on-surface line-clamp-2 mb-2 group-hover:text-primary transition-colors">Smartwatch Fit Pro Monitor Cardíaco e GPS</h3>
+<div class="mt-auto">
+<div class="text-on-surface-variant line-through text-xs mb-0.5">R$ 1.299,00</div>
+<div class="font-price-display text-price-display text-secondary text-xl mb-3">R$ 1.104,00</div>
+<button class="w-full py-2 bg-primary-container text-on-primary-container font-label-bold text-label-bold rounded-lg hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1 active:scale-[0.98]">
+                                    Comprar
+                                </button>
+</div>
+</div>
+</div>
+<!-- Product Card 5 -->
+<div class="bg-surface rounded-xl border border-outline-variant/20 overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-md transition-shadow group flex flex-col h-full hidden md:flex">
+<div class="relative aspect-square p-4 bg-surface-container-lowest flex items-center justify-center border-b border-outline-variant/10">
+<img class="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300" data-alt="A heavy-duty professional kitchen blender featuring a large glass jar and a brushed stainless steel base. Placed on a crisp white backdrop under high-key studio lighting that accentuates its robust build and clean lines. Professional e-commerce style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgVCjh2GsdZVE8jeW7n8033eGp2thNR0iLuJW2F51wslvu_NtSBEFzP_gkKSnlVCOSzkW_3p3jokaEJLot8I8RxjsVSMXmooE5OqqEDlym0zldF_m9gM84LKgVoWwP6AZ1i8XbZFPKfaqS-6dITjMPRIJzH7waf3nFVReY8CKQH9uzVM-zUVa3mAu9FewM_74PdWMP-_hJJBJIeN8ROXyoXi_Kn5R4Eo87MhVrNRHTPVAIQehTRzgzN3xKaXkqO3Bb8WP9dwBkgNZ-"/>
+<div class="absolute top-2 left-2 bg-secondary text-on-secondary font-label-sm text-label-sm px-2 py-0.5 rounded shadow-sm">
+                                -20%
+                            </div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="font-label-bold text-label-bold text-on-surface line-clamp-2 mb-2 group-hover:text-primary transition-colors">Liquidificador Profissional 1200W Copo de Vidro</h3>
+<div class="mt-auto">
+<div class="text-on-surface-variant line-through text-xs mb-0.5">R$ 399,00</div>
+<div class="font-price-display text-price-display text-secondary text-xl mb-3">R$ 319,00</div>
+<button class="w-full py-2 bg-primary-container text-on-primary-container font-label-bold text-label-bold rounded-lg hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-1 active:scale-[0.98]">
+                                    Comprar
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<div class="h-24 md:h-0"></div> <!-- Spacer for mobile bottom nav -->
+</main>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface/95 backdrop-blur-sm border-t border-outline-variant/50 shadow-[0_-4px_12px_rgba(0,0,0,0.04)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-lg p-2 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="local_offer">local_offer</span>
+<span class="font-label-sm text-label-sm mt-1">Deals</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-lg p-2 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+<span class="font-label-sm text-label-sm mt-1">Flash Sale</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="font-label-sm text-label-sm mt-1">Saved</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container rounded-lg p-2 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm mt-1">Account</span>
+</a>
+</nav>
+</body></html>

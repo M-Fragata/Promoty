@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+
+<html class="light" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Meu Perfil - SmartSave</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline": "#75777d",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#ffdbca",
+                    "on-surface": "#191c1d",
+                    "on-secondary-fixed-variant": "#005236",
+                    "on-secondary": "#ffffff",
+                    "surface-dim": "#d9dadb",
+                    "on-secondary-fixed": "#002113",
+                    "background": "#f8f9fa",
+                    "on-tertiary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "tertiary-fixed-dim": "#ffb690",
+                    "surface-variant": "#e1e3e4",
+                    "surface-container-low": "#f3f4f5",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-tertiary-fixed": "#341100",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-tertiary-container": "#eb6905",
+                    "outline-variant": "#c5c6cd",
+                    "on-primary-fixed": "#111c2d",
+                    "secondary-container": "#6cf8bb",
+                    "on-primary-container": "#8590a6",
+                    "surface-container-high": "#e7e8e9",
+                    "surface-tint": "#545f73",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#bcc7de",
+                    "inverse-on-surface": "#f0f1f2",
+                    "tertiary-container": "#481b00",
+                    "secondary": "#006c49",
+                    "on-background": "#191c1d",
+                    "inverse-surface": "#2e3132",
+                    "surface-bright": "#f8f9fa",
+                    "tertiary": "#280c00",
+                    "on-surface-variant": "#45474c",
+                    "surface-container": "#edeeef",
+                    "primary-fixed-dim": "#bcc7de",
+                    "primary-container": "#1e293b",
+                    "on-tertiary-fixed-variant": "#783200",
+                    "surface": "#f8f9fa",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#3c475a",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-error-container": "#93000a",
+                    "on-secondary-container": "#00714d",
+                    "primary-fixed": "#d8e3fb",
+                    "primary": "#091426"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "12px",
+                    "stack-lg": "24px",
+                    "base": "8px",
+                    "gutter": "16px",
+                    "container-padding-mobile": "16px",
+                    "stack-sm": "4px",
+                    "container-padding-desktop": "40px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "label-bold": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "label-sm": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "price-display": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "26px", "fontWeight": "400"}],
+                    "label-bold": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "price-display": ["22px", {"lineHeight": "22px", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Hanken Grotesk', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col">
+<!-- TopNavBar (Shared Component) -->
+<nav class="sticky top-0 w-full z-50 flex items-center justify-between px-container-padding-mobile md:px-container-padding-desktop py-base bg-surface dark:bg-surface-dim bg-surface/90 dark:bg-surface-dim/90 backdrop-blur-md shadow-sm border-b border-outline-variant/30 dark:border-outline/20">
+<div class="flex items-center gap-gutter">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim active:scale-95 transition-transform duration-150 cursor-pointer">SmartSave</span>
+</div>
+<div class="flex items-center gap-gutter">
+<!-- Search Icon (Search bar on right logic) -->
+<button class="p-2 rounded-full hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors active:scale-95 transition-transform duration-150 text-on-surface-variant dark:text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="font-label-bold text-label-bold text-primary dark:text-primary-fixed-dim px-4 py-2 rounded-lg hover:bg-surface-container-low dark:hover:bg-surface-container-highest transition-colors active:scale-95 transition-transform duration-150 flex items-center gap-base">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+                Filters
+            </button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-1 w-full max-w-3xl mx-auto px-container-padding-mobile md:px-container-padding-desktop py-stack-lg pb-32 flex flex-col gap-stack-lg">
+<!-- Page Title -->
+<header class="mb-stack-sm">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary">Meu Perfil</h1>
+</header>
+<!-- Profile Hero Section -->
+<section class="flex flex-col items-center justify-center py-stack-md gap-stack-md">
+<div class="relative group cursor-pointer">
+<img class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover shadow-sm ring-4 ring-surface-container-lowest" data-alt="A high-quality, professional headshot of a diverse individual, used as a profile picture in a sleek, modern e-commerce application. The image is circular, brightly lit with soft, high-key white lighting, embodying a clean, minimalist, light-mode corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuADxciJScGqv1NmNHmU2agFpJZJdzvUrtpNEpo0lpg-gSs_klCAEQual5SC2vUhKERLPcxyQD5coDgIgwYtrSJT1HKStaXhp5NpJGfjXnBxC0vrFv2hEiYGjxIqtVcc4vMcP2IpkZG4WdlvVT9BzTLNGTo_05da7IyAtbwF2zRaFSBo35pABoGFzlSxam7lVlhruo3eHZQ2rpmGx_7h5g-Wd55lEhlikNbbJpb66DjgdbOQsDlWREuhaHj5NbSnPimV1rr3dLhGHvGb"/>
+<div class="absolute inset-0 bg-primary/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+<span class="material-symbols-outlined text-on-primary text-3xl" data-icon="edit">edit</span>
+</div>
+</div>
+</section>
+<!-- User Info Details Card (Bento/Glassmorphism inspired) -->
+<section class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden flex flex-col divide-y divide-outline-variant/20">
+<div class="flex items-center justify-between p-gutter hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Nome</span>
+<span class="font-body-md text-body-md font-medium text-on-surface">Alexandre Costa</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="flex items-center justify-between p-gutter hover:bg-surface-container-low transition-colors">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Email</span>
+<span class="font-body-md text-body-md font-medium text-on-surface">alexandre.costa@example.com</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<div class="flex items-center justify-between p-gutter bg-surface-container-low/30">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Conta criada em</span>
+<span class="font-body-md text-body-md text-on-surface-variant">15 de Novembro, 2023</span>
+</div>
+</div>
+</section>
+<!-- My Activity (Bento Grid) -->
+<section class="flex flex-col gap-stack-md mt-stack-md">
+<h2 class="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-widest pl-2">My Activity</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Card 1 -->
+<div class="bg-primary/5 hover:bg-primary/10 transition-colors border border-primary/10 rounded-xl p-stack-lg flex flex-col items-start gap-stack-sm cursor-pointer group shadow-sm hover:shadow-md">
+<div class="p-3 bg-surface-container-lowest rounded-full shadow-sm text-primary mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="link" data-weight="fill" style="font-variation-settings: 'FILL' 1;">link</span>
+</div>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-primary">142</span>
+<span class="font-body-md text-body-md text-on-surface-variant font-medium">Links Clicados</span>
+</div>
+<!-- Card 2 -->
+<div class="bg-secondary/5 hover:bg-secondary/10 transition-colors border border-secondary/10 rounded-xl p-stack-lg flex flex-col items-start gap-stack-sm cursor-pointer group shadow-sm hover:shadow-md">
+<div class="p-3 bg-surface-container-lowest rounded-full shadow-sm text-secondary mb-2 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined" data-icon="favorite" data-weight="fill" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-secondary">38</span>
+<span class="font-body-md text-body-md text-on-surface-variant font-medium">Favoritos</span>
+</div>
+</div>
+</section>
+<!-- Settings List -->
+<section class="flex flex-col gap-stack-md mt-stack-md">
+<h2 class="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-widest pl-2">Configurações</h2>
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 overflow-hidden flex flex-col">
+<button class="flex items-center gap-gutter p-gutter hover:bg-surface-container-low transition-colors w-full text-left border-b border-outline-variant/20">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+<span class="font-body-md text-body-md flex-1 text-on-surface">Notificações</span>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="flex items-center gap-gutter p-gutter hover:bg-surface-container-low transition-colors w-full text-left border-b border-outline-variant/20">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="security">security</span>
+<span class="font-body-md text-body-md flex-1 text-on-surface">Segurança</span>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="flex items-center gap-gutter p-gutter hover:bg-error-container/30 transition-colors w-full text-left group">
+<span class="material-symbols-outlined text-error" data-icon="logout">logout</span>
+<span class="font-body-md text-body-md flex-1 text-error font-medium">Sair</span>
+</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Shared Component) - Active Item: Account -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 md:hidden bg-surface/95 dark:bg-surface-dim/95 backdrop-blur-sm rounded-t-xl border-t border-outline-variant/50 dark:border-outline/30 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+<!-- Item 1: Deals (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high active:scale-90 transition-all duration-200 w-16 h-14 rounded-xl">
+<span class="material-symbols-outlined mb-1" data-icon="local_offer">local_offer</span>
+<span class="font-label-sm text-label-sm">Deals</span>
+</button>
+<!-- Item 2: Flash Sale (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high active:scale-90 transition-all duration-200 w-16 h-14 rounded-xl">
+<span class="material-symbols-outlined mb-1" data-icon="bolt">bolt</span>
+<span class="font-label-sm text-label-sm">Flash Sale</span>
+</button>
+<!-- Item 3: Saved (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high active:scale-90 transition-all duration-200 w-16 h-14 rounded-xl">
+<span class="material-symbols-outlined mb-1" data-icon="bookmark">bookmark</span>
+<span class="font-label-sm text-label-sm">Saved</span>
+</button>
+<!-- Item 4: Account (ACTIVE) -->
+<button class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-fixed-dim text-on-primary-container dark:text-on-primary-fixed-variant rounded-full px-4 py-1 hover:bg-surface-container dark:hover:bg-surface-container-high active:scale-90 transition-all duration-200 min-w-[64px] h-14">
+<span class="material-symbols-outlined mb-1" data-icon="person" data-weight="fill" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-sm text-label-sm">Account</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html><html lang="pt-BR" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Achadinhos - SmartSave</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#f0f1f2",
+                        "tertiary-container": "#481b00",
+                        "surface-container-low": "#f3f4f5",
+                        "primary-container": "#1e293b",
+                        "on-background": "#191c1d",
+                        "tertiary-fixed-dim": "#ffb690",
+                        "on-primary-fixed": "#111c2d",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-tertiary-container": "#eb6905",
+                        "outline": "#75777d",
+                        "background": "#f8f9fa",
+                        "tertiary-fixed": "#ffdbca",
+                        "on-tertiary": "#ffffff",
+                        "surface-tint": "#545f73",
+                        "secondary": "#006c49",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#bcc7de",
+                        "surface-container": "#edeeef",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#2e3132",
+                        "primary-fixed": "#d8e3fb",
+                        "on-surface-variant": "#45474c",
+                        "surface": "#f8f9fa",
+                        "tertiary": "#280c00",
+                        "on-tertiary-fixed-variant": "#783200",
+                        "secondary-fixed-dim": "#4edea3",
+                        "primary-fixed-dim": "#bcc7de",
+                        "secondary-container": "#6cf8bb",
+                        "on-primary-fixed-variant": "#3c475a",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-tertiary-fixed": "#341100",
+                        "surface-dim": "#d9dadb",
+                        "outline-variant": "#c5c6cd",
+                        "on-secondary-container": "#00714d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-high": "#e7e8e9",
+                        "surface-bright": "#f8f9fa",
+                        "primary": "#091426",
+                        "on-surface": "#191c1d",
+                        "surface-variant": "#e1e3e4",
+                        "on-primary-container": "#8590a6",
+                        "surface-container-highest": "#e1e3e4",
+                        "on-secondary-fixed": "#002113"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "container-padding-mobile": "16px",
+                        "stack-sm": "4px",
+                        "container-padding-desktop": "40px",
+                        "stack-md": "12px",
+                        "stack-lg": "24px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "label-bold": ["Hanken Grotesk"],
+                        "price-display": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "26px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-bold": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" }],
+                        "price-display": ["22px", { "lineHeight": "22px", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface antialiased font-body-md h-full flex flex-col">
+<!-- TopNavBar -->
+<header class="sticky top-0 w-full z-50 flex items-center justify-between px-container-padding-mobile md:px-container-padding-desktop py-base bg-surface dark:bg-surface-dim shadow-sm border-b border-outline-variant/30 dark:border-outline/20">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Fragata Ofertas</span>
+</div>
+<div class="flex-1 max-w-xl hidden md:flex items-center px-4">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-full focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-body-md font-body-md text-on-surface placeholder-on-surface-variant" placeholder="Buscar achadinhos..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="md:hidden p-2 text-on-surface-variant">
+<span class="material-symbols-outlined">search</span>
+</button>
+<div class="relative group">
+  <button class="flex items-center justify-center w-10 h-10 text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low transition-colors rounded-full active:scale-95 duration-150">
+    <span class="material-symbols-outlined">notifications</span>
+    <span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+  </button>
+  <!-- Notification Dropdown -->
+  <div class="absolute right-0 mt-2 w-80 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-lg overflow-hidden hidden group-focus-within:block z-50">
+    <div class="p-4 border-b border-outline-variant/20 flex justify-between items-center">
+      <h3 class="font-label-bold text-label-bold text-on-surface">Notificações</h3>
+      <button class="text-xs text-secondary font-label-bold hover:underline">Ler tudo</button>
+    </div>
+    <div class="max-h-64 overflow-y-auto">
+      <div class="p-4 border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors cursor-pointer">
+        <p class="text-sm font-semibold text-on-surface">Baixa de preço!</p>
+        <p class="text-xs text-on-surface-variant">Smartphone Mega Pro agora por R$ 2.499,00</p>
+        <span class="text-[10px] text-outline mt-1 block">Há 5 min</span>
+      </div>
+      <div class="p-4 border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors cursor-pointer">
+        <p class="text-sm font-semibold text-on-surface">Nova Oferta Relâmpago</p>
+        <p class="text-xs text-on-surface-variant">Confira os novos itens em promoção agora.</p>
+        <span class="text-[10px] text-outline mt-1 block">Há 1 hora</span>
+      </div>
+    </div>
+    <div class="p-3 bg-surface-container-low">
+      <button class="w-full py-2 bg-primary text-on-primary rounded-lg font-label-bold text-label-bold text-sm hover:bg-primary-container transition-colors flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">add_alert</span>
+        Criar alerta personalizado
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+</header>
+<!-- Main Layout -->
+<div class="flex flex-1 w-full max-w-7xl mx-auto md:px-container-padding-desktop">
+<!-- SideNavBar (Desktop) -->
+<aside class="h-screen w-64 hidden md:flex flex-col border-r border-outline-variant/30 dark:border-outline/20 bg-surface dark:bg-surface-container-low hidden lg:flex flex-col gap-stack-lg p-stack-lg sticky top-16 pb-24 overflow-y-auto">
+<div class="mb-stack-lg">
+<h2 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim">Filter Results</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Refine by platform and price</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 p-3 bg-secondary-container text-on-secondary-container dark:bg-secondary dark:text-on-secondary rounded-lg font-bold font-label-bold text-label-bold active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">storefront</span>
+                    Stores
+                </a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-all rounded-lg font-label-bold text-label-bold active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">category</span>
+                    Categories
+                </a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container-highest dark:hover:bg-surface-container-high transition-all rounded-lg font-label-bold text-label-bold active:translate-x-1 transition-transform" href="#">
+<span class="material-symbols-outlined">payments</span>
+                    Price Range
+                </a>
+</nav>
+<button class="mt-auto w-full py-3 bg-primary text-on-primary rounded-lg font-label-bold text-label-bold hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm">Filtrar</button>
+</aside>
+<!-- Right Main Area (Product Grid) -->
+<main class="flex-1 p-container-padding-mobile md:py-stack-lg md:pl-stack-lg w-full pb-24 md:pb-stack-lg">
+<div class="flex items-center justify-between mb-stack-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Principais Ofertas</h1>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-bold text-label-bold md:hidden">
+<span class="material-symbols-outlined">tune</span>
+                    Filtrar
+                </div>
+</div>
+<!-- Bento Grid inspired layout -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-stack-lg">
+<!-- Product Card 1 -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200 hover:-translate-y-1 flex flex-col relative group border border-outline-variant/20">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img alt="Fritadeira" class="w-full h-full object-cover mix-blend-multiply p-4 transition-transform duration-300 group-hover:scale-105" data-alt="A high-quality, brightly lit product photography shot of a modern, sleek black air fryer sitting on a clean, minimalist kitchen counter. The lighting is soft and natural, creating a premium feel. The environment is styled with light mode aesthetics, using whites, light grays, and subtle green accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUH6Y0PpmgrBTeABveHuiQHIvCjKmHpf_eDY8Yioa_1GUh9GPUmoAg0dMLR5LAklz5YR_l9rRlDD-654d6UqPdNUmgFV4MAjrofqmnFAHVp-jGkxPqIszLxWaZ_ODczzfQ35JBSihEKMwudhv89ha2418fx_DkRFZ5pM4iPrlY_y_XsoaMCydj070jzySPk_sagD18gMoiQOVWmsK6xp1nwD5ePvien5Gpxt5B_pFVAN3s8L_I4d9eBRfSIbFeoqk4HrAA_fXRjdY0">
+<div class="absolute top-2 left-2 flex flex-col gap-1">
+<span class="inline-flex items-center justify-center bg-white text-on-surface rounded-full px-2 py-1 shadow-sm font-label-sm text-label-sm border border-outline-variant/10">
+<span class="material-symbols-outlined text-[16px] mr-1 text-[#FF9900]">shopping_bag</span> Amazon
+                            </span>
+<span class="inline-flex items-center justify-center bg-tertiary text-on-tertiary rounded-full px-2 py-1 shadow-sm font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] mr-1">bolt</span> Relâmpago
+                            </span>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="font-body-md text-body-md text-on-surface font-semibold line-clamp-2 mb-2 min-h-[48px]">Fritadeira Elétrica Air Fryer 4L Mondial Family</h3>
+<div class="mt-auto flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant line-through text-sm">R$ 499,90</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-label-bold text-label-bold text-xs">45% OFF</span>
+</div>
+<span class="font-price-display text-price-display text-secondary">R$ 274,90</span>
+</div>
+<button class="mt-4 w-full py-3 bg-primary text-on-primary rounded-lg font-label-bold text-label-bold hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm flex items-center justify-center gap-2">
+                            Comprar <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</div>
+</article>
+<!-- Product Card 2 -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200 hover:-translate-y-1 flex flex-col relative group border border-outline-variant/20">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img alt="Fone" class="w-full h-full object-cover mix-blend-multiply p-4 transition-transform duration-300 group-hover:scale-105" data-alt="A premium close-up shot of a pair of high-end wireless noise-canceling headphones resting on a minimalist desk surface. Soft, diffused lighting highlights the matte texture of the earcups. The overall color palette is light and clean, with subtle indigo and gray tones creating a sophisticated, tech-forward aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAGnCT5e8tWQ0F3gjfu3aVAE7Oz1vzQuTC47WbAMEGoJZ_cYjoBcimQmhiCpLMpqKqsTL9zmjblufzhSc8wiLC_4MrXdFvQxO2NrTaOWCVrgoj2_42QQLOOQlj6yFI1NFSlVmHu3yhQewZlbA_z9lLB07aRm9ObbJzOXzQ4f2mtfg90BrpvsoE_06pIWAVZaCn-UKkCOw8mk4z7FWojBh5b1Sk5N0b_a1-ub9wFDwaU4hOwhWyz3H6Luj3Qug00lfc33LQF15JMscP">
+<div class="absolute top-2 left-2 flex flex-col gap-1">
+<span class="inline-flex items-center justify-center bg-white text-on-surface rounded-full px-2 py-1 shadow-sm font-label-sm text-label-sm border border-outline-variant/10">
+<span class="material-symbols-outlined text-[16px] mr-1 text-[#EE4D2D]">shopping_bag</span> Shopee
+                            </span>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="font-body-md text-body-md text-on-surface font-semibold line-clamp-2 mb-2 min-h-[48px]">Fone de Ouvido Bluetooth 5.3 com Cancelamento Ativo</h3>
+<div class="mt-auto flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant line-through text-sm">R$ 299,00</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-label-bold text-label-bold text-xs">60% OFF</span>
+</div>
+<span class="font-price-display text-price-display text-secondary">R$ 119,60</span>
+</div>
+<button class="mt-4 w-full py-3 bg-primary text-on-primary rounded-lg font-label-bold text-label-bold hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm flex items-center justify-center gap-2">
+                            Comprar <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</div>
+</article>
+<!-- Product Card 3 -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200 hover:-translate-y-1 flex flex-col relative group border border-outline-variant/20">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img alt="Garrafa" class="w-full h-full object-cover mix-blend-multiply p-4 transition-transform duration-300 group-hover:scale-105" data-alt="A lifestyle product shot of a sleek, stainless steel smart water bottle with a digital temperature display on the lid. The bottle is placed on a light wooden table near a window, with bright, airy daylight casting soft shadows. The scene feels modern, healthy, and clean, perfectly matching a bright UI theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzskZen3WR1mEgIL6r2i1_rF2VB_gpdYEfWMjTMl2XPCYL1XnlSDgRPKV78jEr5emY5Ur69KzQikGDTYjFxIPhFGVkoWE4PzOEMl0NLSL8ZVsGUOfYBGh8gtm7_33KmYbkWZxN_XkZmKZAjgr_BfHYE69EmjrWW9kRUrJlpxvHRqVyhVjuUEC2ISF7-Uq7jDFkFj7LPKikq-l1GcT47ZYSaVTanuqDrlXnb4SvttGcx7KYg_-taBlH6jvXSmv6vNNF42nmYjCytye7">
+<div class="absolute top-2 left-2 flex flex-col gap-1">
+<span class="inline-flex items-center justify-center bg-white text-on-surface rounded-full px-2 py-1 shadow-sm font-label-sm text-label-sm border border-outline-variant/10">
+<span class="material-symbols-outlined text-[16px] mr-1 text-[#FFE600]">shopping_bag</span> Mercado Livre
+                            </span>
+<span class="inline-flex items-center justify-center bg-tertiary text-on-tertiary rounded-full px-2 py-1 shadow-sm font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] mr-1">bolt</span> Relâmpago
+                            </span>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="font-body-md text-body-md text-on-surface font-semibold line-clamp-2 mb-2 min-h-[48px]">Garrafa Térmica Inteligente Inox com Display Digital 500ml</h3>
+<div class="mt-auto flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant line-through text-sm">R$ 89,90</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-label-bold text-label-bold text-xs">55% OFF</span>
+</div>
+<span class="font-price-display text-price-display text-secondary">R$ 40,45</span>
+</div>
+<button class="mt-4 w-full py-3 bg-primary text-on-primary rounded-lg font-label-bold text-label-bold hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm flex items-center justify-center gap-2">
+                            Comprar <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</div>
+</article>
+<!-- Product Card 4 -->
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] transition-all duration-200 hover:-translate-y-1 flex flex-col relative group border border-outline-variant/20">
+<div class="relative aspect-square overflow-hidden bg-surface-container-low">
+<img alt="Smartwatch" class="w-full h-full object-cover mix-blend-multiply p-4 transition-transform duration-300 group-hover:scale-105" data-alt="A high-resolution image of a modern smart watch with a vibrant digital face, shown resting on a smooth, light-colored stone surface. The lighting is crisp and studio-quality, emphasizing the metallic finish of the watch bezel and the deep blacks of the screen. The aesthetic is clean, premium, and minimalist." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGAWJRbc7BE9ol7c6-WBOfOTxXLw4E0PdwWPKALV9X9Sm_9elDEAKuEs2Tt_tvE1yi51DuWM96JM7ot52w_Tsgcco74BeewJxslrnWM-FXugsfZO6AirPFNuZSc3uWHeZIFuE8neiJDT33wkNKHWxV7D4LSAg75m0TbXClodAc_EQw9mKAWa_vZ287Y9mtNxBW9JIdUnc6GO9lSTvSXeWUGIHd_7URPP7nSFbp3IU4mWDeSjvqSiBiVYX0Hnjg1s4fMjgBN8mzJfFu">
+<div class="absolute top-2 left-2 flex flex-col gap-1">
+<span class="inline-flex items-center justify-center bg-white text-on-surface rounded-full px-2 py-1 shadow-sm font-label-sm text-label-sm border border-outline-variant/10">
+<span class="material-symbols-outlined text-[16px] mr-1 text-[#FF9900]">shopping_bag</span> Amazon
+                            </span>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-1">
+<h3 class="font-body-md text-body-md text-on-surface font-semibold line-clamp-2 mb-2 min-h-[48px]">Smartwatch Relógio Inteligente Esportivo Monitor Cardíaco</h3>
+<div class="mt-auto flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant line-through text-sm">R$ 159,90</span>
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-label-bold text-label-bold text-xs">30% OFF</span>
+</div>
+<span class="font-price-display text-price-display text-secondary">R$ 111,90</span>
+</div>
+<button class="mt-4 w-full py-3 bg-primary text-on-primary rounded-lg font-label-bold text-label-bold hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm flex items-center justify-center gap-2">
+                            Comprar <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</div>
+</article>
+</div>
+<!-- Pagination -->
+<div class="mt-stack-lg flex justify-center items-center gap-2">
+<button class="px-4 py-2 border border-outline-variant rounded-lg font-label-bold text-label-bold text-on-surface hover:bg-surface-container-low transition-colors disabled:opacity-50" disabled="">
+                    Anterior
+                </button>
+<div class="hidden sm:flex gap-1">
+<button class="w-10 h-10 rounded-lg flex items-center justify-center font-label-bold text-label-bold bg-primary text-on-primary">1</button>
+<button class="w-10 h-10 rounded-lg flex items-center justify-center font-label-bold text-label-bold text-on-surface hover:bg-surface-container-low transition-colors">2</button>
+<button class="w-10 h-10 rounded-lg flex items-center justify-center font-label-bold text-label-bold text-on-surface hover:bg-surface-container-low transition-colors">3</button>
+<span class="w-10 h-10 flex items-center justify-center text-on-surface-variant">...</span>
+<button class="w-10 h-10 rounded-lg flex items-center justify-center font-label-bold text-label-bold text-on-surface hover:bg-surface-container-low transition-colors">10</button>
+</div>
+<button class="px-4 py-2 border border-outline-variant rounded-lg font-label-bold text-label-bold text-on-surface hover:bg-surface-container-low transition-colors">
+                    Próximo
+                </button>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 md:hidden bg-surface/95 dark:bg-surface-dim/95 backdrop-blur-sm border-t border-outline-variant/50 dark:border-outline/30 shadow-[0_-4px_12px_rgba(0,0,0,0.04)] docked full-width rounded-t-xl">
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary-fixed-dim text-on-primary-container dark:text-on-primary-fixed-variant rounded-full px-4 py-1 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">local_offer</span>
+<span class="font-label-sm text-label-sm">Deals</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high px-4 py-1 rounded-full active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">bolt</span>
+<span class="font-label-sm text-label-sm">Flash Sale</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high px-4 py-1 rounded-full active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="font-label-sm text-label-sm">Saved</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-high px-4 py-1 rounded-full active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm">Account</span>
+</a>
+</nav>
+
+
+</body></html>

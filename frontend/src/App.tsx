@@ -4,6 +4,7 @@ import { Home } from './pages/Home';
 import { ProductDetail } from './pages/ProductDetail';
 import { Login } from './pages/Login';
 import { Favorites } from './pages/Favorites';
+import { Profile } from './pages/Profile';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 function App() {
@@ -19,6 +20,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Favorites />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

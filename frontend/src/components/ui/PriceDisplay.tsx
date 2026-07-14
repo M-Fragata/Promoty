@@ -25,7 +25,7 @@ export function PriceDisplay({
       {/* Original price + discount badge */}
       {discount > 0 && originalPrice && (
         <div className="flex items-center gap-2">
-          <span className="text-label-sm text-text-secondary line-through">
+          <span className="text-sm text-text-secondary line-through">
             {formatPrice(originalPrice)}
           </span>
           {showDiscountBadge && (
@@ -39,7 +39,7 @@ export function PriceDisplay({
 
       {/* Installments */}
       {installments && (
-        <span className="text-label-sm text-text-secondary">{installments}</span>
+        <span className="text-sm text-text-secondary">{installments}</span>
       )}
     </div>
   );

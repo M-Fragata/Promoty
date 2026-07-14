@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, LogOut, Heart, MousePointerClick } from 'lucide-react';
+import { LogOut, Heart, MousePointerClick } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { MobileNav } from '../components/layout/MobileNav';
+import { Header } from '../components/layout/Header';
 
 export function Profile() {
   const [favoritesCount, setFavoritesCount] = useState(0);
@@ -27,10 +28,6 @@ export function Profile() {
       });
   }, [isAuthenticated, navigate]);
 
-  const handleBack = () => {
-    navigate(-1);
-  };
-
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -42,34 +39,12 @@ export function Profile() {
 
   return (
     <div className="min-h-screen bg-app-bg">
-      {/* Mobile Header */}
-      <header className="fixed top-0 w-full z-40 flex items-center justify-between px-container-padding-mobile py-base bg-surface/95 backdrop-blur-md border-b border-outline-variant/30 lg:hidden">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="w-10 h-10 flex items-center justify-center rounded-full active:bg-surface-container-high transition-colors text-primary"
-          aria-label="Voltar"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex-1 text-center font-label-bold text-label-bold text-text-primary truncate px-4">
-          Meu Perfil
-        </div>
-        <div className="w-10" />
-      </header>
-
-      {/* Desktop Header */}
-      <header className="hidden lg:flex fixed top-0 left-0 right-0 z-40 h-16 bg-app-bg/95 backdrop-blur supports-[backdrop-filter]:bg-app-bg/80 border-b border-card-border">
-        <div className="mx-auto h-full px-4 sm:px-6 lg:px-8 lg:ml-64 w-full max-w-7xl flex items-center">
-          <h1 className="font-headline-md text-headline-md text-text-primary">
-            Meu Perfil
-          </h1>
-        </div>
-      </header>
+      {/* Header */}
+      <Header />
 
       {/* Main Content */}
       <main className="md:mt-5 pt-16 lg:pt-16 pb-24 lg:pb-8">
-        <div className="mx-auto max-w-3xl lg:ml-64 px-4 md:px-6">
+        <div className="mx-auto max-w-3xl px-4 md:px-6">
           {/* Profile Hero Section */}
           <section className="flex flex-col items-center justify-center py-6 gap-4 mb-6">
             <div className="relative group cursor-pointer">

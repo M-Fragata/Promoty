@@ -8,16 +8,25 @@ import { Header } from '../components/layout/Header';
 
 export function Profile() {
   const [favoritesCount, setFavoritesCount] = useState(0);
+  const [createdAt, setCreatedAt] = useState<string | null>(null);
 
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Carregar contagem de favoritos
+  // Carregar dados do usuário e contagem de favoritos
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login', { state: { from: '/perfil' } });
       return;
     }
+
+    api.getMe()
+      .then((data) => {
+        setCreatedAt(data.createdAt);
+      })
+      .catch(() => {
+        // Ignorar erros
+      });
 
     api.getFavorites()
       .then((data) => {
@@ -84,7 +93,16 @@ export function Profile() {
             <div className="flex items-center justify-between p-4 bg-surface-container-low/30 border-t border-card-border">
               <div className="flex flex-col">
                 <span className="text-xs text-text-secondary uppercase tracking-wider mb-1">Conta criada em</span>
-                <span className="text-body-md text-text-secondary">Data não disponível</span>
+                <span className="text-body-md text-text-secondary">
+                  {createdAt
+                    ? new Date(createdAt).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric'
+                      })
+                    : 'Data não disponível'
+                  }
+                </span>
               </div>
             </div>
           </section>

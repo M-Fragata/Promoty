@@ -2,6 +2,7 @@ import { type Request, type Response } from 'express';
 import { prisma } from '../Database/Prisma.js';
 import { detectStore, appendAffiliateParams, type StoreType } from '../utils/affiliateUtils.js';
 import { EncurtaLinkController } from './EncutarLinkController.js';
+import { isShortenedUrl, expandUrl } from '../utils/expandUrl.js';
 
 // Mapeamento de loja para nome amigável
 const STORE_LABELS: Record<StoreType, string> = {
@@ -37,9 +38,15 @@ export class CreatedLinksController {
         return res.status(400).json({ error: 'URL inválida' });
       }
 
+      // Expandir URL se for encurtada
+      let resolvedUrl = url;
+      if (isShortenedUrl(url)) {
+        resolvedUrl = await expandUrl(url);
+      }
+
       // Detectar loja e appendar parâmetros de afiliado
-      const store = detectStore(url);
-      const affiliateUrl = appendAffiliateParams(url, store);
+      const store = detectStore(resolvedUrl);
+      const affiliateUrl = appendAffiliateParams(resolvedUrl, store);
 
       // Encurtar link via Kutt
       const shortUrl = await EncurtaLinkController(affiliateUrl);

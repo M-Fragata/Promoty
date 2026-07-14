@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Heart, MousePointerClick } from 'lucide-react';
+import { LogOut, Heart, MousePointerClick, Sun, Moon, Monitor } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/api';
 import { MobileNav } from '../components/layout/MobileNav';
 import { Header } from '../components/layout/Header';
+import { clsx } from 'clsx';
 
 export function Profile() {
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
 
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
   // Carregar dados do usuário e contagem de favoritos
@@ -138,6 +141,53 @@ export function Profile() {
           <section className="flex flex-col gap-3 mb-6">
             <h2 className="text-label-bold text-text-secondary uppercase tracking-widest pl-2">Configurações</h2>
             <div className="bg-card-bg rounded-xl shadow-sm border border-card-border overflow-hidden flex flex-col">
+              {/* Theme Settings */}
+              <div className="p-4 border-b border-card-border">
+                <span className="text-xs text-text-secondary uppercase tracking-wider mb-3 block">Tema</span>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTheme('light')}
+                    className={clsx(
+                      'flex flex-col items-center gap-2 p-3 rounded-lg border transition-all',
+                      theme === 'light'
+                        ? 'border-brand bg-brand/10 text-brand'
+                        : 'border-card-border hover:bg-surface-container-low text-text-secondary'
+                    )}
+                  >
+                    <Sun className="w-5 h-5" />
+                    <span className="text-xs font-medium">Claro</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTheme('dark')}
+                    className={clsx(
+                      'flex flex-col items-center gap-2 p-3 rounded-lg border transition-all',
+                      theme === 'dark'
+                        ? 'border-brand bg-brand/10 text-brand'
+                        : 'border-card-border hover:bg-surface-container-low text-text-secondary'
+                    )}
+                  >
+                    <Moon className="w-5 h-5" />
+                    <span className="text-xs font-medium">Escuro</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTheme('system')}
+                    className={clsx(
+                      'flex flex-col items-center gap-2 p-3 rounded-lg border transition-all',
+                      theme === 'system'
+                        ? 'border-brand bg-brand/10 text-brand'
+                        : 'border-card-border hover:bg-surface-container-low text-text-secondary'
+                    )}
+                  >
+                    <Monitor className="w-5 h-5" />
+                    <span className="text-xs font-medium">Padrão</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Logout */}
               <button
                 type="button"
                 onClick={handleLogout}

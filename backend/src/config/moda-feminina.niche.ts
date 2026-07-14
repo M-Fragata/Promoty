@@ -7,53 +7,78 @@ export const modaFeminina: NicheConfig = {
   groupJid: Env.WHATSAPP_GROUP_JID_MODA_FEMININA,
   groupInviteLink: Env.WHATSAPP_GROUP_INVITE_MODA_FEMININA,
   keywords: [
-    // 👗 Roupas de Marca / Conhecidas (Gera muita conversão no ML)
-    "jaqueta hering feminina",
-    "calca levis feminina",
-    "moletom adidas feminino",
-    "blazer feminino alfaiataria",
-    "pijama cetim feminino",
-    "vestido farm", // Farm vende absurdamente bem e tem alto valor/comissão
-    "body loba",    // Loba/Lupo é tiro certeiro por tamanho padrão
+    // 👗 Moda Feminina Genérica (captura ampla)
+    "vestido", "saia", "jaqueta feminina", "jaqueta jeans",
+    "calça feminina", "calça alfaiataria", "blusa feminina",
+    "moletom feminino", "cardigã", "casaco feminino",
+    "pijama", "camiseta feminina", "bermuda feminina", "shorts feminino",
+    "sutiã", "calcinha", "conjunto feminino",
 
-    // 👟 Calçados (Onde elas sabem o número e compram sem medo)
-    "tenis vert feminino", // Vert/Veja é febre de moda urbana
-    "tenis olimpikus feminino",
-    "tenis adidas feminino",
-    "chinelo havaianas feminino",
-    "sandalia melissa",
-    "bota cano curto feminina",
+    // 👗 Roupas de Marca (conversão alta)
+    "jaqueta hering", "calca levis", "moletom adidas",
+    "blazer alfaiataria", "pijama cetim",
+    "vestido farm", "body loba",
 
-    // 👜 Bolsas e Malas (Alto valor agregado)
-    "bolsa santa lolla",
-    "bolsa colcci feminina",
-    "mala de viagem bordo",
+    // 👟 Calçados (expandido)
+    "tênis feminino", "chinelo feminino", "sandália", "bota feminina",
+    "sapatilha", "rasteira", "mocassim", "scarpin",
+    "tenis olimpikus", "tenis adidas", "chinelo havaianas",
+    "sandalia melissa", "bota cano curto",
 
-    // 💄 Beleza & Skincare de Farmácia/Luxo (ML é forte no Envio Full disso)
-    "protetor solar la roche",
-    "serum cerave",
-    "hidratante cetaphil",
-    "kit eudora siage",
-    "perfume carolina herrera feminino",
-    "perfume lily boticario",
+    // 👜 Bolsas e Malas (expandido)
+    "bolsa feminina", "mochila feminina", "carteira feminina",
+    "necessaire", "bolsa couro", "bandeja",
+    "bolsa santa lolla", "bolsa colcci", "mala de viagem",
 
-    // 🔌 Eletro de Beleza (Produtos de desejo com caixa e garantia original)
-    "secador taiff",
-    "chapinha babyliss pro",
-    "escova secadora mondial"
+    // 💄 Beleza & Skincare (expandido)
+    "protetor solar", "creme hidratante", "sérum", "loção",
+    "base líquida", "batom", "máscara", "rimel", "kit maquiagem",
+    "perfume feminino", "desodorante", "shampoo",
+    "protetor solar la roche", "serum cerave", "hidratante cetaphil",
+    "kit eudora", "perfume carolina herrera", "perfume lily boticario",
+
+    // 🔌 Eletro de Beleza
+    "secador", "chapinha", "escova secadora", "escova alisadora",
+    "modelador de cachos", "babyliss",
+    "secador taiff", "chapinha babyliss", "escova mondial",
+
+    // 🏠 Casa & Móveis (NOVO)
+    "sofá", "sofa", "cadeira", "mesa", "cama", "armário", "armario",
+    "estante", "gaveteiro", "rack", "poltrona", "criado mudo",
+    "aparador", "prateleira", "cômoda", "comoda",
+    "luminária", "luminaria", "quadro", "espelho", "cortina",
+    "tapete", "almofada", "organizador", "vaso",
+    "jogo de cama", "toalha", "cortina",
+
+    // 🔌 Eletrodomésticos (NOVO)
+    "air fryer", "airfryer", "fritadeira", "liquidificador",
+    "batedeira", "sanduicheira", "cafeteira", "aspirador",
+    "ventilador", "panela elétrica", "maquina de lavar",
+    "secadora", "microondas", "purificador de agua",
+    "ferro de passar", "aspirador de pó",
+
+    // 🍳 Cozinha & Utilidades
+    "jogo de panela", "jogo de faca", "utensílio", "panela",
+    "frigideira", "forma de bolo", "tabua de corte",
+    "congelador", "faqueiro", "jogo de copo"
   ],
   banwords: [
+    // Gênero oposto
     "masculino", "masculina", "barba", "aparelho de barbear", "pênis", "homem", "homens",
     "gilette", "barbeador", "sabão em barra",
+    // Tech (evitar cruzamento com nicho gamers)
     "ferramenta", "parafuso", "broca", "serra", "furadeira",
-    "ddr2", "ddr3", "ddr4", "ddr5", "placa de vídeo",
-    "processador", "memória ram", "fonte para pc",
+    "ddr2", "ddr3", "ddr4", "ddr5", "placa de vídeo", "placa de video",
+    "processador", "memória ram", "memoria ram", "fonte para pc",
     "gabinete gamer", "water cooler", "cooler",
-    "mouse gamer", "teclado gamer"
+    "mouse gamer", "teclado gamer", "monitor", "notebook",
+    "celular", "smartphone", "ssd", "hd externo",
+    // Outros
+    "infantil", "pet", "cachorro", "gato", "bebedouro pet"
   ],
-  limitedWords: [],
+  limitedWords: ["air fryer"],
   minDiscount: 30,
-  maxPrice: 3000,
+  maxPrice: 4500,
   mlCategoryIds: [
     "MLB1579", // Casa, Móveis e Decoração
     "MLB1585", // Móveis
@@ -64,29 +89,35 @@ export const modaFeminina: NicheConfig = {
     "MLB11769", // Perfumes
   ],
   shopeeKeywordGroups: [
-    // Grupo 1: Achadinhos de Cozinha & Organização (Febre de vendas por impulso)
-    ["organizador acrilico", "pote hermetico", "mop giratorio", "mini processador sem fio", "porta temperos rotativo", "organizador geladeira"],
+    // Grupo 1: Achadinhos de Cozinha & Organização
+    ["organizador acrilico", "pote hermetico", "mop giratorio", "porta temperos rotativo", "organizador geladeira", "tabua de corte"],
 
-    // Grupo 2: Casa & Decoração "Estilo Pinterest" (Itens leves e estéticos)
-    ["luminaria led sem fio", "difusor de ambiente", "espelho decorativo", "capa de almofada", "manta sofa", "quadro decorativo minimalista"],
+    // Grupo 2: Casa & Decoração "Estilo Pinterest"
+    ["luminaria led", "difusor de ambiente", "espelho decorativo", "capa de almofada", "manta", "quadro decorativo", "cortina"],
 
-    // Grupo 3: Cama, Mesa & Banho (Fácil de vender por foto)
-    ["pijama cetim feminino", "jogo de cama casal", "toalha de banho fio penteado", "trilho de mesa", "jogo americano mesa posta"],
+    // Grupo 3: Cama, Mesa & Banho
+    ["pijama cetim", "jogo de cama", "toalha de banho", "trilho de mesa", "jogo americano", "jogo de toalha"],
 
-    // Grupo 4: Moda Feminina Estratégica (Peças-coringa e tendências)
-    ["jaqueta jeans feminina", "calca alfaiataria feminina", "blazer feminino", "vestido canelado", "casaco moletom feminino", "biquini fita"],
+    // Grupo 4: Moda Feminina Genérica
+    ["vestido feminino", "jaqueta jeans", "calça alfaiataria", "blazer", "saia", "casaco", "moletom feminino", "shorts feminino"],
 
-    // Grupo 5: Bolsas & Malas (Alto desejo)
-    ["bolsa feminina", "mochila feminina", "carteira feminina", "maleta de maquiagem", "necessaire viagem"],
+    // Grupo 5: Bolsas & Malas
+    ["bolsa feminina", "mochila feminina", "carteira feminina", "maleta de maquiagem", "necessaire"],
 
-    // Grupo 6: Calçados Conforto & Estilo
-    ["tenis feminino", "sandalia rasteira", "chinelo nuvem feminino", "sapatilha bico fino", "bota cano curto feminina"],
+    // Grupo 6: Calçados
+    ["tênis feminino", "sandália", "chinelo feminino", "sapatilha", "bota", "rasteira"],
 
-    // Grupo 7: Beleza & Skincare de Marca (Evitando maquiagem barata de R$ 5)
-    ["protetor solar cerave", "serum la roche", "hidratante cetaphil", "kit eudora", "kit boticario", "kit natura"],
+    // Grupo 7: Beleza & Skincare
+    ["protetor solar", "hidratante", "sérum", "kit eudora", "kit boticario", "kit natura", "creme para pele"],
 
-    // Grupo 8: Eletro-Portáteis de Beleza (Ticket alto e muita busca)
-    ["secador de cabelo", "chapinha", "babyliss", "escova alisadora", "escova rotativa", "modelador de cachos"]
+    // Grupo 8: Eletro de Beleza
+    ["secador de cabelo", "chapinha", "babyliss", "escova alisadora", "escova rotativa"],
+
+    // Grupo 9: Casa & Móveis (NOVO)
+    ["sofá", "cadeira", "mesa", "estante", "armário", "poltrona", "rack", "gaveteiro", "luminária"],
+
+    // Grupo 10: Eletrodomésticos (NOVO)
+    ["air fryer", "aspirador", "ventilador", "liquidificador", "cafeteira", "sanduicheira", "microondas", "maquina de lavar"]
   ],
   amazonCategoryNodes: ["n:16339927011", "n:16209063011"]
 }

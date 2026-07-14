@@ -4,6 +4,7 @@ import { ArrowLeft, ShoppingCart, CreditCard, ExternalLink } from 'lucide-react'
 import { FavoriteButton } from '../components/product/FavoriteButton';
 import { ShareButton } from '../components/product/ShareButton';
 import { RelatedProducts } from '../components/product/RelatedProducts';
+import { ProductDetailSkeleton } from '../components/product/ProductDetailSkeleton';
 import { MobileNav } from '../components/layout/MobileNav';
 import { Button } from '../components/ui/Button';
 import { StoreTag } from '../components/ui/StoreTag';
@@ -57,11 +58,7 @@ export function ProductDetail() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-app-bg flex items-center justify-center">
-        <div className="animate-pulse text-text-secondary">Carregando...</div>
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (error || !product) {

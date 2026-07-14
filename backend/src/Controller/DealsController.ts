@@ -1,5 +1,6 @@
 import { type Request, type Response } from "express";
 import { prisma } from "../Database/Prisma.js";
+import { z } from "zod"
 
 const PAGE_SIZE = 12;
 const HOURS_FILTER = 6;
@@ -13,8 +14,13 @@ function getRecentWhere() {
 export class DealsController {
 
   getDealById = async (req: Request, res: Response) => {
+
+    const idParse = z.object({
+      id: z.string()
+    })
+
     try {
-      const { id } = req.params;
+      const { id } = idParse.parse(req.params);
 
       const product = await prisma.productsMl.findUnique({
         where: { id },

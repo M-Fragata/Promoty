@@ -1,14 +1,29 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import { Home } from './pages/Home';
 import { ProductDetail } from './pages/ProductDetail';
+import { Login } from './pages/Login';
+import { Favorites } from './pages/Favorites';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/produto/:id" element={<ProductDetail />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/produto/:id" element={<ProductDetail />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/favoritos"
+            element={
+              <ProtectedRoute>
+                <Favorites />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

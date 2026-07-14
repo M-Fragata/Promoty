@@ -8,6 +8,32 @@ datasource db {
   //url      = "" //Só para calar a boca
 }
 
+model User {
+  id         String     @id @default(uuid())
+  email      String     @unique
+  name       String
+  password   String
+  avatar     String?
+  provider   String     @default("local") // "local" | "google"
+  providerId String?
+  createdAt  DateTime   @default(now())
+  favorites  Favorite[]
+
+  @@map("users")
+}
+
+model Favorite {
+  id        String     @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   ProductsMl @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
+}
+
 model Ofertas {
   id            String   @id @default(uuid())
   source_id     String
@@ -31,6 +57,8 @@ model ProductsMl {
   store         String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  favorites Favorite[]
 
   @@map("products_ml")
 }

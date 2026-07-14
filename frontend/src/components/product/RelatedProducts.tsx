@@ -52,7 +52,7 @@ function ProductCardHorizontal({ product }: ProductCardHorizontalProps) {
     <article
       onClick={() => navigate(`/produto/${product.id}`)}
       className={clsx(
-        'min-w-[160px] w-[160px] lg:min-w-0 lg:w-full',
+        'min-w-[170px] w-[170px] lg:min-w-0 lg:w-full',
         'bg-card-bg rounded-xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]',
         'border border-card-border flex flex-col',
         'snap-start shrink-0 overflow-hidden',
@@ -89,18 +89,18 @@ function ProductCardHorizontal({ product }: ProductCardHorizontalProps) {
         <div className="mt-auto pt-2 flex flex-col">
           <div className="flex gap-1 items-center">
             {product.originalPrice && (
-              <span className="text-label-sm text-text-secondary line-through">
+              <span className="text-sm text-text-secondary line-through">
                 {formatPrice(product.originalPrice)}
               </span>
             )}
             {discount > 0 && (
-              <span className="inline-flex items-center bg-discount-bg text-discount-text rounded-full px-2 py-0.5 text-label-sm font-semibold w-fit mb-1">
+              <span className="inline-flex items-center bg-discount-bg text-discount-text rounded-full px-2 py-0.5 text-sm font-semibold w-fit mb-1">
                 -{discount}% OFF
               </span>
             )}
           </div>
-          <span className="font-label-bold text-label-bold text-accent-green">
-            {formatPrice(product.price)}
+          <span className="font-bold text-bold text-accent-green">
+            <strong>{formatPrice(product.price)}</strong>
           </span>
         </div>
 

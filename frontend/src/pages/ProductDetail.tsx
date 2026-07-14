@@ -4,6 +4,7 @@ import { ArrowLeft, ShoppingCart, CreditCard, ExternalLink } from 'lucide-react'
 import { FavoriteButton } from '../components/product/FavoriteButton';
 import { ShareButton } from '../components/product/ShareButton';
 import { RelatedProducts } from '../components/product/RelatedProducts';
+import { MobileNav } from '../components/layout/MobileNav';
 import { Button } from '../components/ui/Button';
 import { StoreTag } from '../components/ui/StoreTag';
 import { formatPrice, calculateDiscount } from '../utils/format';
@@ -125,8 +126,13 @@ export function ProductDetail() {
                 </div>
               )}
 
+              {/* Store tag - top left */}
+              <div className="absolute top-2 left-3 z-10">
+                <StoreTag store={product.store} />
+              </div>
+
               {/* Favorite button - top right */}
-              <div className="absolute top-3 right-3 z-10">
+              <div className="absolute top-5 right-5 z-10">
                 <FavoriteButton productId={product.id} size="lg" />
               </div>
             </div>
@@ -138,9 +144,6 @@ export function ProductDetail() {
                 <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-text-primary mb-3">
                   {product.title}
                 </h1>
-
-                {/* Store Tag */}
-                <StoreTag store={product.store} />
               </div>
 
               {/* Price Block */}
@@ -199,6 +202,8 @@ export function ProductDetail() {
           )}
         </div>
       </main>
+
+      <MobileNav />
     </div>
   );
 }

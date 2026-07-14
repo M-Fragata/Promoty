@@ -60,7 +60,10 @@ export const modaFeminina: NicheConfig = {
     // 🍳 Cozinha & Utilidades
     "jogo de panela", "jogo de faca", "utensílio", "panela",
     "frigideira", "forma de bolo", "tabua de corte",
-    "congelador", "faqueiro", "jogo de copo"
+    "congelador", "faqueiro", "jogo de copo",
+
+    //esportivo
+    "whey", "creatina", "bicicleta ergométrica"
   ],
   banwords: [
     // Gênero oposto

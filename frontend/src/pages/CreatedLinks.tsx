@@ -105,7 +105,7 @@ export function CreatedLinks() {
       <Header />
 
       {/* Main Content */}
-      <main className="pt-16 lg:pt-16 pb-24 lg:pb-8">
+      <main className="mt-5 pt-16 lg:pt-16 pb-24 lg:pb-8">
         <div className="mx-auto max-w-3xl px-4 md:px-6">
           {/* Create Link Section */}
           <section className="mb-6">
@@ -144,7 +144,7 @@ export function CreatedLinks() {
                 </button>
               </div>
               <p className="text-xs text-text-secondary mt-2">
-                Suporta Mercado Livre, Amazon, Shopee e outras lojas
+                Suporta Mercado Livre, Amazon, Shopee.
               </p>
             </div>
           </section>

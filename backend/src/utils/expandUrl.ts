@@ -7,33 +7,18 @@ const SHORTENER_DOMAINS = [
   'amzn.to',
   'a.co',
   'amzn.com',
-  // Generic shorteners
-  'bit.ly',
-  'tinyurl.com',
-  't.co',
-  'goo.gl',
-  'owl.ly',
-  'shorturl.at',
-  'rb.gy',
-  'cutt.ly',
-  'is.gd',
-  'buff.ly',
   // Shopee share link
-  's.shopee.com.br',
+  's.shopee',
+  //mercadolivre share link
+  'meli.la'
 ];
 
 /**
  * Verifica se uma URL é de um encurtador conhecido
  */
 export function isShortenedUrl(url: string): boolean {
-  try {
-    const hostname = new URL(url).hostname.toLowerCase();
-    return SHORTENER_DOMAINS.some(
-      (domain) => hostname === domain || hostname.endsWith('.' + domain)
-    );
-  } catch {
-    return false;
-  }
+  const lowerUrl = url.toLowerCase();
+  return SHORTENER_DOMAINS.some((domain) => lowerUrl.includes(domain));
 }
 
 /**

@@ -1,12 +1,12 @@
 import { type Request, type Response } from "express";
 import { whatsAppService } from "../app.js";
 import { prisma } from "../Database/Prisma.js";
-import { Env } from "../utils/Envirolment.js";
 
 import { EncurtaLinkController } from "./EncutarLinkController.js";
 import type { NicheConfig } from "../types/niche.js";
 import { getActiveNiches } from "../config/index.js";
 import { dispatchProductToNiches } from "../Services/NicheDispatcher.js";
+import { detectStore, appendAffiliateParams } from "../utils/affiliateUtils.js";
 
 const MARGEM_TOLERANCIA = 0.04
 
@@ -55,37 +55,14 @@ export class PromosController {
         }
 
         const urlOriginal = product.link;
-        const urlObj = new URL(urlOriginal);
+        const store = detectStore(urlOriginal);
+        const urlWithAffiliate = appendAffiliateParams(urlOriginal, store);
 
-        if (urlObj.hostname.toLowerCase().includes("mercadolivre")) {
-            urlObj.searchParams.set('matt_tool', Env.MATT_TOOL);
-            urlObj.searchParams.set('matt_word', Env.MELI_ID);
-            urlObj.searchParams.set('forceInApp', 'true');
+        let urlEncurt = urlWithAffiliate;
+
+        if (store === 'mercadolivre') {
+            urlEncurt = await EncurtaLinkController(urlWithAffiliate);
         }
-        if (urlObj.hostname.toLowerCase().includes("amazon")) {
-            const asinMatch = urlObj.pathname.match(/(?:dp|gp\/product)\/([A-Z0-9]{10})/i);
-
-            if (asinMatch && asinMatch[1]) {
-                const asin = asinMatch[1].toUpperCase();
-                urlObj.pathname = `/dp/${asin}`;
-                urlObj.search = '';
-            } else {
-                urlObj.searchParams.delete('qid');
-                urlObj.searchParams.delete('sr');
-                urlObj.searchParams.delete('pf_rd_r');
-                urlObj.searchParams.delete('pf_rd_p');
-                urlObj.searchParams.delete('ref_');
-                urlObj.searchParams.delete('sbo');
-                urlObj.searchParams.delete('linkCode');
-                urlObj.searchParams.delete('linkId');
-            }
-
-            urlObj.searchParams.set('tag', Env.AMAZON_TAG);
-        }
-
-        let urlEncurt = urlObj.toString()
-
-        if (urlObj.hostname.toLowerCase().includes("mercadolivre")) urlEncurt = await EncurtaLinkController(urlObj.toString());
 
         lines.push(`*Link com desconto:*`);
         lines.push(urlEncurt);

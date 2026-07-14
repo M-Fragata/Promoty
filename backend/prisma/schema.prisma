@@ -9,15 +9,16 @@ datasource db {
 }
 
 model User {
-  id         String     @id @default(uuid())
-  email      String     @unique
-  name       String
-  password   String
-  avatar     String?
-  provider   String     @default("local") // "local" | "google"
-  providerId String?
-  createdAt  DateTime   @default(now())
-  favorites  Favorite[]
+  id          String        @id @default(uuid())
+  email       String        @unique
+  name        String
+  password    String
+  avatar      String?
+  provider    String        @default("local") // "local" | "google"
+  providerId  String?
+  createdAt   DateTime      @default(now())
+  favorites   Favorite[]
+  createdLinks CreatedLink[]
 
   @@map("users")
 }
@@ -32,6 +33,21 @@ model Favorite {
 
   @@unique([userId, productId])
   @@map("favorites")
+}
+
+model CreatedLink {
+  id           String   @id @default(uuid())
+  userId       String
+  originalUrl  String
+  affiliateUrl String
+  shortUrl     String?
+  store        String
+  clickCount   Int      @default(0)
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("created_links")
 }
 
 model Ofertas {

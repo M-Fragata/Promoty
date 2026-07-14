@@ -228,11 +228,6 @@ export function CreatedLinks() {
                           </a>
                         </div>
 
-                        {/* Original URL */}
-                        <p className="text-xs text-text-secondary truncate mb-2">
-                          {link.originalUrl}
-                        </p>
-
                         {/* Stats & Actions */}
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-text-secondary">

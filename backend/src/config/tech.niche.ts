@@ -4,7 +4,7 @@ import { Env } from "../utils/Envirolment.js";
 export const techNiche: NicheConfig = {
   id: "tech",
   name: "Tech",
-  groupJid: Env.WHATSAPP_GROUP_JID,
+  groupJid: Env.WHATSAPP_GROUP_JID_GAMERS,
   groupInviteLink: Env.WHATSAPP_GROUP_INVITE_GAMERS,
   keywords: [
     "notebook", "celular", "smartphone", "monitor", "placa de vídeo",
@@ -26,21 +26,21 @@ export const techNiche: NicheConfig = {
     "case", "suporte de celular", "suporte celular", "suporte p/ celular", "suporte para celular", "fashion",
     "suporte tablet", "infantil", "rato", "bebedouros", "bebedouro",
     "conversor", "lapela", "ddr2", "ddr3", "suporte gpu",
-    "mulher", "feminino"
+    "mulher", "feminino", "ventilador de m", "mini ventilador"
   ],
   limitedWords: ["Carregador", "smartwatch", "power bank"],
   minDiscount: 35,
   maxPrice: 4500,
   mlCategoryIds: ["MLB1648", "MLB1051"],
   shopeeKeywordGroups: [
-    ["teclado", "mouse"],
-    ["fone", "headset", "microfone"],
-    ["ssd", "nvme", "hd", "pen drive"],
-    ["processador", "memória ram", "placa de vídeo"],
-    ["gabinete gamer", "fonte para pc", "cooler", "water cooler"],
-    ["monitor", "tv", "webcam"],
-    ["celular", "smartphone", "tablet", "notebook"],
-    ["cadeira gamer", "cadeira ergonomica", "cadeira de escritório", "mesa gamer"]
+    ["teclado", "teclado gamer", "teclado bluetooth", "mouse", "mouse gamer", "mouse wireless"],
+    ["fone", "fone bluetooth", "headset", "headset gamer", "microfone", "microfone gamer"],
+    ["ssd", "ssd 1tb", "ssd 500gb", "nvme", "nvme 1tb", "hd externo", "pen drive"],
+    ["processador", "processador amd", "processador intel", "memória ram", "memoria ram", "placa de vídeo", "placa de video"],
+    ["gabinete gamer", "gabinete", "fonte para pc", "fonte gamer", "cooler", "cooler gamer", "water cooler"],
+    ["monitor", "monitor gamer", "monitor 144hz", "tv", "smart tv", "webcam", "webcam gamer"],
+    ["celular", "smartphone", "tablet", "notebook", "notebook gamer"],
+    ["cadeira gamer", "cadeira ergonomica", "cadeira ergonômica", "cadeira de escritório", "mesa gamer", "mesa para computador"]
   ],
   amazonCategoryNodes: ["n:16339927011", "n:16209063011"]
 }

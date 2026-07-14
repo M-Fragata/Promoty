@@ -93,34 +93,34 @@ export const modaFeminina: NicheConfig = {
   ],
   shopeeKeywordGroups: [
     // Grupo 1: Achadinhos de Cozinha & Organização
-    ["organizador acrilico", "pote hermetico", "mop giratorio", "porta temperos rotativo", "organizador geladeira", "tabua de corte"],
+    ["organizador acrilico", "organizador", "pote hermetico", "pote", "mop giratorio", "mop", "porta temperos rotativo", "organizador geladeira", "tabua de corte", "tábua de corte"],
 
     // Grupo 2: Casa & Decoração "Estilo Pinterest"
-    ["luminaria led", "difusor de ambiente", "espelho decorativo", "capa de almofada", "manta", "quadro decorativo", "cortina"],
+    ["luminaria led", "luminária led", "difusor de ambiente", "espelho decorativo", "espelho", "capa de almofada", "manta", "quadro decorativo", "quadro", "cortina"],
 
     // Grupo 3: Cama, Mesa & Banho
-    ["pijama cetim", "jogo de cama", "toalha de banho", "trilho de mesa", "jogo americano", "jogo de toalha"],
+    ["pijama cetim", "pijama", "jogo de cama", "toalha de banho", "toalha", "trilho de mesa", "jogo americano", "jogo de toalha"],
 
     // Grupo 4: Moda Feminina Genérica
-    ["vestido feminino", "jaqueta jeans", "calça alfaiataria", "blazer", "saia", "casaco", "moletom feminino", "shorts feminino"],
+    ["vestido feminino", "vestido", "jaqueta jeans", "calça alfaiataria", "calça", "blazer", "saia", "casaco", "moletom feminino", "moletom", "shorts feminino"],
 
     // Grupo 5: Bolsas & Malas
-    ["bolsa feminina", "mochila feminina", "carteira feminina", "maleta de maquiagem", "necessaire"],
+    ["bolsa feminina", "bolsa", "mochila feminina", "mochila", "carteira feminina", "carteira", "maleta de maquiagem", "necessaire", "bolsa couro"],
 
     // Grupo 6: Calçados
-    ["tênis feminino", "sandália", "chinelo feminino", "sapatilha", "bota", "rasteira"],
+    ["tênis feminino", "tênis", "sandália", "chinelo feminino", "chinelo", "sapatilha", "bota", "rasteira", "mocassim", "scarpin"],
 
     // Grupo 7: Beleza & Skincare
-    ["protetor solar", "hidratante", "sérum", "kit eudora", "kit boticario", "kit natura", "creme para pele"],
+    ["protetor solar", "hidratante", "hidratante facial", "sérum", "sérum facial", "kit eudora", "kit boticario", "kit natura", "creme para pele", "creme facial"],
 
     // Grupo 8: Eletro de Beleza
-    ["secador de cabelo", "chapinha", "babyliss", "escova alisadora", "escova rotativa"],
+    ["secador de cabelo", "secador", "chapinha", "chapinha profissional", "babyliss", "escova alisadora", "escova rotativa", "escova secadora"],
 
-    // Grupo 9: Casa & Móveis (NOVO)
-    ["sofá", "cadeira", "mesa", "estante", "armário", "poltrona", "rack", "gaveteiro", "luminária"],
+    // Grupo 9: Casa & Móveis (REESCRITO - mais específicos)
+    ["sofá retrátil", "sofá", "poltrona conforto", "poltrona", "mesa de jantar", "mesa", "estante organização", "estante", "armário", "armario", "rack tv", "rack", "gaveteiro", "criado mudo", "prateleira"],
 
-    // Grupo 10: Eletrodomésticos (NOVO)
-    ["air fryer", "aspirador", "ventilador", "liquidificador", "cafeteira", "sanduicheira", "microondas", "maquina de lavar"]
+    // Grupo 10: Eletrodomésticos (CORRIGIDO - com variações)
+    ["air fryer", "airfryer", "fritadeira air fryer", "aspirador robô", "aspirador robot", "aspirador portátil", "aspirador", "ventilador", "liquidificador", "cafeteira", "sanduicheira", "microondas", "máquina de lavar", "maquina de lavar"]
   ],
   amazonCategoryNodes: ["n:16339927011", "n:16209063011"]
 }

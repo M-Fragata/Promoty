@@ -97,18 +97,6 @@ export function ProfileSkeleton() {
           </section>
         </div>
       </main>
-
-      {/* MobileNav skeleton */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md border-t border-outline-variant/30 lg:hidden">
-        <div className="flex items-center justify-around h-16">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex flex-col items-center gap-1">
-              <div className="w-6 h-6 rounded bg-surface-container animate-pulse" />
-              <div className="w-8 h-2 rounded bg-surface-container animate-pulse" />
-            </div>
-          ))}
-        </div>
-      </nav>
     </div>
   );
 }

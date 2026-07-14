@@ -26,9 +26,17 @@ export class ShopeePromosController {
     private static counterPagePichau: number = 1
     private static counterPageTerabyte: number = 1
 
-    private static getAllShopeeKeywordGroups(): string[][] {
+    private static getAllShopeeKeywordGroups(niche?: 'tech' | 'casa'): string[][] {
         const niches = getActiveNiches();
 
+        if (niche === 'tech') {
+            return niches.find(n => n.id === "tech")?.shopeeKeywordGroups ?? [];
+        }
+        if (niche === 'casa') {
+            return niches.find(n => n.id === "casa-moda-feminina")?.shopeeKeywordGroups ?? [];
+        }
+
+        // Fallback: mistura todas (crawler antigo)
         const techGroups = niches.find(n => n.id === "tech")?.shopeeKeywordGroups ?? [];
         const casaGroups = niches.find(n => n.id === "casa-moda-feminina")?.shopeeKeywordGroups ?? [];
 
@@ -67,7 +75,8 @@ export class ShopeePromosController {
 
     async GetProducts(req: Request, res: Response) {
 
-        const keywords = ShopeePromosController.getAllShopeeKeywordGroups();
+        const niche = req.query.niche as 'tech' | 'casa' | undefined;
+        const keywords = ShopeePromosController.getAllShopeeKeywordGroups(niche);
 
         try {
 

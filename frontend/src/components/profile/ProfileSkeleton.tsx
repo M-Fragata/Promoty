@@ -1,3 +1,5 @@
+import { MobileNav } from '../layout/MobileNav';
+
 export function ProfileSkeleton() {
   return (
     <div className="min-h-screen bg-app-bg">
@@ -97,6 +99,8 @@ export function ProfileSkeleton() {
           </section>
         </div>
       </main>
+
+      <MobileNav />
     </div>
   );
 }

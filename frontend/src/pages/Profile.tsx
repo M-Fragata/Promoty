@@ -6,12 +6,14 @@ import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/api';
 import { MobileNav } from '../components/layout/MobileNav';
 import { Header } from '../components/layout/Header';
+import { ProfileSkeleton } from '../components/profile/ProfileSkeleton';
 import { clsx } from 'clsx';
 
 export function Profile() {
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [linksCount, setLinksCount] = useState(0);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -24,29 +26,11 @@ export function Profile() {
       return;
     }
 
-    api.getMe()
-      .then((data) => {
-        setCreatedAt(data.createdAt);
-      })
-      .catch(() => {
-        // Ignorar erros
-      });
-
-    api.getFavorites()
-      .then((data) => {
-        setFavoritesCount(data.length);
-      })
-      .catch(() => {
-        // Ignorar erros
-      });
-
-    api.getLinks()
-      .then((data) => {
-        setLinksCount(data.length);
-      })
-      .catch(() => {
-        // Ignorar erros
-      });
+    Promise.all([
+      api.getMe().then((data) => setCreatedAt(data.createdAt)).catch(() => {}),
+      api.getFavorites().then((data) => setFavoritesCount(data.length)).catch(() => {}),
+      api.getLinks().then((data) => setLinksCount(data.length)).catch(() => {}),
+    ]).finally(() => setLoading(false));
   }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
@@ -54,8 +38,8 @@ export function Profile() {
     navigate('/');
   };
 
-  if (!user) {
-    return null;
+  if (loading || !user) {
+    return <ProfileSkeleton />;
   }
 
   return (

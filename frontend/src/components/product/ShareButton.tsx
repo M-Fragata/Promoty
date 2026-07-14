@@ -57,8 +57,8 @@ export function ShareButton({
       type="button"
       onClick={handleShare}
       className={clsx(
-        'flex items-center justify-center rounded-full transition-all duration-200',
-        'active:scale-90 hover:bg-surface-container text-text-secondary hover:text-text-primary',
+        'cursor-pointer flex items-center justify-center rounded-lg border border-card-border transition-all duration-200',
+        'active:scale-90 bg-surface-container-lowest/80 backdrop-blur-sm text-text-secondary hover:text-text-primary',
         sizeStyles[size],
         className
       )}

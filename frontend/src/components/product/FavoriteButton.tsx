@@ -43,8 +43,8 @@ export function FavoriteButton({
       type="button"
       onClick={handleToggle}
       className={clsx(
-        'flex items-center justify-center rounded-full transition-all duration-200',
-        'active:scale-90 hover:bg-surface-container',
+        'cursor-pointer flex items-center justify-center rounded-lg border border-card-border transition-all duration-200',
+        'bg-surface-container-lowest/80 backdrop-blur-sm active:scale-90',
         sizeStyles[size],
         isFavorited
           ? 'text-accent-orange-light'

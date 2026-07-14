@@ -1,15 +1,18 @@
+import type { ReactNode } from 'react';
 import { StoreTag } from '../ui/StoreTag';
 
 interface ProductCardImageProps {
   imageUrl: string | null;
   title: string;
   store: string;
+  children?: ReactNode;
 }
 
 export function ProductCardImage({
   imageUrl,
   title,
   store,
+  children,
 }: ProductCardImageProps) {
   return (
     <div className="relative">
@@ -33,6 +36,13 @@ export function ProductCardImage({
       <div className="absolute -top-4 -left-4 z-10">
         <StoreTag store={store} />
       </div>
+
+      {/* Favorite button — top right */}
+      {children && (
+        <div className="absolute top-2 right-2 z-10">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

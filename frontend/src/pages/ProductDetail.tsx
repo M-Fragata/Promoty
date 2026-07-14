@@ -89,34 +89,20 @@ export function ProductDetail() {
         <div className="flex-1 text-center font-label-bold text-label-bold text-text-primary truncate px-4">
           Detalhes da Oferta
         </div>
-        <ShareButton
-          productTitle={product.title}
-          productLink={product.link}
-          size="md"
-        />
+        <div className="w-10" />
       </header>
 
       {/* Desktop Header */}
       <header className="hidden lg:flex fixed top-0 left-0 right-0 z-40 h-16 bg-app-bg/95 backdrop-blur supports-[backdrop-filter]:bg-app-bg/80 border-b border-card-border">
-        <div className="mx-auto h-full px-4 sm:px-6 lg:px-8 lg:ml-64 w-full max-w-7xl flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-label-bold">Voltar</span>
-            </button>
-          </div>
-          <div className="flex items-center gap-3">
-            <FavoriteButton productId={product.id} size="md" />
-            <ShareButton
-              productTitle={product.title}
-              productLink={product.link}
-              size="md"
-            />
-          </div>
+        <div className="mx-auto h-full px-4 sm:px-6 lg:px-8 lg:ml-64 w-full max-w-7xl flex items-center">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="font-label-bold">Voltar</span>
+          </button>
         </div>
       </header>
 
@@ -138,6 +124,11 @@ export function ProductDetail() {
                   Sem imagem
                 </div>
               )}
+
+              {/* Favorite button - top right */}
+              <div className="absolute top-3 right-3 z-10">
+                <FavoriteButton productId={product.id} size="lg" />
+              </div>
             </div>
 
             {/* Product Details */}
@@ -181,29 +172,23 @@ export function ProductDetail() {
               </div>
 
               {/* Action Buttons */}
-              <div className="mt-auto space-y-4">
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-card-border">
-                  <a
-                    href={product.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 bg-text-primary text-card-bg font-label-bold text-label-bold h-12 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm active:scale-[0.98]"
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    Ir para Loja
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
+              <div className="mt-auto pt-4 border-t border-card-border flex gap-3">
+                <a
+                  href={product.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-text-primary text-card-bg font-label-bold text-label-bold h-12 rounded-lg flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm active:scale-[0.98]"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                  Ir para Loja
+                  <ExternalLink className="w-5 h-5" />
+                </a>
 
-                  {/* Mobile: Favorite & Share buttons */}
-                  <div className="flex gap-2 lg:hidden">
-                    <FavoriteButton productId={product.id} size="lg" />
-                    <ShareButton
-                      productTitle={product.title}
-                      productLink={product.link}
-                      size="lg"
-                    />
-                  </div>
-                </div>
+                <ShareButton
+                  productTitle={product.title}
+                  productLink={product.link}
+                  size="lg"
+                />
               </div>
             </div>
           </section>

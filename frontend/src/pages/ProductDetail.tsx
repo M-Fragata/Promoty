@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Star, Store, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, CreditCard, ExternalLink } from 'lucide-react';
 import { FavoriteButton } from '../components/product/FavoriteButton';
 import { ShareButton } from '../components/product/ShareButton';
 import { RelatedProducts } from '../components/product/RelatedProducts';
 import { Button } from '../components/ui/Button';
+import { StoreTag } from '../components/ui/StoreTag';
 import { formatPrice, calculateDiscount } from '../utils/format';
 import { api } from '../services/api';
 import type { MlProducts } from '../types/product';
@@ -137,36 +138,18 @@ export function ProductDetail() {
                   Sem imagem
                 </div>
               )}
-
-              {/* Flash Sale Badge */}
-              {product.badge && (
-                <div className="absolute top-4 right-4 bg-urgency-bg text-urgency-text font-label-bold text-label-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-sm">
-                  <Star className="w-4 h-4" fill="currentColor" />
-                  {product.badge}
-                </div>
-              )}
             </div>
 
             {/* Product Details */}
             <div className="w-full md:w-1/2 lg:w-3/5 flex flex-col">
-              {/* Category & Title */}
+              {/* Title */}
               <div className="mb-4">
-                <span className="inline-block px-2 py-1 bg-surface-container-high text-text-secondary rounded text-xs font-semibold mb-3 uppercase tracking-wider">
-                  {product.store}
-                </span>
-                <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-text-primary mb-2">
+                <h1 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-text-primary mb-3">
                   {product.title}
                 </h1>
 
-                {/* Store */}
-                <div className="flex items-center gap-3 mt-2">
-                  <div className="flex items-center px-3 py-1 bg-surface-container-low border border-card-border rounded-full">
-                    <Store className="w-4 h-4 text-text-secondary mr-1" />
-                    <span className="font-label-bold text-label-bold text-text-primary">
-                      {product.store}
-                    </span>
-                  </div>
-                </div>
+                {/* Store Tag */}
+                <StoreTag store={product.store} />
               </div>
 
               {/* Price Block */}
@@ -180,9 +163,8 @@ export function ProductDetail() {
                       </span>
                     )}
                     {discount > 0 && (
-                      <span className="bg-accent-green text-accent-green-on font-label-bold text-label-bold px-2 py-0.5 rounded flex items-center">
-                        <span className="material-symbols-outlined text-[14px] mr-1">arrow_downward</span>
-                        {discount}% OFF
+                      <span className="bg-accent-green text-accent-green-on font-label-bold text-label-bold px-2 py-0.5 rounded">
+                        <strong>{discount}% OFF</strong>
                       </span>
                     )}
                   </div>
@@ -191,7 +173,7 @@ export function ProductDetail() {
                   </span>
                   {product.installments && (
                     <div className="text-text-secondary text-sm flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px]">credit_card</span>
+                      <CreditCard className="w-4 h-4" />
                       {product.installments}
                     </div>
                   )}

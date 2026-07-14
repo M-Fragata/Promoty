@@ -7,8 +7,10 @@ import type { NicheConfig } from "../types/niche.js";
 import { getActiveNiches } from "../config/index.js";
 import { dispatchProductToNiches } from "../Services/NicheDispatcher.js";
 import { detectStore, appendAffiliateParams } from "../utils/affiliateUtils.js";
+import { SecondaryFunction } from "../utils/secondaryFunction.js";
 
 const MARGEM_TOLERANCIA = 0.04
+const utils = new SecondaryFunction();
 
 export class PromosController {
 
@@ -16,12 +18,34 @@ export class PromosController {
         const niches = getActiveNiches();
         const matched = dispatchProductToNiches(product, niches);
 
+        console.log(`🔍 [DISPATCH] Produto: "${product.title.substring(0, 50)}..." | Nichos ativos: ${niches.length} | Matched: ${matched.length}`);
+
+        if (matched.length === 0) {
+            console.log(`⚠️ [DISPATCH] Nenhum nicho aceitou o produto. Verificando motivo...`);
+            for (const niche of niches) {
+                const kw = utils.verifyKeyWords(product.title, niche);
+                const bw = utils.verifyBanWords(product.title, niche);
+                const lw = utils.checkLimitedWords(product.title, niche);
+                const disc = utils.verifyDiscount(product.originalPrice, product.price, niche);
+                const price = utils.verifyMaxPrice(product.price, niche);
+                console.log(`  → ${niche.id}: keyword=${kw} banword=${bw} limited=${lw} discount=${disc} price=${price}`);
+            }
+            return;
+        }
+
         for (const niche of matched) {
-            if (!niche.groupJid) continue;
+            console.log(`📤 [DISPATCH] Enviando para niche: ${niche.id} | groupJid: ${niche.groupJid || 'VAZIO!'}`);
+
+            if (!niche.groupJid) {
+                console.log(`❌ [DISPATCH] groupJid vazio! Pulando envio para ${niche.id}`);
+                continue;
+            }
 
             const msg = await this.messageFormat(product, niche);
+            console.log(`📤 [DISPATCH] imageUrl: ${msg.image ? 'OK' : 'NULL!'}`);
 
-            await whatsAppService.sendMessage(niche.groupJid, msg.caption, msg.image, product.id);
+            const result = await whatsAppService.sendMessage(niche.groupJid, msg.caption, msg.image, product.id);
+            console.log(`📤 [DISPATCH] Resultado: ${result ? '✅ Sucesso' : '❌ Falha'}`);
         }
     }
 

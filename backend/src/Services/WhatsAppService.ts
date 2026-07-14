@@ -81,7 +81,10 @@ export class WhatsAppService {
     async sendMessage(jid: string, text: string, imageUrl?: string | null, productId?: string | number): Promise<boolean> {
         return new Promise<boolean>((resolve) => {
 
-            if (!imageUrl) return resolve(false);
+            if (!imageUrl) {
+            console.log(`⚠️ [WhatsApp] Imagem nula para produto ID ${productId}. Ignorando envio.`);
+            return resolve(false);
+        }
 
             if (productId) {
                 const idString = String(productId);

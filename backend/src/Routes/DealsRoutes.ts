@@ -5,5 +5,6 @@ export const dealsRoutes = Router();
 const dealsController = new DealsController();
 
 dealsRoutes.get('/deals', dealsController.getDeals);
+dealsRoutes.get('/deals/:id', dealsController.getDealById);
 dealsRoutes.get('/search', dealsController.search);
 dealsRoutes.get('/live-search', dealsController.liveSearch);

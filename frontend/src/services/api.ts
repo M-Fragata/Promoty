@@ -1,6 +1,6 @@
 import type { MlProducts } from '../types/product';
-import { MlProductsArraySchema } from '../types/product';
-import type { DealsResponse, SearchResponse, PaginationInfo } from '../types/api';
+import { MlProductsArraySchema, MlProductsSchema } from '../types/product';
+import type { DealsResponse, SearchResponse, PaginationInfo, ApiResponse } from '../types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -27,6 +27,14 @@ interface PaginatedResult {
 }
 
 export const api = {
+  async getProductById(id: string): Promise<MlProducts> {
+    const response = await fetchJson<ApiResponse<MlProducts>>(`/api/deals/${id}`);
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Produto não encontrado');
+    }
+    return MlProductsSchema.parse(response.data);
+  },
+
   async getDeals(page: number = 1): Promise<PaginatedResult> {
     const response = await fetchJson<DealsResponse>(`/api/deals?page=${page}`);
     if (!response.success || !response.data) {

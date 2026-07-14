@@ -12,6 +12,28 @@ function getRecentWhere() {
 
 export class DealsController {
 
+  getDealById = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+
+      const product = await prisma.productsMl.findUnique({
+        where: { id },
+      });
+
+      if (!product) {
+        return res.status(404).json({ success: false, error: "Produto não encontrado." });
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: product,
+      });
+    } catch (error: any) {
+      console.error("💥 [DealsController] Erro ao buscar produto:", error);
+      return res.status(500).json({ success: false, error: "Erro interno ao buscar produto." });
+    }
+  };
+
   getDeals = async (req: Request, res: Response) => {
     try {
       const page = Math.max(1, parseInt(req.query.page as string) || 1);

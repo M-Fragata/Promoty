@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
 import { clsx } from 'clsx';
 import { ProductCardImage } from './ProductCardImage';
@@ -11,10 +12,27 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const navigate = useNavigate();
   const { discount, info } = parseBadge(product.badge);
 
+  const handleCardClick = () => {
+    navigate(`/produto/${product.id}`);
+  };
+
   return (
-    <article className="flex flex-col gap-3 rounded-lg bg-card-bg border border-card-border p-3 shadow-sm transition-shadow hover:shadow-md">
+    <article
+      className="flex flex-col gap-3 rounded-lg bg-card-bg border border-card-border p-3 shadow-sm transition-shadow hover:shadow-md cursor-pointer"
+      onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Ver detalhes de ${product.title}`}
+    >
       <ProductCardImage
         imageUrl={product.imageUrl}
         title={product.title}
@@ -38,6 +56,7 @@ export function ProductCard({ product }: ProductCardProps) {
         href={product.link}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
         className={clsx(
           'mt-auto inline-flex items-center justify-center gap-2 w-full h-10 rounded-md text-label-bold font-semibold transition-colors duration-150',
           'bg-text-primary text-card-bg hover:opacity-90 active:opacity-80 shadow-sm',

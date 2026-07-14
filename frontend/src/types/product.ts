@@ -11,20 +11,40 @@ export interface MlProducts {
   link: string;
   store: string;
   installments: string | null;
+  description?: string | null;
+  rating?: number | null;
+  reviewCount?: number | null;
+  shipping?: {
+    free: boolean;
+    estimatedDays?: number | null;
+  } | null;
+  relatedProducts?: MlProducts[];
 }
 
-export const MlProductsSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  price: z.number(),
-  originalPrice: z.number().nullable(),
-  coupon: z.string().nullable(),
-  badge: z.string().nullable(),
-  imageUrl: z.string().nullable(),
-  link: z.string().url(),
-  store: z.string(),
-  installments: z.string().nullable(),
+const ShippingSchema = z.object({
+  free: z.boolean(),
+  estimatedDays: z.number().nullable().optional(),
 });
+
+export const MlProductsSchema: z.ZodType<MlProducts> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    title: z.string(),
+    price: z.number(),
+    originalPrice: z.number().nullable(),
+    coupon: z.string().nullable(),
+    badge: z.string().nullable(),
+    imageUrl: z.string().nullable(),
+    link: z.string().url(),
+    store: z.string(),
+    installments: z.string().nullable(),
+    description: z.string().nullable().optional(),
+    rating: z.number().nullable().optional(),
+    reviewCount: z.number().nullable().optional(),
+    shipping: ShippingSchema.nullable().optional(),
+    relatedProducts: z.array(MlProductsSchema).optional(),
+  })
+);
 
 export type MlProductsArray = MlProducts[];
 

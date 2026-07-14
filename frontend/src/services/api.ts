@@ -137,6 +137,48 @@ export const api = {
     );
     return response.isFavorite;
   },
+
+  // ============================================
+  // LINKS (links criados)
+  // ============================================
+
+  async createLink(url: string): Promise<CreatedLink> {
+    const response = await fetchJson<{ id: string; originalUrl: string; affiliateUrl: string; shortUrl: string | null; store: string; storeLabel: string; clickCount: number; createdAt: string }>(
+      '/api/links',
+      {
+        method: 'POST',
+        body: JSON.stringify({ url }),
+      }
+    );
+    return response as unknown as CreatedLink;
+  },
+
+  async getLinks(): Promise<CreatedLink[]> {
+    const response = await fetchJson<{ links: CreatedLink[] }>('/api/links');
+    return response.links;
+  },
+
+  async deleteLink(id: string): Promise<void> {
+    await fetchJson<{ message: string }>(
+      `/api/links/${id}`,
+      { method: 'DELETE' }
+    );
+  },
 };
+
+// ============================================
+// TYPES (links criados)
+// ============================================
+
+export interface CreatedLink {
+  id: string;
+  originalUrl: string;
+  affiliateUrl: string;
+  shortUrl: string | null;
+  store: string;
+  storeLabel: string;
+  clickCount: number;
+  createdAt: string;
+}
 
 export { API_BASE_URL };

@@ -5,6 +5,7 @@ import { ProductDetail } from './pages/ProductDetail';
 import { Login } from './pages/Login';
 import { Favorites } from './pages/Favorites';
 import { Profile } from './pages/Profile';
+import { CreatedLinks } from './pages/CreatedLinks';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 function App() {
@@ -20,6 +21,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Favorites />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/links-criados"
+            element={
+              <ProtectedRoute>
+                <CreatedLinks />
               </ProtectedRoute>
             }
           />

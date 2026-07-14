@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Heart, MousePointerClick, Sun, Moon, Monitor } from 'lucide-react';
+import { LogOut, Heart, Link2, Sun, Moon, Monitor } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { api } from '../services/api';
@@ -10,13 +10,14 @@ import { clsx } from 'clsx';
 
 export function Profile() {
   const [favoritesCount, setFavoritesCount] = useState(0);
+  const [linksCount, setLinksCount] = useState(0);
   const [createdAt, setCreatedAt] = useState<string | null>(null);
 
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
-  // Carregar dados do usuário e contagem de favoritos
+  // Carregar dados do usuário, favoritos e links
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login', { state: { from: '/perfil' } });
@@ -34,6 +35,14 @@ export function Profile() {
     api.getFavorites()
       .then((data) => {
         setFavoritesCount(data.length);
+      })
+      .catch(() => {
+        // Ignorar erros
+      });
+
+    api.getLinks()
+      .then((data) => {
+        setLinksCount(data.length);
       })
       .catch(() => {
         // Ignorar erros
@@ -114,13 +123,16 @@ export function Profile() {
           <section className="flex flex-col gap-3 mb-6">
             <h2 className="text-label-bold text-text-secondary uppercase tracking-widest pl-2">Atividade</h2>
             <div className="grid grid-cols-2 gap-4">
-              {/* Links Clicked Card */}
-              <div className="bg-card-bg hover:bg-card-bg/80 transition-colors border border-card-border rounded-xl p-5 flex flex-col items-start gap-2 cursor-pointer group shadow-sm hover:shadow-md">
+              {/* Links Created Card */}
+              <div
+                onClick={() => navigate('/links-criados')}
+                className="bg-card-bg hover:bg-card-bg/80 transition-colors border border-card-border rounded-xl p-5 flex flex-col items-start gap-2 cursor-pointer group shadow-sm hover:shadow-md"
+              >
                 <div className="p-3 bg-surface-container-lowest rounded-full shadow-sm text-text-primary mb-2 group-hover:scale-110 transition-transform">
-                  <MousePointerClick className="w-5 h-5" />
+                  <Link2 className="w-5 h-5" />
                 </div>
-                <span className="text-headline-lg-mobile text-text-primary">0</span>
-                <span className="text-body-md text-text-secondary font-medium">Links Clicados</span>
+                <span className="text-headline-lg-mobile text-text-primary">{linksCount}</span>
+                <span className="text-body-md text-text-secondary font-medium">Links Criados</span>
               </div>
 
               {/* Favorites Card */}

@@ -122,6 +122,60 @@ export const modaFeminina: NicheConfig = {
     // Grupo 10: Eletrodomésticos (CORRIGIDO - com variações)
     ["air fryer", "airfryer", "fritadeira air fryer", "aspirador robô", "aspirador robot", "aspirador portátil", "aspirador", "ventilador", "liquidificador", "cafeteira", "sanduicheira", "microondas", "máquina de lavar", "maquina de lavar"]
   ],
+  shopeeCategoriesGroup: [
+    // Grupo 0: Móveis
+    [
+      { id: 101166, name: 'Almofadas' },
+      { id: 101171, name: 'Bancos, Cadeiras e Banquetas' },
+      { id: 101172, name: 'Sofás' },
+      { id: 101173, name: 'Armários e Gabinetes' },
+      { id: 101174, name: 'Prateleiras e Racks' },
+    ],
+    // Grupo 1: Organizadores
+    [
+      { id: 101253, name: 'Cabides' },
+      { id: 101254, name: 'Caixas, Bolsas e Cestas' },
+      { id: 101257, name: 'Sacos e Cestos de Roupa' },
+      { id: 101259, name: 'Organizadores de Guarda-Roupas' },
+    ],
+    // Grupo 2: Fragrância da Casa
+    [
+      { id: 101127, name: 'Purificadores de Ar' },
+      { id: 101128, name: 'Óleos Essenciais' },
+      { id: 101129, name: 'Difusores' },
+    ],
+    // Grupo 3: Roupas Femininas
+    [
+      { id: 100350, name: 'Blusas' },
+      { id: 100352, name: 'Calças' },
+      { id: 100353, name: 'Shorts' },
+      { id: 100354, name: 'Saias' },
+      { id: 100355, name: 'Vestidos' },
+      { id: 100356, name: 'Jeans' },
+      { id: 100380, name: 'Lingerie e Roupa Íntima' },
+    ],
+    // Grupo 4: Acessórios de Moda
+    [
+      { id: 100021, name: 'Anéis' },
+      { id: 100022, name: 'Brincos' },
+      { id: 100023, name: 'Pulseiras' },
+      { id: 100024, name: 'Colares' },
+    ],
+    // Grupo 5: Beleza
+    [
+      { id: 101651, name: 'Espelhos' },
+      { id: 101653, name: 'Pincéis de Maquiagem' },
+      { id: 101654, name: 'Esponjas e Aplicadores' },
+      { id: 101661, name: 'Massagem Facial' },
+      { id: 101662, name: 'Limpeza Facial' },
+    ],
+    // Grupo 6: Eletrodomésticos
+    [
+      { id: 100175, name: 'Ferros de Passar e Vaporizadores' },
+      { id: 100177, name: 'Aspiradores de Pó' },
+      { id: 100458, name: 'Purificadores e Umidificador de Ar' },
+    ],
+  ],
   amazonCategoryNodes: ["n:16339927011", "n:16209063011"]
 }
 

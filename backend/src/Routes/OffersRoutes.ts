@@ -13,5 +13,6 @@ offersRoutes.post('/shopee', promosController.processProductsShopee)
 
 //Chamada na API da shopee
 offersRoutes.get('/shopee/products', shopeePromoController.GetProducts)
+offersRoutes.get('/shopee/categories', shopeePromoController.GetByCategories)
 offersRoutes.get('/shopee/pichau', shopeePromoController.GetPichauShop)
 offersRoutes.get('/shopee/terabyte', shopeePromoController.GetTerabyteShop)

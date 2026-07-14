@@ -1,3 +1,8 @@
+export interface ShopeeCategory {
+  id: number
+  name: string
+}
+
 export interface NicheConfig {
   id: string
   name: string
@@ -9,6 +14,7 @@ export interface NicheConfig {
   minDiscount: number
   maxPrice: number
   shopeeKeywordGroups: string[][]
+  shopeeCategoriesGroup: ShopeeCategory[][]
   mlCategoryIds: string[]
   amazonCategoryNodes: string[]
 }

@@ -42,5 +42,6 @@ export const techNiche: NicheConfig = {
     ["celular", "smartphone", "tablet", "notebook", "notebook gamer"],
     ["cadeira gamer", "cadeira ergonomica", "cadeira ergonômica", "cadeira de escritório", "mesa gamer", "mesa para computador"]
   ],
+  shopeeCategoriesGroup: [],
   amazonCategoryNodes: ["n:16339927011", "n:16209063011"]
 }

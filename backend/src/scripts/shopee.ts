@@ -11,7 +11,7 @@ async function executarRobo() {
             console.log(`🌐 [Shopee] Iniciando varredura para niche: ${NICHE}...`);
             const tempoInicio = Date.now();
 
-            const response = await fetch(`http://localhost:3333/ofertas/shopee/products?niche=${NICHE}`, {
+            const response = await fetch(`http://localhost:3333/ofertas/shopee/categories?niche=${NICHE}`, {
                 method: "GET",
                 headers: { "Content-type": "application/json" }
             });

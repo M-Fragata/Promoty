@@ -23,6 +23,7 @@ interface Produto {
 export class ShopeePromosController {
 
     private static counterShopee: number = 0
+    private static counterCategories: number = 0
     private static counterPagePichau: number = 1
     private static counterPageTerabyte: number = 1
 
@@ -353,6 +354,114 @@ export class ShopeePromosController {
 
         } catch (error) {
             console.error("Erro crítico no loop:", error);
+            return res.status(500).json({ error: "Erro interno no servidor" });
+        }
+    }
+
+    async GetByCategories(req: Request, res: Response) {
+        const nicheParam = req.query.niche as string | undefined;
+        const niches = getActiveNiches();
+        const nicheId = nicheParam === 'casa' ? 'casa-moda-feminina' : nicheParam;
+        const categoryGroups = niches.find(n => n.id === nicheId)?.shopeeCategoriesGroup ?? [];
+
+        if (categoryGroups.length === 0) {
+            return res.status(400).json({ error: `Nenhuma categoria encontrada para o nicho: ${nicheParam}` });
+        }
+
+        if (ShopeePromosController.counterCategories >= categoryGroups.length) {
+            ShopeePromosController.counterCategories = 0;
+        }
+
+        const group = categoryGroups[ShopeePromosController.counterCategories]!;
+        const groupIndex = ShopeePromosController.counterCategories;
+        let totalEnviados = 0;
+
+        try {
+            for (const category of group) {
+                const timeStamp = Math.floor(Date.now() / 1000);
+
+                const payload = {
+                    query: `query {
+                        productOfferV2(productCatId: ${category.id}, limit: 20, sortType: 2) {
+                            nodes {
+                                itemId
+                                productName
+                                priceMin
+                                priceMax
+                                offerLink
+                                productLink
+                                imageUrl
+                                commissionRate
+                                priceDiscountRate
+                            }
+                        }
+                    }`
+                };
+
+                const payloadString = JSON.stringify(payload);
+                const signatureFactor = Env.SHOPEE_API_ID + timeStamp + payloadString + Env.SHOPEE_API_PASSWORD;
+                const signature = crypto.createHash('sha256').update(signatureFactor).digest('hex');
+
+                const response = await fetch('https://open-api.affiliate.shopee.com.br/graphql', {
+                    method: "POST",
+                    headers: {
+                        "Content-type": "application/json",
+                        "Authorization": `SHA256 Credential=${Env.SHOPEE_API_ID}, Timestamp=${timeStamp}, Signature=${signature}`
+                    },
+                    body: payloadString
+                });
+
+                if (!response.ok) {
+                    console.error(`⚠️ [Shopee Categories] Erro na categoria [${category.name}]: Status ${response.status}`);
+                    await sleep(2000);
+                    continue;
+                }
+
+                const result = await response.json();
+                const data = result.data?.productOfferV2?.nodes || [];
+
+                const produtos = data.reduce((acc: any[], produto: Produto) => {
+                    const priceNumber = Number(produto.priceMin);
+                    const priceOriginalNumber = priceNumber / (1 - produto.priceDiscountRate / 100);
+
+                    if (!ShopeePromosController.productMatchesAnyNiche(produto.productName, produto.priceDiscountRate, priceNumber)) return acc;
+
+                    acc.push({
+                        id: produto.itemId.toString(),
+                        title: produto.productName,
+                        price: parseFloat(priceNumber.toFixed(2)),
+                        originalPrice: parseFloat(priceOriginalNumber.toFixed(2)),
+                        coupon: null,
+                        badge: (`${produto.priceDiscountRate}% OFF`),
+                        imageUrl: produto.imageUrl,
+                        link: produto.offerLink,
+                        store: "Shopee",
+                        installments: null
+                    });
+
+                    return acc;
+                }, []);
+
+                if (produtos.length > 0) {
+                    shopeeController.processProductsShopee(produtos);
+                    totalEnviados += produtos.length;
+                    console.log(`🚀 [Shopee Categories] Grupo ${groupIndex} - Categoria "${category.name}": ${produtos.length} produtos.`);
+                } else {
+                    console.log(`♻️ [Shopee Categories] Grupo ${groupIndex} - Categoria "${category.name}": sem ofertas.`);
+                }
+
+                await sleep(2000);
+            }
+
+            ShopeePromosController.counterCategories++;
+
+            console.log(`✅ [Shopee Categories] Grupo ${groupIndex} finalizado. Total: ${totalEnviados} produtos.`);
+
+            return res.status(200).json({ success: true, total: totalEnviados });
+
+        } catch (error) {
+            console.error(`❌ [Shopee Categories] Erro no grupo ${groupIndex}:`, error);
+            ShopeePromosController.counterCategories++;
             return res.status(500).json({ error: "Erro interno no servidor" });
         }
     }

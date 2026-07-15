@@ -453,7 +453,6 @@ export class AccesWeb {
             // Verifica se precisa retry de grupo com CAPTCHA
             if (this.captchaRetryPending && this.lastCaptchaGroupIndex === this.contadorAmazon) {
                 console.log(`🔄 [Amazon] Retry do grupo ${this.contadorAmazon} (CAPTCHA anterior)...`);
-                this.captchaRetryPending = false;
             }
 
             const group: string[] = this.urlsAmazon[this.contadorAmazon]!
@@ -644,7 +643,11 @@ export class AccesWeb {
             console.error("❌ Erro catastrófico na Amazon:", error);
         } finally {
             await browser.close();
-            this.contadorAmazon++
+
+            // Só incrementa se não tem retry pendente (CAPTCHA)
+            if (!this.captchaRetryPending) {
+                this.contadorAmazon++
+            }
 
             if (this.contadorAmazon >= this.urlsAmazon.length) {
                 this.contadorAmazon = 0;

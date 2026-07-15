@@ -6,8 +6,6 @@ import { TakePrintScreenService } from './TelegramService.js';
 
 import { SecondaryFunction } from "../utils/secondaryFunction.js"
 import { getActiveNiches } from "../config/index.js"
-import { techMlUrls } from "../config/tech.ml.js"
-import { casaMlUrls } from "../config/casa.ml.js"
 
 chromium.use(stealthPlugin());
 
@@ -49,15 +47,24 @@ export class AccesWeb {
     private static readonly BASE_URL_GROUPS = 5
     private contadorML: number = 0
     private urlsMl: string[][]
+    private contadorAmazon: number = 0
+    private urlsAmazon: string[][]
 
     constructor(nicheFilter?: 'tech' | 'casa') {
-        if (nicheFilter === 'tech') {
-            this.urlsMl = techMlUrls;
-        } else if (nicheFilter === 'casa') {
-            this.urlsMl = casaMlUrls;
+        const niches = getActiveNiches();
+        const niche = niches.find(n =>
+            nicheFilter === 'tech' ? n.id === 'tech' :
+            nicheFilter === 'casa' ? n.id === 'casa-moda-feminina' :
+            true
+        );
+
+        if (niche) {
+            this.urlsMl = niche.mlUrls;
+            this.urlsAmazon = niche.amazonUrls;
         } else {
             // Fallback: todas as URLs (crawler antigo)
-            this.urlsMl = [...techMlUrls, ...casaMlUrls];
+            this.urlsMl = niches.flatMap(n => n.mlUrls);
+            this.urlsAmazon = niches.flatMap(n => n.amazonUrls);
         }
     }
 
@@ -411,12 +418,7 @@ export class AccesWeb {
     // ================
     // Bloco Amazon
     // ================
-    private contadorAmazon: number = 0
-    private URLsAmazon: string[][] = [
-        ["https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=1&qid=1780962721&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_1",
-            "https://www.amazon.com.br/s?i=electronics&rh=n%3A16209063011%2Cp_n_deal_type%3A23565492011&dc&ds=v1%3AM7qKaAQFjtAAj0anALEbfRkWNv96M0a9N9Z4wPaYslI&page=1&qid=1781002007&rnid=23565491011&ref=sr_nr_p_n_deal_type_3",]
-    ]
-    private urlDynamic: string[] = [] //URL dinamica
+    private static readonly MAX_AMAZON_PAGES = 4
 
     async AcessAmazon(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
         const browser = await chromium.launch({
@@ -435,15 +437,8 @@ export class AccesWeb {
         });
 
         const page = await context.newPage();
-        let urlCounter = this.URLsAmazon.length - 1;
-
-        if (this.contadorAmazon > urlCounter) {
-            this.contadorAmazon = 0;
-            if (this.URLsAmazon.length > 1) this.URLsAmazon.length = 1;
-        }
 
         try {
-
             // Bloqueio de recursos desnecessários (Performance)
             await page.route('**/*', (route) => {
                 if (['stylesheet', 'font', 'image'].includes(route.request().resourceType())) {
@@ -453,32 +448,14 @@ export class AccesWeb {
                 }
             });
 
-            let URLsGroup: string[] = this.URLsAmazon[this.contadorAmazon]!
+            const group: string[] = this.urlsAmazon[this.contadorAmazon]!
 
-            for (let i = 0; i < URLsGroup.length; i++) {
+            for (let i = 0; i < group.length; i++) {
 
-                utils.resetWordsAlreadyUsed()//Resetar quantidade de palavras já usadas
+                utils.resetWordsAlreadyUsed()
 
                 const startTime = Date.now()
-
-                const URLAmazon = URLsGroup[i]!;
-                const urlObj = new URL(URLAmazon)
-                urlObj.searchParams.set('page', (this.contadorAmazon + 2).toString())
-
-                this.urlDynamic.push(urlObj.toString())
-
-                if (this.urlDynamic.length === URLsGroup.length) {
-                    this.URLsAmazon.push([...this.urlDynamic])
-                    await TakePrintScreenService({
-                        page: page,
-                        produtosLength: this.URLsAmazon.length,
-                        store: "Amazon",
-                        status: "Novo Array de URL Gerado",
-                        tempoExecucao: 0,
-                        url: `${this.urlDynamic[0]} e ${this.urlDynamic[1]}`
-                    })
-                    this.urlDynamic.splice(0, this.urlDynamic.length)
-                }
+                const URLAmazon = group[i]!;
 
                 try {
                     await page.goto(URLAmazon, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -505,8 +482,8 @@ export class AccesWeb {
 
                             continue;
                         }
-                        this.contadorAmazon++;
-                        console.log(`📦 Fim dos produtos. Avançando para a próxima categoria.`);
+
+                        console.log(`📦 Fim dos produtos.`);
 
                         await TakePrintScreenService({
                             page: page,
@@ -517,7 +494,7 @@ export class AccesWeb {
                             url: URLAmazon
                         })
 
-                        continue; // Sai do método para o próximo ciclo
+                        continue;
                     }
 
                     const productsPage: MlProducts[] = [];
@@ -527,16 +504,12 @@ export class AccesWeb {
                             const id = await card.getAttribute('data-asin');
                             if (!id) continue;
 
-                            // Título
                             const titleEl = await card.$('h2');
                             const title = (await titleEl?.innerText()) || "";
                             if (!titleMatchesAnyNiche(title) || !utils.checkLimitedWords(title)) continue
 
-
-                            // Preços (Amazon geralmente tem: [Atual, Original])
                             const priceEls = await card.$$('.a-price .a-offscreen');
 
-                            // Função auxiliar inline para garantir a padronização
                             const formatPrice = (text: string): number => {
                                 const val = parseFloat(text.replace(/[^\d,]/g, '').replace(',', '.'));
                                 return isNaN(val) ? 0 : Number(val.toFixed(2));
@@ -548,49 +521,31 @@ export class AccesWeb {
                             let originalPrice: number | null = null;
                             if (priceEls.length > 1) {
                                 const rawOriginal = await priceEls[1]!.innerText();
-                                // Verifica se rawOriginal não é vazio/null antes de processar
                                 if (rawOriginal) {
                                     originalPrice = formatPrice(rawOriginal);
                                 }
                             }
                             if (!originalPrice) continue
 
-                            // Verifica se o produto atende os critérios de pelo menos um nicho
                             if (!productMatchesAnyNiche(title, originalPrice, cleanPrice)) continue;
 
                             let badge: String | null = utils.GetDiscount(originalPrice, cleanPrice)
                             if (!badge) badge = null
 
-                            //Parcelamento
                             let installments: string | null = null;
                             try {
-                                // Na Amazon, o preço e o parcelamento vivem dentro do price-recipe
                                 const recipeElement = await card.$('div[data-cy="price-recipe"]');
 
                                 if (recipeElement) {
-                                    // 1. Limpeza: substitui quebras de linha e múltiplos espaços por um espaço simples
                                     let fullText = (await recipeElement.innerText()).replace(/\s+/g, ' ').trim();
-
-                                    // 2. Regex robusto: 
-                                    // (em até \d+x de\s+R\$\s*[\d,]+) -> Captura o bloco "em até Xx de R$ XX,XX"
-                                    // .*?                             -> Ignora qualquer sujeira/preço repetido que venha depois
-                                    // sem juros                       -> Garante que só pegamos parcelas sem juros
                                     const match = fullText.match(/(em até \d+x de\s+R\$\s*[\d,]+).*?sem juros/i);
 
                                     if (match) {
-                                        // match[1] é algo como "em até 3x de R$ 33.29"
-                                        let installmentPart = match[1];
-
-                                        // 1. Limpeza e Formatação
-                                        // O 'g' no final da regex significa "global" (remove todas as ocorrências)
-                                        // O 'i' significa "case insensitive"
-                                        installmentPart = installmentPart!
-                                            .replace(/em até | de/gi, "") // Remove "em até " e " de "
-                                            .replace(',', '.');           // Garante que é ponto decimal
-
-                                        // 4. Monta o formato final
+                                        let installmentPart = match[1]!;
+                                        installmentPart = installmentPart
+                                            .replace(/em até | de/gi, "")
+                                            .replace(',', '.');
                                         installments = `${installmentPart} s/ juros`;
-
                                     } else {
                                         installments = null;
                                     }
@@ -604,7 +559,7 @@ export class AccesWeb {
                                 title: title.trim(),
                                 price: isNaN(cleanPrice) ? 0 : cleanPrice,
                                 originalPrice: isNaN(originalPrice || 0) ? null : originalPrice,
-                                coupon: null, // Amazon cupons geralmente aparecem como badge ou text
+                                coupon: null,
                                 badge: badge,
                                 imageUrl: await (await card.$('img.s-image'))?.getAttribute('src') || null,
                                 link: 'https://www.amazon.com.br' + (await (await card.$('a.a-link-normal'))?.getAttribute('href') || ""),
@@ -627,11 +582,26 @@ export class AccesWeb {
                             tempoExecucao: duration,
                             url: URLAmazon
                         })
-
                     }
 
                 } catch (err) {
-                    console.error(`❌ Erro na URL Amazon: ${URL}`, err);
+                    console.error(`❌ Erro na URL Amazon: ${URLAmazon}`, err);
+                }
+            }
+
+            // Gera grupo da próxima página se não atingiu o limite
+            if (group.length > 0) {
+                const firstUrl = new URL(group[0]!);
+                const currentPage = parseInt(firstUrl.searchParams.get('page') || '1');
+
+                if (currentPage < AccesWeb.MAX_AMAZON_PAGES) {
+                    const nextPageGroup = group.map(url => {
+                        const obj = new URL(url);
+                        obj.searchParams.set('page', (currentPage + 1).toString());
+                        return obj.toString();
+                    });
+                    this.urlsAmazon.push(nextPageGroup);
+                    console.log(`📄 [Amazon] Grupo page ${currentPage + 1} adicionado à fila.`);
                 }
             }
 
@@ -640,9 +610,10 @@ export class AccesWeb {
         } finally {
             await browser.close();
             this.contadorAmazon++
-            if (this.URLsAmazon.length > 50) {
-                // Mantém apenas os últimos 50 registros para não estourar a memória
-                this.URLsAmazon = this.URLsAmazon.slice(-50);
+
+            if (this.contadorAmazon >= this.urlsAmazon.length) {
+                this.contadorAmazon = 0;
+                console.log(`🔄 [Amazon] Ciclo reiniciado.`);
             }
         }
     }

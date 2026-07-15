@@ -79,7 +79,7 @@ export const modaFeminina: NicheConfig = {
     // Outros
     "infantil", "pet", "cachorro", "gato", "bebedouro pet"
   ],
-  limitedWords: ["air fryer"],
+  limitedWords: [""],
   minDiscount: 30,
   maxPrice: 4500,
   mlCategoryIds: [
@@ -90,6 +90,33 @@ export const modaFeminina: NicheConfig = {
     "MLB1246", // Beleza
     "MLB149036", // Eletrodomésticos de Cozinha
     "MLB11769", // Perfumes
+  ],
+  mlUrls: [
+    // Lote 0: Casa, Móveis e Decoração (p1, p2)
+    [
+      "https://www.mercadolivre.com.br/ofertas?category=MLB1579&page=1&promotion_type=lightning",
+      "https://www.mercadolivre.com.br/ofertas?category=MLB1579&page=2&promotion_type=lightning",
+    ],
+    // Lote 1: Moda Feminina (p1, p2)
+    [
+      "https://www.mercadolivre.com.br/ofertas?category=MLB1430&page=1&promotion_type=lightning",
+      "https://www.mercadolivre.com.br/ofertas?category=MLB1430&page=2&promotion_type=lightning",
+    ],
+    // Lote 2: Moda Feminina (p3) + Eletrodomésticos (p1)
+    [
+      "https://www.mercadolivre.com.br/ofertas?category=MLB1430&page=3&promotion_type=lightning",
+      "https://www.mercadolivre.com.br/ofertas?category=MLB5726&page=1&promotion_type=lightning",
+    ],
+    // Lote 3: Eletrodomésticos (p2) + Beleza (p1)
+    [
+      "https://www.mercadolivre.com.br/ofertas?category=MLB5726&page=2&promotion_type=lightning",
+      "https://www.mercadolivre.com.br/ofertas?category=MLB1246&page=1&promotion_type=lightning",
+    ],
+    // Lote 4: Ofertas do Dia
+    [
+      "https://www.mercadolivre.com.br/ofertas?category=MLB1579&container_id=MLB779362-1&promotion_type=deal_of_the_day",
+      "https://www.mercadolivre.com.br/ofertas?category=MLB1430&container_id=MLB779362-1&promotion_type=deal_of_the_day",
+    ],
   ],
   shopeeKeywordGroups: [
     // Grupo 1: Achadinhos de Cozinha & Organização
@@ -176,7 +203,34 @@ export const modaFeminina: NicheConfig = {
       { id: 100458, name: 'Purificadores e Umidificador de Ar' },
     ],
   ],
-  amazonCategoryNodes: ["n:16339927011", "n:16209063011"]
+  amazonCategoryNodes: ["n:16191000011", "n:17365811011", "n:16194414011", "n:16522082011"],
+  amazonUrls: [
+    // Lote 0: Casa - Móveis (p1, p2)
+    [
+      "https://www.amazon.com.br/s?i=home&rh=n%3A16191000011%2Cn%3A17100530011%2Cp_n_deal_type%3A23565493011&dc&page=1",
+      "https://www.amazon.com.br/s?i=home&rh=n%3A16191000011%2Cn%3A17100530011%2Cp_n_deal_type%3A23565493011&dc&page=2",
+    ],
+    // Lote 1: Casa - Cozinha + Decoração
+    [
+      "https://www.amazon.com.br/s?i=home&rh=n%3A16191000011%2Cn%3A23783015011%2Cp_n_deal_type%3A23565493011&dc&page=1",
+      "https://www.amazon.com.br/s?i=home&rh=n%3A16191000011%2Cn%3A17100531011%2Cp_n_deal_type%3A23565493011&dc&page=1",
+    ],
+    // Lote 2: Moda Feminina (p1, p2)
+    [
+      "https://www.amazon.com.br/s?i=fashion&rh=n%3A17365811011%2Cn%3A17681969011%2Cp_n_deal_type%3A23565493011&dc&page=1",
+      "https://www.amazon.com.br/s?i=fashion&rh=n%3A17365811011%2Cn%3A17681969011%2Cp_n_deal_type%3A23565493011&dc&page=2",
+    ],
+    // Lote 3: Beleza - Perfumes + Maquiagem
+    [
+      "https://www.amazon.com.br/s?i=beauty&rh=n%3A16194414011%2Cn%3A16754347011%2Cp_n_deal_type%3A23565493011&dc&page=1",
+      "https://www.amazon.com.br/s?i=beauty&rh=n%3A16194414011%2Cn%3A16754350011%2Cp_n_deal_type%3A23565493011&dc&page=1",
+    ],
+    // Lote 4: Eletrodomésticos (p1, p2)
+    [
+      "https://www.amazon.com.br/s?i=appliances&rh=n%3A16522082011%2Cp_n_deal_type%3A23565493011&dc&page=1",
+      "https://www.amazon.com.br/s?i=appliances&rh=n%3A16522082011%2Cp_n_deal_type%3A23565493011&dc&page=2",
+    ],
+  ],
 }
 
 /*

@@ -16,5 +16,7 @@ export interface NicheConfig {
   shopeeKeywordGroups: string[][]
   shopeeCategoriesGroup: ShopeeCategory[][]
   mlCategoryIds: string[]
+  mlUrls: string[][]
   amazonCategoryNodes: string[]
+  amazonUrls: string[][]
 }

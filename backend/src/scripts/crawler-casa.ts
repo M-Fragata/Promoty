@@ -10,10 +10,10 @@ async function executarRobo() {
 
     // Definição das tarefas do nicho Casa & Moda Feminina
     // NOTA: Pichau e Terabyte são lojas Tech, NÃO são usadas neste crawler
-    // NOTA: Amazon não tem categorias de Casa/Moda ainda
     const tarefas: Array<() => any> = [
         executShopeeKeywords,   // 1º Shopee (API Rápida - Keywords Casa/Moda)
         executMercadoLivre,     // 2º Mercado Livre (Playwright - Categorias Casa/Moda)
+        executAmazon,           // 3º Amazon (Playwright - Categorias Casa/Moda)
     ];
 
     let indiceTarefaAtual = 0;
@@ -112,6 +112,42 @@ function isHorarioComercial(): boolean {
     if (hours >= 0 && hours < 7) return false;
 
     return true
+}
+
+// 🟠 TAREFA 3: AMAZON CRAWLER (Casa/Moda)
+async function executAmazon() {
+    try {
+        console.log("📦 [Casa/Amazon] Iniciando varredura com fluxo assíncrono...");
+        const tempoInicioAmazon = Date.now();
+
+        await scraper.AcessAmazon(async (produtosParciais) => {
+
+            console.log(`⚡ [Casa/Amazon] Lote de ${produtosParciais.length} recebido! Enviando para API local...`);
+
+            try {
+                const response = await fetch("http://localhost:3333/ofertas/amazon", {
+                    method: "POST",
+                    headers: { "Content-type": "application/json" },
+                    body: JSON.stringify(produtosParciais)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`${response.status} - ${response.statusText}`);
+                }
+
+                console.log(`✅ [Casa/Amazon] Lote de ${produtosParciais.length} produtos processado com sucesso!`);
+            } catch (err: any) {
+                console.error("❌ [Casa/Amazon] Erro ao enviar lote parcial para a API:", err.message);
+            }
+        });
+
+        const tempoFimAmazon = Date.now();
+        const tempoTotalAmazon = ((tempoFimAmazon - tempoInicioAmazon) / 1000).toFixed(2);
+        console.log(`⏱️ [Casa/Amazon] Navegador finalizou todas as URLs em ${tempoTotalAmazon} segundos!`);
+
+    } catch (error) {
+        console.error("❌ [Casa/Amazon] Falha crítica no teste principal:", error);
+    }
 }
 
 //Chamada para iniciar o script

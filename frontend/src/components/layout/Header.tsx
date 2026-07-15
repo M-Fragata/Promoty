@@ -63,7 +63,7 @@ export function Header() {
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="hidden lg:flex p-2 rounded-lg hover:bg-surface-container-high transition-colors text-text-primary"
+                className="cursor-pointer hidden lg:flex p-2 rounded-lg hover:bg-surface-container-high transition-colors text-text-primary"
                 aria-label="Menu"
               >
                 {isMenuOpen ? (
@@ -98,7 +98,7 @@ export function Header() {
                     type="button"
                     onClick={() => handleNavClick(path, requiresAuth)}
                     className={clsx(
-                      'flex items-center gap-3 px-4 py-3 transition-colors duration-150 w-full text-left',
+                      'cursor-pointer flex items-center gap-3 px-4 py-3 transition-colors duration-150 w-full text-left',
                       isActive
                         ? 'text-brand bg-surface-container-low'
                         : 'text-text-primary hover:bg-surface-container-low'

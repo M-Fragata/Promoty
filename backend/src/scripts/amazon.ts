@@ -5,6 +5,7 @@ const delay = (minutos: number) => new Promise(resolve => setTimeout(resolve, mi
 const TimeBetweenRunsDia = 5; // 5 minutos para teste (produção você ajusta para 30)
 const timeBetweensRunsMadrugada = 180; // 3 horas
 
+// casa || tech
 const NICHE = 'casa'
 
 async function executarRobo() {

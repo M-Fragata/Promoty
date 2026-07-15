@@ -16,7 +16,7 @@ export const techNiche: NicheConfig = {
     "cadeira de escritório", "mesa gamer", "power bank", "cabo usb",
     "carregador portátil", "suporte para notebook", "microfone",
     "filtro de linha", "no-break", "pen drive", "cartão de memória",
-    "nvme", "water cooler"
+    "nvme", "water cooler", "whey", "creatina"
   ],
   banwords: [
     "capa", "capinha", "pés", "ipad", "cabo smartwatch",

@@ -49,6 +49,8 @@ export class AccesWeb {
     private urlsMl: string[][]
     private contadorAmazon: number = 0
     private urlsAmazon: string[][]
+    private captchaRetryPending = false;
+    private lastCaptchaGroupIndex = -1;
 
     constructor(nicheFilter?: 'tech' | 'casa') {
         const niches = getActiveNiches();
@@ -448,7 +450,15 @@ export class AccesWeb {
                 }
             });
 
+            // Verifica se precisa retry de grupo com CAPTCHA
+            if (this.captchaRetryPending && this.lastCaptchaGroupIndex === this.contadorAmazon) {
+                console.log(`🔄 [Amazon] Retry do grupo ${this.contadorAmazon} (CAPTCHA anterior)...`);
+                this.captchaRetryPending = false;
+            }
+
             const group: string[] = this.urlsAmazon[this.contadorAmazon]!
+
+            let groupSuccessCount = 0;
 
             for (let i = 0; i < group.length; i++) {
 
@@ -467,9 +477,20 @@ export class AccesWeb {
                     if (cards.length === 0) {
                         const duration = (Date.now() - startTime) / 1000
 
-                        const captcha = await page.locator('img#d')
-                        if (captcha) {
-                            console.warn("⚠️ Captcha (Cachorro) detectado! Pulando esta URL específica...");
+                        const captchaDog = await page.locator('img#d').count();
+                        const captchaForm = await page.locator('form[action*="validateCaptcha"]').count();
+                        const isCaptcha = captchaDog > 0 || captchaForm > 0;
+
+                        if (isCaptcha) {
+                            // Se já é retry e ainda tem CAPTCHA, pula grupo
+                            if (this.captchaRetryPending && this.lastCaptchaGroupIndex === this.contadorAmazon) {
+                                console.warn(`⚠️ [Amazon] CAPTCHA persistente no grupo ${this.contadorAmazon}. Pulando...`);
+                                this.captchaRetryPending = false;
+                                this.contadorAmazon++;
+                                break;
+                            }
+
+                            console.warn("⚠️ [Amazon] CAPTCHA (Cachorro) detectado! Parando grupo...");
 
                             await TakePrintScreenService({
                                 page: page,
@@ -480,7 +501,11 @@ export class AccesWeb {
                                 url: URLAmazon
                             })
 
-                            continue;
+                            // Marca que precisa retry neste grupo
+                            this.captchaRetryPending = true;
+                            this.lastCaptchaGroupIndex = this.contadorAmazon;
+
+                            break; // ← Para o grupo INTEIRO, não apenas esta URL
                         }
 
                         console.log(`📦 Fim dos produtos.`);
@@ -571,6 +596,7 @@ export class AccesWeb {
                     }
 
                     if (productsPage.length > 0) {
+                        groupSuccessCount++;
                         onPageScraped?.(productsPage);
 
                         const duration = (Date.now() - startTime) / 1000
@@ -589,8 +615,15 @@ export class AccesWeb {
                 }
             }
 
+            // Delay entre grupos (apenas se não teve CAPTCHA)
+            if (!this.captchaRetryPending && this.urlsAmazon.length > 1) {
+                const delayBetweenGroups = 10000 + Math.random() * 10000; // 10-20s
+                console.log(`⏳ [Amazon] Aguardando ${(delayBetweenGroups / 1000).toFixed(0)}s antes do próximo grupo...`);
+                await new Promise(resolve => setTimeout(resolve, delayBetweenGroups));
+            }
+
             // Gera grupo da próxima página se não atingiu o limite
-            if (group.length > 0) {
+            if (groupSuccessCount > 0 && group.length > 0) {
                 const firstUrl = new URL(group[0]!);
                 const currentPage = parseInt(firstUrl.searchParams.get('page') || '1');
 
@@ -603,6 +636,8 @@ export class AccesWeb {
                     this.urlsAmazon.push(nextPageGroup);
                     console.log(`📄 [Amazon] Grupo page ${currentPage + 1} adicionado à fila.`);
                 }
+            } else if (groupSuccessCount === 0) {
+                console.log(`🛑 [Amazon] Grupo sem produtos. Próxima página não gerada.`);
             }
 
         } catch (error) {

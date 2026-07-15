@@ -298,6 +298,8 @@ export class AccesWeb {
                                     const discountText = await discountElement.innerText();
                                     if (discountText && discountText.trim()) {
                                         textosDestaque.push(discountText.trim());
+                                    } else {
+                                        textosDestaque.push(`${(100 - (price / originalPrice) * 100).toFixed(0)}% OFF`)
                                     }
                                 }
 

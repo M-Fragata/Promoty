@@ -8,7 +8,7 @@ const EnvSchema = z.object({
     AMAZON_TAG: z.string(),
     SHOPEE_ID: z.string().default(''),
     DATABASE_URL: z.string(),
-    WHATSAPP_GROUP_JID: z.string(),
+    WHATSAPP_GROUP_JID_GAMERS: z.string(),
     WHATSAPP_GROUP_INVITE_GAMERS: z.string(),
     WHATSAPP_GROUP_JID_MODA_FEMININA: z.string(),
     WHATSAPP_GROUP_INVITE_MODA_FEMININA: z.string(),

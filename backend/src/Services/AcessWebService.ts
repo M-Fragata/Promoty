@@ -45,54 +45,46 @@ export class AccesWeb {
     // Bloco Mercado Livre 
     // ======================
     private static readonly BASE_URL_GROUPS = 5
-    private static contadorML: number = 0
-    private static URLs: string[][] = [
+    private contadorML: number = 0
+    private urlsMl: string[][]
+    private contadorAmazon: number = 0
+    private urlsAmazon: string[][]
+    private captchaRetryPending = false;
+    private lastCaptchaGroupIndex = -1;
 
-        // ══════════════ ESTEIRA HÍBRIDA (2 Tech + 2 Casa/Moda/Beleza) ══════════════
+    constructor(nicheFilter?: 'tech' | 'casa') {
+        const niches = getActiveNiches();
+        const niche = niches.find(n =>
+            nicheFilter === 'tech' ? n.id === 'tech' :
+            nicheFilter === 'casa' ? n.id === 'casa-moda-feminina' :
+            true
+        );
 
-        // Lote 0: 2 páginas de Info + 2 páginas de Casa/Decoração
-        [
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=1&promotion_type=lightning", // Tech: Info p1
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=2&promotion_type=lightning", // Tech: Info p2
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1579&page=1&promotion_type=lightning", // Novo: Casa p1
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1579&page=2&promotion_type=lightning", // Novo: Casa p2
-        ],
+        if (niche) {
+            this.urlsMl = niche.mlUrls;
+            this.urlsAmazon = niche.amazonUrls;
+        } else {
+            // Fallback: todas as URLs (crawler antigo)
+            this.urlsMl = niches.flatMap(n => n.mlUrls);
+            this.urlsAmazon = niches.flatMap(n => n.amazonUrls);
+        }
+    }
 
-        // Lote 1: 2 páginas de Tech (Info/Cel) + 2 páginas de Moda/Calçados
-        [
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=3&promotion_type=lightning", // Tech: Info p3
-            "https://www.mercadolivre.com.br/ofertas?container_id=MLB779535-1&page=1",                  // Tech: Celulares p1
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1430&page=1&promotion_type=lightning", // Novo: Moda p1
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1430&page=2&promotion_type=lightning", // Novo: Moda p2
-        ],
+    private get BASE_URL_GROUPS(): number {
+        return AccesWeb.BASE_URL_GROUPS;
+    }
 
-        // Lote 2: 2 páginas de Tech (Cel/TVs) + 2 páginas de Moda/Eletro-Portáteis
-        [
-            "https://www.mercadolivre.com.br/ofertas?container_id=MLB779535-1&page=2",                  // Tech: Celulares p2
-            "https://www.mercadolivre.com.br/ofertas?container_id=MLB779539-1&page=1",                  // Tech: TVs p1
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1430&page=3&promotion_type=lightning", // Novo: Moda p3
-            "https://www.mercadolivre.com.br/ofertas?category=MLB5726&page=1&promotion_type=lightning", // Novo: Eletro-Portáteis p1
-        ],
+    private get URLs(): string[][] {
+        return this.urlsMl;
+    }
 
-        // Lote 3: 2 páginas de Tech (TVs/Info) + 2 páginas de Eletro/Beleza
-        [
-            "https://www.mercadolivre.com.br/ofertas?container_id=MLB779539-1&page=2",                  // Tech: TVs p2
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&page=4&promotion_type=lightning", // Tech: Info p4
-            "https://www.mercadolivre.com.br/ofertas?category=MLB5726&page=2&promotion_type=lightning", // Novo: Eletro-Portáteis p2
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1246&page=1&promotion_type=lightning", // Novo: Beleza/Skincare p1
-        ],
-
-        // Lote 4: Ofertas do Dia (2 Tech limpas + 2 Novo Nicho limpas)
-        [
-            // Tech: Ofertas do dia de Info e Celulares
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1648&container_id=MLB779362-1&promotion_type=deal_of_the_day",
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1051&container_id=MLB779362-1&promotion_type=deal_of_the_day",
-
-            // Novo Nicho: Ofertas do dia de Casa e Moda
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1579&container_id=MLB779362-1&promotion_type=deal_of_the_day",
-            "https://www.mercadolivre.com.br/ofertas?category=MLB1430&container_id=MLB779362-1&promotion_type=deal_of_the_day"
-        ],
-    ]
+    private set URLs(value: string[][] | number) {
+        if (typeof value === 'number') {
+            this.urlsMl.length = value;
+        } else {
+            this.urlsMl = value;
+        }
+    }
 
     async AcessMercadoLivre(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
 
@@ -114,22 +106,22 @@ export class AccesWeb {
         const page = await context.newPage();
         //const produtosEncontrados: MlProducts[] = [];
 
-        let urlCounter = AccesWeb.URLs.length - 1
+        let urlCounter = this.URLs.length - 1
 
         // 🚨 SE O CONTADOR VOLTAR PRO ZERO, RESETAMOS AS ABAS DINÂMICAS!
-        if (AccesWeb.contadorML > urlCounter) {
-            AccesWeb.contadorML = 0;
+        if (this.contadorML > urlCounter) {
+            this.contadorML = 0;
 
             // Corta o array estático de volta para os 4 blocos originais de fábrica
             // eliminando qualquer push de Pichau feito em ciclos passados.
-            if (AccesWeb.URLs.length > AccesWeb.BASE_URL_GROUPS) {
-                AccesWeb.URLs.length = AccesWeb.BASE_URL_GROUPS;
+            if (this.URLs.length > this.BASE_URL_GROUPS) {
+                this.URLs.length = this.BASE_URL_GROUPS;
                 console.log("♻️ [Fila Dinâmica] Varredura completa reiniciada. Expurgando URLs antigas da memória!");
             }
         }
 
         try {
-            let URLsGroup: string[] = AccesWeb.URLs[AccesWeb.contadorML]!
+            let URLsGroup: string[] = this.URLs[this.contadorML]!
 
             // 🔄 O laço percorre as URLs dentro do Try principal
             for (let i = 0; i < URLsGroup.length; i++) {
@@ -190,15 +182,15 @@ export class AccesWeb {
                                 console.log(`➕ [Fila Dinâmica] Nova janela detectada no NAV. Injetando Bloco Pichau (Páginas ${paginaInicialDoProximoBloco} até ${paginaFinalDoProximoBloco}) ao final da fila.`);
 
                                 //Verificando URL's passadas
-                                console.log("URL's passadas", AccesWeb.URLs)
+                                console.log("URL's passadas", this.URLs)
 
                                 // Injeta o próximo lote de 5 páginas na esteira
-                                AccesWeb.URLs.push(utils.gerarBlocoPichau(paginaInicialDoProximoBloco, paginaFinalDoProximoBloco));
+                                this.URLs.push(utils.gerarBlocoPichau(paginaInicialDoProximoBloco, paginaFinalDoProximoBloco));
 
                                 //Verificando URL's presentes
-                                console.log("URL's de agora", AccesWeb.URLs)
+                                console.log("URL's de agora", this.URLs)
 
-                                console.log(`📊 [Fila Dinâmica] Total de Grupos na classe agora: ${AccesWeb.URLs.length}`);
+                                console.log(`📊 [Fila Dinâmica] Total de Grupos na classe agora: ${this.URLs.length}`);
                             }
 
                         }
@@ -422,7 +414,7 @@ export class AccesWeb {
         } finally {
             // O bloco finally fecha o navegador uma única vez ao término de todas as iterações ou em caso de quebra do try principal
             console.log("🔒 [Scraper] Finalizando sessões e fechando o navegador de forma segura...");
-            AccesWeb.contadorML++
+            this.contadorML++
             await browser.close();
         }
     }
@@ -430,14 +422,7 @@ export class AccesWeb {
     // ================
     // Bloco Amazon
     // ================
-    private static contadorAmazon: number = 0
-    //https://www.amazon.com.br/s?k=celular&page=1
-    private static URLsAmazon: string[][] = [
-        ["https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=1&qid=1780962721&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_1",
-            "https://www.amazon.com.br/s?i=electronics&rh=n%3A16209063011%2Cp_n_deal_type%3A23565492011&dc&ds=v1%3AM7qKaAQFjtAAj0anALEbfRkWNv96M0a9N9Z4wPaYslI&page=1&qid=1781002007&rnid=23565491011&ref=sr_nr_p_n_deal_type_3",]
-
-    ]
-    private static urlDynamic: string[] = [] //URL dinamica
+    private static readonly MAX_AMAZON_PAGES = 4
 
     async AcessAmazon(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
         const browser = await chromium.launch({
@@ -456,15 +441,8 @@ export class AccesWeb {
         });
 
         const page = await context.newPage();
-        let urlCounter = AccesWeb.URLsAmazon.length - 1;
-
-        if (AccesWeb.contadorAmazon > urlCounter) {
-            AccesWeb.contadorAmazon = 0;
-            if (AccesWeb.URLsAmazon.length > 1) AccesWeb.URLsAmazon.length = 1;
-        }
 
         try {
-
             // Bloqueio de recursos desnecessários (Performance)
             await page.route('**/*', (route) => {
                 if (['stylesheet', 'font', 'image'].includes(route.request().resourceType())) {
@@ -474,36 +452,25 @@ export class AccesWeb {
                 }
             });
 
-            let URLsGroup: string[] = AccesWeb.URLsAmazon[AccesWeb.contadorAmazon]!
+            // Verifica se precisa retry de grupo com CAPTCHA
+            if (this.captchaRetryPending && this.lastCaptchaGroupIndex === this.contadorAmazon) {
+                console.log(`🔄 [Amazon] Retry do grupo ${this.contadorAmazon} (CAPTCHA anterior)...`);
+            }
 
-            for (let i = 0; i < URLsGroup.length; i++) {
+            const group: string[] = this.urlsAmazon[this.contadorAmazon]!
 
-                utils.resetWordsAlreadyUsed()//Resetar quantidade de palavras já usadas
+            let groupSuccessCount = 0;
+
+            for (let i = 0; i < group.length; i++) {
+
+                utils.resetWordsAlreadyUsed()
 
                 const startTime = Date.now()
-
-                const URLAmazon = URLsGroup[i]!;
-                const urlObj = new URL(URLAmazon)
-                urlObj.searchParams.set('page', (AccesWeb.contadorAmazon + 2).toString())
-
-                AccesWeb.urlDynamic.push(urlObj.toString())
-
-                if (AccesWeb.urlDynamic.length === URLsGroup.length) {
-                    AccesWeb.URLsAmazon.push([...AccesWeb.urlDynamic])
-                    await TakePrintScreenService({
-                        page: page,
-                        produtosLength: AccesWeb.URLsAmazon.length,
-                        store: "Amazon",
-                        status: "Novo Array de URL Gerado",
-                        tempoExecucao: 0,
-                        url: `${AccesWeb.urlDynamic[0]} e ${AccesWeb.urlDynamic[1]}`
-                    })
-                    AccesWeb.urlDynamic.splice(0, AccesWeb.urlDynamic.length)
-                }
+                const URLAmazon = group[i]!;
 
                 try {
                     await page.goto(URLAmazon, { waitUntil: 'domcontentloaded', timeout: 30000 });
-                    await HUMAN_DELAY(3000, 6000);
+                    await HUMAN_DELAY(8000, 12000); // 8-12s para Amazon (mais lento para evitar CAPTCHA)
 
                     const cards = await page.$$('.s-result-item[data-asin]');
                     console.log(`📦 [Amazon] Encontrados ${cards.length} produtos.`);
@@ -511,9 +478,20 @@ export class AccesWeb {
                     if (cards.length === 0) {
                         const duration = (Date.now() - startTime) / 1000
 
-                        const captcha = await page.locator('img#d')
-                        if (captcha) {
-                            console.warn("⚠️ Captcha (Cachorro) detectado! Pulando esta URL específica...");
+                        const captchaDog = await page.locator('img#d').count();
+                        const captchaForm = await page.locator('form[action*="validateCaptcha"]').count();
+                        const isCaptcha = captchaDog > 0 || captchaForm > 0;
+
+                        if (isCaptcha) {
+                            // Se já é retry e ainda tem CAPTCHA, pula grupo
+                            if (this.captchaRetryPending && this.lastCaptchaGroupIndex === this.contadorAmazon) {
+                                console.warn(`⚠️ [Amazon] CAPTCHA persistente no grupo ${this.contadorAmazon}. Pulando...`);
+                                this.captchaRetryPending = false;
+                                this.contadorAmazon++;
+                                break;
+                            }
+
+                            console.warn("⚠️ [Amazon] CAPTCHA (Cachorro) detectado! Parando grupo...");
 
                             await TakePrintScreenService({
                                 page: page,
@@ -524,10 +502,14 @@ export class AccesWeb {
                                 url: URLAmazon
                             })
 
-                            continue;
+                            // Marca que precisa retry neste grupo
+                            this.captchaRetryPending = true;
+                            this.lastCaptchaGroupIndex = this.contadorAmazon;
+
+                            break; // ← Para o grupo INTEIRO, não apenas esta URL
                         }
-                        AccesWeb.contadorAmazon++;
-                        console.log(`📦 Fim dos produtos. Avançando para a próxima categoria.`);
+
+                        console.log(`📦 Fim dos produtos.`);
 
                         await TakePrintScreenService({
                             page: page,
@@ -538,7 +520,7 @@ export class AccesWeb {
                             url: URLAmazon
                         })
 
-                        continue; // Sai do método para o próximo ciclo
+                        continue;
                     }
 
                     const productsPage: MlProducts[] = [];
@@ -548,16 +530,12 @@ export class AccesWeb {
                             const id = await card.getAttribute('data-asin');
                             if (!id) continue;
 
-                            // Título
                             const titleEl = await card.$('h2');
                             const title = (await titleEl?.innerText()) || "";
                             if (!titleMatchesAnyNiche(title) || !utils.checkLimitedWords(title)) continue
 
-
-                            // Preços (Amazon geralmente tem: [Atual, Original])
                             const priceEls = await card.$$('.a-price .a-offscreen');
 
-                            // Função auxiliar inline para garantir a padronização
                             const formatPrice = (text: string): number => {
                                 const val = parseFloat(text.replace(/[^\d,]/g, '').replace(',', '.'));
                                 return isNaN(val) ? 0 : Number(val.toFixed(2));
@@ -569,49 +547,31 @@ export class AccesWeb {
                             let originalPrice: number | null = null;
                             if (priceEls.length > 1) {
                                 const rawOriginal = await priceEls[1]!.innerText();
-                                // Verifica se rawOriginal não é vazio/null antes de processar
                                 if (rawOriginal) {
                                     originalPrice = formatPrice(rawOriginal);
                                 }
                             }
                             if (!originalPrice) continue
 
-                            // Verifica se o produto atende os critérios de pelo menos um nicho
                             if (!productMatchesAnyNiche(title, originalPrice, cleanPrice)) continue;
 
                             let badge: String | null = utils.GetDiscount(originalPrice, cleanPrice)
                             if (!badge) badge = null
 
-                            //Parcelamento
                             let installments: string | null = null;
                             try {
-                                // Na Amazon, o preço e o parcelamento vivem dentro do price-recipe
                                 const recipeElement = await card.$('div[data-cy="price-recipe"]');
 
                                 if (recipeElement) {
-                                    // 1. Limpeza: substitui quebras de linha e múltiplos espaços por um espaço simples
                                     let fullText = (await recipeElement.innerText()).replace(/\s+/g, ' ').trim();
-
-                                    // 2. Regex robusto: 
-                                    // (em até \d+x de\s+R\$\s*[\d,]+) -> Captura o bloco "em até Xx de R$ XX,XX"
-                                    // .*?                             -> Ignora qualquer sujeira/preço repetido que venha depois
-                                    // sem juros                       -> Garante que só pegamos parcelas sem juros
                                     const match = fullText.match(/(em até \d+x de\s+R\$\s*[\d,]+).*?sem juros/i);
 
                                     if (match) {
-                                        // match[1] é algo como "em até 3x de R$ 33.29"
-                                        let installmentPart = match[1];
-
-                                        // 1. Limpeza e Formatação
-                                        // O 'g' no final da regex significa "global" (remove todas as ocorrências)
-                                        // O 'i' significa "case insensitive"
-                                        installmentPart = installmentPart!
-                                            .replace(/em até | de/gi, "") // Remove "em até " e " de "
-                                            .replace(',', '.');           // Garante que é ponto decimal
-
-                                        // 4. Monta o formato final
+                                        let installmentPart = match[1]!;
+                                        installmentPart = installmentPart
+                                            .replace(/em até | de/gi, "")
+                                            .replace(',', '.');
                                         installments = `${installmentPart} s/ juros`;
-
                                     } else {
                                         installments = null;
                                     }
@@ -625,7 +585,7 @@ export class AccesWeb {
                                 title: title.trim(),
                                 price: isNaN(cleanPrice) ? 0 : cleanPrice,
                                 originalPrice: isNaN(originalPrice || 0) ? null : originalPrice,
-                                coupon: null, // Amazon cupons geralmente aparecem como badge ou text
+                                coupon: null,
                                 badge: badge,
                                 imageUrl: await (await card.$('img.s-image'))?.getAttribute('src') || null,
                                 link: 'https://www.amazon.com.br' + (await (await card.$('a.a-link-normal'))?.getAttribute('href') || ""),
@@ -637,6 +597,7 @@ export class AccesWeb {
                     }
 
                     if (productsPage.length > 0) {
+                        groupSuccessCount++;
                         onPageScraped?.(productsPage);
 
                         const duration = (Date.now() - startTime) / 1000
@@ -648,22 +609,44 @@ export class AccesWeb {
                             tempoExecucao: duration,
                             url: URLAmazon
                         })
-
                     }
 
                 } catch (err) {
-                    console.error(`❌ Erro na URL Amazon: ${URL}`, err);
+                    console.error(`❌ Erro na URL Amazon: ${URLAmazon}`, err);
                 }
+            }
+
+            // Gera grupo da próxima página se não atingiu o limite
+            if (groupSuccessCount > 0 && group.length > 0) {
+                const firstUrl = new URL(group[0]!);
+                const currentPage = parseInt(firstUrl.searchParams.get('page') || '1');
+
+                if (currentPage < AccesWeb.MAX_AMAZON_PAGES) {
+                    const nextPageGroup = group.map(url => {
+                        const obj = new URL(url);
+                        obj.searchParams.set('page', (currentPage + 1).toString());
+                        return obj.toString();
+                    });
+                    this.urlsAmazon.push(nextPageGroup);
+                    console.log(`📄 [Amazon] Grupo page ${currentPage + 1} adicionado à fila.`);
+                }
+            } else if (groupSuccessCount === 0) {
+                console.log(`🛑 [Amazon] Grupo sem produtos. Próxima página não gerada.`);
             }
 
         } catch (error) {
             console.error("❌ Erro catastrófico na Amazon:", error);
         } finally {
             await browser.close();
-            AccesWeb.contadorAmazon++
-            if (AccesWeb.URLsAmazon.length > 50) {
-                // Mantém apenas os últimos 50 registros para não estourar a memória
-                AccesWeb.URLsAmazon = AccesWeb.URLsAmazon.slice(-50);
+
+            // Só incrementa se não tem retry pendente (CAPTCHA)
+            if (!this.captchaRetryPending) {
+                this.contadorAmazon++
+            }
+
+            if (this.contadorAmazon >= this.urlsAmazon.length) {
+                this.contadorAmazon = 0;
+                console.log(`🔄 [Amazon] Ciclo reiniciado.`);
             }
         }
     }

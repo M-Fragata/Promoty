@@ -12,7 +12,7 @@ export function getActiveNiches(): NicheConfig[] {
 
   niches.push({
     ...techNiche,
-    groupJid: Env.WHATSAPP_GROUP_JID,
+    groupJid: Env.WHATSAPP_GROUP_JID_GAMERS,
   });
 
   niches.push({

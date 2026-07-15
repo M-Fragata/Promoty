@@ -5,10 +5,13 @@ const delay = (minutos: number) => new Promise(resolve => setTimeout(resolve, mi
 const TimeBetweenRunsDia = 5; // 5 minutos para teste (produção você ajusta para 30)
 const timeBetweensRunsMadrugada = 180; // 3 horas
 
-async function executarRobo() {
-    console.log("🤖 Iniciando bateria de promoções para Amazon...\n");
+// casa || tech
+const NICHE = 'casa'
 
-    const scraper = new AccesWeb();
+async function executarRobo() {
+    console.log(`🤖 Iniciando bateria de promoções para Amazon (Nicho: ${NICHE})...\n`);
+
+    const scraper = new AccesWeb(NICHE);
 
     while (true) {
         // Captura o tempo e o intervalo logo no início do ciclo atual

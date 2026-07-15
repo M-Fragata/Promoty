@@ -8,7 +8,7 @@ const timeBetweensRunsMadrugada = 180; // 3 horas
 async function executarRobo() {
     console.log("🤖 Iniciando bateria de promoções para Mercado Livre...\n");
 
-    const scraper = new AccesWeb();
+    const scraper = new AccesWeb('casa');
 
     while (true) {
         // Captura o tempo e o intervalo logo no início do ciclo atual

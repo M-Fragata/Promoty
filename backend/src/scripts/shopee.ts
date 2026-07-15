@@ -1,54 +1,39 @@
 
 const delay = (minutos: number) => new Promise(resolve => setTimeout(resolve, minutos * 60 * 1000))
 
+const NICHE = 'casa'; // 'tech' ou 'casa'
+
 async function executarRobo() {
-    console.log("🤖 Iniciando bateria de promoções para Shopee...\n");
+    console.log(`🤖 Iniciando bateria de promoções para Shopee (Niche: ${NICHE})...\n`);
 
     while (true) {
-        // ==========================================
-        // 🟠 BLOCO TESTE: AMAZON
-        // ==========================================
         try {
-            console.log("🌐 [Shopee] Iniciando varredura com fluxo assíncrono...");
-            const tempoInicioML = Date.now();
+            console.log(`🌐 [Shopee] Iniciando varredura para niche: ${NICHE}...`);
+            const tempoInicio = Date.now();
 
-            const responseShopee = await fetch("http://localhost:3333/ofertas/shopee/shop", {
+            const response = await fetch(`http://localhost:3333/ofertas/shopee/categories?niche=${NICHE}`, {
                 method: "GET",
-                headers: { "Content-type": "application/json" },
-            })
-
-            if (!responseShopee.ok) return console.log("Erro no fetch")
-
-            const produtos = await responseShopee.json()
-
-            const responseApi = await fetch("http://localhost:3333/ofertas/amazon", {
-                method: "POST",
-                headers: { "Content-type": "application/json" },
-                body: JSON.stringify(produtos)
+                headers: { "Content-type": "application/json" }
             });
 
-            if (!responseApi.ok) {
-                throw new Error(`${responseApi.status} - ${responseApi.statusText}`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error(`⚠️ [Shopee] Erro na API: ${response.status}`, errorData);
+            } else {
+                console.log("✨ [Shopee] Requisição processada e enviada para a fila de transmissão!");
             }
 
-            console.log(`✅ [Crawler] Lote de ${produtos.length} produtos processado com sucesso!`);
-
-            const tempoFimML = Date.now();
-            const tempoTotalML = ((tempoFimML - tempoInicioML) / 1000).toFixed(2);
-            console.log(`⏱️ [Shopee] Navegador finalizou o fetch em ${tempoTotalML} segundos!`);
+            const tempoFim = Date.now();
+            const tempoTotal = ((tempoFim - tempoInicio) / 1000).toFixed(2);
+            console.log(`⏱️ [Shopee] Varredura finalizada em ${tempoTotal} segundos!`);
 
         } catch (error) {
-
-            console.error("❌ [Shopee] Falha crítica no teste principal:", error);
-
+            console.error("❌ [Shopee] Falha crítica:", error);
         }
 
-
-
-        console.log('⏳ Aguardando 10 minutos de intervalo de segurança...', Date.now());
+        console.log('⏳ Aguardando 10 minutos de intervalo de segurança...');
         await delay(10);
     }
 }
-
 
 executarRobo();

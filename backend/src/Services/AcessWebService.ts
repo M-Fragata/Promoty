@@ -306,6 +306,8 @@ export class AccesWeb {
                                     const discountText = await discountElement.innerText();
                                     if (discountText && discountText.trim()) {
                                         textosDestaque.push(discountText.trim());
+                                    } else {
+                                        textosDestaque.push(`${(100 - (price / originalPrice) * 100).toFixed(0)}% OFF`)
                                     }
                                 }
 
@@ -429,7 +431,7 @@ export class AccesWeb {
     // Bloco Amazon
     // ================
     private static contadorAmazon: number = 0
-//https://www.amazon.com.br/s?k=celular&page=1
+    //https://www.amazon.com.br/s?k=celular&page=1
     private static URLsAmazon: string[][] = [
         ["https://www.amazon.com.br/s?i=computers&rh=n%3A16339927011%2Cp_n_deal_type%3A23565493011&dc&page=1&qid=1780962721&rnid=23565491011&xpid=ug7b2y3U-qvbv&ref=sr_pg_1",
             "https://www.amazon.com.br/s?i=electronics&rh=n%3A16209063011%2Cp_n_deal_type%3A23565492011&dc&ds=v1%3AM7qKaAQFjtAAj0anALEbfRkWNv96M0a9N9Z4wPaYslI&page=1&qid=1781002007&rnid=23565491011&ref=sr_nr_p_n_deal_type_3",]

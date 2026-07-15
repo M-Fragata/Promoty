@@ -27,9 +27,9 @@ export function Profile() {
     }
 
     Promise.all([
-      api.getMe().then((data) => setCreatedAt(data.createdAt)).catch(() => {}),
-      api.getFavorites().then((data) => setFavoritesCount(data.length)).catch(() => {}),
-      api.getLinks().then((data) => setLinksCount(data.length)).catch(() => {}),
+      api.getMe().then((data) => setCreatedAt(data.createdAt)).catch(() => { }),
+      api.getFavorites().then((data) => setFavoritesCount(data.length)).catch(() => { }),
+      api.getLinks().then((data) => setLinksCount(data.length)).catch(() => { }),
     ]).finally(() => setLoading(false));
   }, [isAuthenticated, navigate]);
 
@@ -92,10 +92,10 @@ export function Profile() {
                 <span className="text-body-md text-text-secondary">
                   {createdAt
                     ? new Date(createdAt).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: 'long',
-                        year: 'numeric'
-                      })
+                      day: '2-digit',
+                      month: 'long',
+                      year: 'numeric'
+                    })
                     : 'Data não disponível'
                   }
                 </span>
@@ -145,7 +145,7 @@ export function Profile() {
                     type="button"
                     onClick={() => setTheme('light')}
                     className={clsx(
-                      'flex flex-col items-center gap-2 p-3 rounded-lg border transition-all',
+                      'cursor-pointer flex flex-col items-center gap-2 p-3 rounded-lg border transition-all',
                       theme === 'light'
                         ? 'border-brand bg-brand/10 text-brand'
                         : 'border-card-border hover:bg-surface-container-low text-text-secondary'
@@ -156,22 +156,9 @@ export function Profile() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setTheme('dark')}
-                    className={clsx(
-                      'flex flex-col items-center gap-2 p-3 rounded-lg border transition-all',
-                      theme === 'dark'
-                        ? 'border-brand bg-brand/10 text-brand'
-                        : 'border-card-border hover:bg-surface-container-low text-text-secondary'
-                    )}
-                  >
-                    <Moon className="w-5 h-5" />
-                    <span className="text-xs font-medium">Escuro</span>
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setTheme('system')}
                     className={clsx(
-                      'flex flex-col items-center gap-2 p-3 rounded-lg border transition-all',
+                      'cursor-pointer flex flex-col items-center gap-2 p-3 rounded-lg border transition-all',
                       theme === 'system'
                         ? 'border-brand bg-brand/10 text-brand'
                         : 'border-card-border hover:bg-surface-container-low text-text-secondary'
@@ -180,6 +167,19 @@ export function Profile() {
                     <Monitor className="w-5 h-5" />
                     <span className="text-xs font-medium">Padrão</span>
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setTheme('dark')}
+                    className={clsx(
+                      'cursor-pointer flex flex-col items-center gap-2 p-3 rounded-lg border transition-all',
+                      theme === 'dark'
+                        ? 'border-brand bg-brand/10 text-brand'
+                        : 'border-card-border hover:bg-surface-container-low text-text-secondary'
+                    )}
+                  >
+                    <Moon className="w-5 h-5" />
+                    <span className="text-xs font-medium">Escuro</span>
+                  </button>
                 </div>
               </div>
 
@@ -187,7 +187,7 @@ export function Profile() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center gap-4 p-4 hover:bg-red-500/10 transition-colors w-full text-left group"
+                className="cursor-pointer flex items-center gap-4 p-4 hover:bg-red-500/10 transition-colors w-full text-left group"
               >
                 <LogOut className="w-5 h-5 text-red-500" />
                 <span className="text-body-md flex-1 text-red-500 font-medium">Sair</span>

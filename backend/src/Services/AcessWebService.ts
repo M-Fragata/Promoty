@@ -468,7 +468,7 @@ export class AccesWeb {
 
                 try {
                     await page.goto(URLAmazon, { waitUntil: 'domcontentloaded', timeout: 30000 });
-                    await HUMAN_DELAY(3000, 6000);
+                    await HUMAN_DELAY(8000, 12000); // 8-12s para Amazon (mais lento para evitar CAPTCHA)
 
                     const cards = await page.$$('.s-result-item[data-asin]');
                     console.log(`📦 [Amazon] Encontrados ${cards.length} produtos.`);
@@ -612,13 +612,6 @@ export class AccesWeb {
                 } catch (err) {
                     console.error(`❌ Erro na URL Amazon: ${URLAmazon}`, err);
                 }
-            }
-
-            // Delay entre grupos (apenas se não teve CAPTCHA)
-            if (!this.captchaRetryPending && this.urlsAmazon.length > 1) {
-                const delayBetweenGroups = 10000 + Math.random() * 10000; // 10-20s
-                console.log(`⏳ [Amazon] Aguardando ${(delayBetweenGroups / 1000).toFixed(0)}s antes do próximo grupo...`);
-                await new Promise(resolve => setTimeout(resolve, delayBetweenGroups));
             }
 
             // Gera grupo da próxima página se não atingiu o limite

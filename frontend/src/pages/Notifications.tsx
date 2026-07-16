@@ -45,12 +45,6 @@ export function Notifications() {
       {/* Main Content */}
       <main className="md:mt-5 pt-16 lg:pt-16 pb-24 lg:pb-8">
         <div className="mx-auto max-w-3xl px-4 md:px-6">
-          {/* Page Title */}
-          <div className="py-6">
-            <h1 className="text-headline-lg-mobile font-headline-lg text-text-primary">
-              Notificações
-            </h1>
-          </div>
 
           {/* Loading State */}
           {isLoading && (
@@ -61,7 +55,7 @@ export function Notifications() {
 
           {/* Empty State */}
           {!isLoading && notifications.length === 0 && (
-            <div className="bg-card-bg border border-card-border rounded-xl p-8 text-center">
+            <div className="bg-card-bg border border-card-border rounded-xl p-8 text-center mt-5">
               <BellOff className="w-12 h-12 text-text-secondary mx-auto mb-4" />
               <h2 className="text-headline-sm text-text-primary font-headline-sm mb-2">
                 Nenhuma notificação
@@ -72,7 +66,7 @@ export function Notifications() {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="text-brand hover:underline font-semibold"
+                className="cursor-pointer text-brand hover:underline font-semibold"
               >
                 Ver ofertas
               </button>

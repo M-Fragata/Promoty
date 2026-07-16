@@ -1,6 +1,8 @@
 import fs from 'fs';
+import path from 'path';
 
-const LOCK_FILE = '/tmp/crawler.lock';
+// Em ESM, __dirname não existe - usar import.meta.dirname (Node.js 21+)
+const LOCK_FILE = path.join(import.meta.dirname, '..', '..', 'tmp', 'crawler.lock');
 const LOCK_TIMEOUT = 20 * 60 * 1000;  // 20 minutos (15min cooldown + 5min buffer)
 
 interface LockData {

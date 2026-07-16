@@ -93,7 +93,7 @@ export function Favorites() {
                 <button
                   type="button"
                   onClick={() => navigate('/')}
-                  className="text-brand hover:underline font-semibold"
+                  className="text-brand hover:underline font-semibold cursor-pointer"
                 >
                   Ver ofertas
                 </button>

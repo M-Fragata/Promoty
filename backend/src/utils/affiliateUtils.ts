@@ -1,4 +1,5 @@
 import { Env } from './Envirolment.js';
+import { encurtarLink } from './encurtador.js';
 
 export type StoreType = 'mercadolivre' | 'amazon' | 'shopee' | 'other';
 
@@ -60,7 +61,6 @@ export function appendAffiliateParams(url: string, store: StoreType): string {
           urlObj.pathname = `/dp/${asin}`;
           urlObj.search = '';
         } else {
-          // Limpar parâmetros de rastreamento desnecessários
           urlObj.searchParams.delete('qid');
           urlObj.searchParams.delete('sr');
           urlObj.searchParams.delete('pf_rd_r');
@@ -76,17 +76,31 @@ export function appendAffiliateParams(url: string, store: StoreType): string {
       }
 
       case 'shopee':
-        // Links da Shopee já vêm com afiliado da API
         break;
 
       case 'other':
-        // Sem parâmetros de afiliado para outras lojas
         break;
     }
 
     return urlObj.toString();
   } catch {
-    // Se a URL for inválida, retorna a original
     return url;
   }
+}
+
+/**
+ * Constrói URL final com afiliado + encurtamento (quando aplicável)
+ * - ML: parâmetros de afiliado + encurta via Kutt
+ * - Amazon: apenas tag de afiliado
+ * - Shopee: sem alteração (já vem com afiliado da API)
+ */
+export async function buildAffiliateUrl(url: string): Promise<string> {
+  const store = detectStore(url);
+  const urlWithAffiliate = appendAffiliateParams(url, store);
+
+  if (store === 'mercadolivre') {
+    return await encurtarLink(urlWithAffiliate);
+  }
+
+  return urlWithAffiliate;
 }

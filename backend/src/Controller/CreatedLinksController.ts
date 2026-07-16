@@ -1,7 +1,7 @@
 import { type Request, type Response } from 'express';
 import { prisma } from '../Database/Prisma.js';
 import { detectStore, appendAffiliateParams, type StoreType } from '../utils/affiliateUtils.js';
-import { EncurtaLinkController } from './EncutarLinkController.js';
+import { encurtarLink } from '../utils/encurtador.js';
 import { isShortenedUrl, expandUrl } from '../utils/expandUrl.js';
 
 // Mapeamento de loja para nome amigável
@@ -49,7 +49,7 @@ export class CreatedLinksController {
       const affiliateUrl = appendAffiliateParams(resolvedUrl, store);
 
       // Encurtar link via Kutt
-      const shortUrl = await EncurtaLinkController(affiliateUrl);
+      const shortUrl = await encurtarLink(affiliateUrl);
 
       // Salvar no banco
       const createdLink = await prisma.createdLink.create({

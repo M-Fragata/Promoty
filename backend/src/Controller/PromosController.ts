@@ -2,11 +2,10 @@ import { type Request, type Response } from "express";
 import { whatsAppService } from "../app.js";
 import { prisma } from "../Database/Prisma.js";
 
-import { EncurtaLinkController } from "./EncutarLinkController.js";
 import type { NicheConfig } from "../types/niche.js";
 import { getActiveNiches } from "../config/index.js";
 import { dispatchProductToNiches } from "../Services/NicheDispatcher.js";
-import { detectStore, appendAffiliateParams } from "../utils/affiliateUtils.js";
+import { buildAffiliateUrl } from "../utils/affiliateUtils.js";
 import { SecondaryFunction } from "../utils/secondaryFunction.js";
 import { categorizeProduct } from "../utils/categoryClassifier.js";
 
@@ -88,18 +87,9 @@ export class PromosController {
             lines.push('');
         }
 
-        const urlOriginal = product.link;
-        const store = detectStore(urlOriginal);
-        const urlWithAffiliate = appendAffiliateParams(urlOriginal, store);
-
-        let urlEncurt = urlWithAffiliate;
-
-        if (store === 'mercadolivre') {
-            urlEncurt = await EncurtaLinkController(urlWithAffiliate);
-        }
-
+        // URL já vem processada do banco (affiliate + encurtado para ML)
         lines.push(`*Link com desconto:*`);
-        lines.push(urlEncurt);
+        lines.push(product.link);
 
         if (niche?.groupInviteLink) {
             lines.push('')
@@ -127,6 +117,9 @@ export class PromosController {
 
             for (const prod of products) {
                 try {
+                    // Processar URL com afiliado + encurtar (ML)
+                    prod.link = await buildAffiliateUrl(prod.link);
+
                     // Determinar category antes de salvar
                     ensureCategory(prod);
 
@@ -237,6 +230,9 @@ export class PromosController {
 
             for (const prod of products) {
                 try {
+                    // Processar URL com afiliado (Amazon: tag, ML: tag + encurtador)
+                    prod.link = await buildAffiliateUrl(prod.link);
+
                     // Determinar category antes de salvar
                     ensureCategory(prod);
 

@@ -77,7 +77,7 @@ export const modaFeminina: NicheConfig = {
     "mouse gamer", "teclado gamer", "monitor", "notebook",
     "celular", "smartphone", "ssd", "hd externo",
     // Outros
-    "infantil", "pet", "cachorro", "gato", "bebedouro pet"
+    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório"
   ],
   limitedWords: ["mini ventilador"],
   minDiscount: 30,

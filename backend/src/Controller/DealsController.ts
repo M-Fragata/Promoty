@@ -44,8 +44,12 @@ export class DealsController {
     try {
       const page = Math.max(1, parseInt(req.query.page as string) || 1);
       const skip = (page - 1) * PAGE_SIZE;
+      const category = (req.query.category as string || "").trim();
 
-      const where = getRecentWhere();
+      const where = {
+        ...getRecentWhere(),
+        ...(category ? { category } : {}),
+      };
 
       const [products, total] = await Promise.all([
         prisma.productsMl.findMany({
@@ -78,6 +82,7 @@ export class DealsController {
       const q = (req.query.q as string || "").trim();
       const page = Math.max(1, parseInt(req.query.page as string) || 1);
       const skip = (page - 1) * PAGE_SIZE;
+      const category = (req.query.category as string || "").trim();
 
       if (!q) {
         return res.status(400).json({ success: false, error: "Parâmetro 'q' é obrigatório." });
@@ -92,6 +97,7 @@ export class DealsController {
             ],
           },
           getRecentWhere(),
+          ...(category ? [{ category }] : []),
         ],
       };
 

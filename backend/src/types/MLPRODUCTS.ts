@@ -8,5 +8,6 @@ export interface MlProducts {
     imageUrl: String | null;
     link: String;
     store: String;
-    installments: String | null
+    installments: String | null;
+    category?: String | null;
 }

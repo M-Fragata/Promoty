@@ -71,6 +71,7 @@ model ProductsMl {
   link          String
   installments  String?
   store         String
+  category      String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

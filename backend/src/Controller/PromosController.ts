@@ -8,9 +8,19 @@ import { getActiveNiches } from "../config/index.js";
 import { dispatchProductToNiches } from "../Services/NicheDispatcher.js";
 import { detectStore, appendAffiliateParams } from "../utils/affiliateUtils.js";
 import { SecondaryFunction } from "../utils/secondaryFunction.js";
+import { categorizeProduct } from "../utils/categoryClassifier.js";
 
 const MARGEM_TOLERANCIA = 0.04
 const utils = new SecondaryFunction();
+
+function ensureCategory(prod: any): void {
+  if (!prod.category) {
+    const niches = getActiveNiches();
+    const matchedNiches = dispatchProductToNiches(prod, niches);
+    const nicheId = matchedNiches[0]?.id;
+    prod.category = categorizeProduct(prod.title, nicheId);
+  }
+}
 
 export class PromosController {
 
@@ -113,8 +123,13 @@ export class PromosController {
                 return res.status(400).json({ error: "O corpo da requisição deve ser um array de produtos." });
             }
 
+            const niches = getActiveNiches();
+
             for (const prod of products) {
                 try {
+                    // Determinar category antes de salvar
+                    ensureCategory(prod);
+
                     const produtoExistente = await prisma.productsMl.findUnique({
                         where: { id: prod.id }
                     });
@@ -142,7 +157,8 @@ export class PromosController {
                                     originalPrice: prod.originalPrice,
                                     coupon: prod.coupon,
                                     badge: prod.badge,
-                                    link: prod.link
+                                    link: prod.link,
+                                    category: prod.category
                                 }
                             });
 
@@ -162,7 +178,8 @@ export class PromosController {
                                         originalPrice: prod.originalPrice,
                                         coupon: prod.coupon,
                                         badge: prod.badge,
-                                        link: prod.link
+                                        link: prod.link,
+                                        category: prod.category
                                     }
                                 });
 
@@ -176,7 +193,8 @@ export class PromosController {
                                         originalPrice: prod.originalPrice,
                                         coupon: prod.coupon,
                                         badge: prod.badge,
-                                        link: prod.link
+                                        link: prod.link,
+                                        category: prod.category
                                     }
                                 });
                             }
@@ -190,7 +208,8 @@ export class PromosController {
                                     originalPrice: prod.originalPrice,
                                     coupon: prod.coupon,
                                     badge: prod.badge,
-                                    link: prod.link
+                                    link: prod.link,
+                                    category: prod.category
                                 }
                             });
                         }
@@ -218,6 +237,9 @@ export class PromosController {
 
             for (const prod of products) {
                 try {
+                    // Determinar category antes de salvar
+                    ensureCategory(prod);
+
                     const produtoExistente = await prisma.productsMl.findUnique({
                         where: { id: prod.id }
                     });
@@ -246,7 +268,8 @@ export class PromosController {
                                     originalPrice: prod.originalPrice,
                                     coupon: prod.coupon,
                                     badge: prod.badge,
-                                    link: prod.link
+                                    link: prod.link,
+                                    category: prod.category
                                 }
                             });
 
@@ -266,7 +289,8 @@ export class PromosController {
                                         originalPrice: prod.originalPrice,
                                         coupon: prod.coupon,
                                         badge: prod.badge,
-                                        link: prod.link
+                                        link: prod.link,
+                                        category: prod.category
                                     }
                                 });
 
@@ -281,7 +305,8 @@ export class PromosController {
                                         originalPrice: prod.originalPrice,
                                         coupon: prod.coupon,
                                         badge: prod.badge,
-                                        link: prod.link
+                                        link: prod.link,
+                                        category: prod.category
                                     }
                                 });
                             }
@@ -294,7 +319,8 @@ export class PromosController {
                                     originalPrice: prod.originalPrice,
                                     coupon: prod.coupon,
                                     badge: prod.badge,
-                                    link: prod.link
+                                    link: prod.link,
+                                    category: prod.category
                                 }
                             });
                         }
@@ -320,6 +346,9 @@ export class PromosController {
 
             for (const prod of products) {
                 try {
+                    // Determinar category antes de salvar
+                    ensureCategory(prod);
+
                     const produtoExistente = await prisma.productsMl.findUnique({
                         where: { id: prod.id }
                     });
@@ -348,7 +377,8 @@ export class PromosController {
                                     originalPrice: prod.originalPrice,
                                     coupon: prod.coupon,
                                     badge: prod.badge,
-                                    link: prod.link
+                                    link: prod.link,
+                                    category: prod.category
                                 }
                             });
 
@@ -368,7 +398,8 @@ export class PromosController {
                                         originalPrice: prod.originalPrice,
                                         coupon: prod.coupon,
                                         badge: prod.badge,
-                                        link: prod.link
+                                        link: prod.link,
+                                        category: prod.category
                                     }
                                 });
 
@@ -383,7 +414,8 @@ export class PromosController {
                                         originalPrice: prod.originalPrice,
                                         coupon: prod.coupon,
                                         badge: prod.badge,
-                                        link: prod.link
+                                        link: prod.link,
+                                        category: prod.category
                                     }
                                 });
                             }
@@ -396,7 +428,8 @@ export class PromosController {
                                     originalPrice: prod.originalPrice,
                                     coupon: prod.coupon,
                                     badge: prod.badge,
-                                    link: prod.link
+                                    link: prod.link,
+                                    category: prod.category
                                 }
                             });
                         }

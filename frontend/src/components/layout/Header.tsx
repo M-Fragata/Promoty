@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Search, Heart, User, Menu, X, Bell, BellOff } from 'lucide-react';
+import { Home, Search, Heart, User, Menu, X, Bell, BellOff, MessageCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuth } from '../../contexts/AuthContext';
 import logo from '../../assets/fragatalogo.png';
@@ -19,7 +19,11 @@ const NAV_ITEMS: NavItem[] = [
   { icon: User, label: 'Perfil', path: '/perfil', requiresAuth: true },
 ];
 
-export function Header() {
+interface HeaderProps {
+  onToggleWhatsApp?: () => void;
+}
+
+export function Header({ onToggleWhatsApp }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const navigate = useNavigate();
@@ -69,6 +73,22 @@ export function Header() {
                   <span className="sr-only">Notificações</span>
                 </button>
               </div>
+
+              {/* Mobile: WhatsApp Groups */}
+              {onToggleWhatsApp && (
+                <div className="lg:hidden">
+                  <button
+                    type="button"
+                    onClick={onToggleWhatsApp}
+                    className="p-2 rounded-md bg-surface-container text-text-secondary hover:bg-surface-container-high hover:text-accent-green transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:ring-offset-2 focus:ring-offset-app-bg"
+                    aria-label="Nossos Grupos WhatsApp"
+                    title="Nossos Grupos WhatsApp"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    <span className="sr-only">Grupos WhatsApp</span>
+                  </button>
+                </div>
+              )}
 
               {/* Desktop: Hamburger Menu */}
               <button

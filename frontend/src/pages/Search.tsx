@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Search as SearchIcon } from 'lucide-react';
-import { Header } from '../components/layout/Header';
-import { MobileNav } from '../components/layout/MobileNav';
+import { PageShell } from '../components/layout/PageShell';
 import { SearchBar } from '../components/search/SearchBar';
 import { SearchFilters } from '../components/search/SearchFilters';
 import { ProductCard } from '../components/product/ProductCard';
@@ -39,80 +38,71 @@ export function Search() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-app-bg">
-      {/* Header */}
-      <Header />
-
-      {/* Main Content */}
-      <main className="md:mt-5 pt-16 lg:pt-16 pb-24 lg:pb-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Search Bar */}
-          <div className="mb-6 mt-4">
-            <SearchBar
-              onSearch={handleSearch}
-              className="w-full max-w-md"
-            />
-          </div>
-
-          {/* Progress indicator */}
-          {isSearching && progress && (
-            <div className="mb-4 p-3 rounded-md bg-surface-container text-text-secondary text-label-sm">
-              Buscando em {progress.store}... ({progress.current}/{progress.total})
-            </div>
-          )}
-
-          {/* Error */}
-          {error && (
-            <div className="mb-4 p-3 rounded-md bg-error-container text-on-error-container text-label-bold">
-              {error}
-            </div>
-          )}
-
-          {/* Content: Search prompts or Results */}
-          {!searchQuery.trim() ? (
-            <EmptyState
-              icon={SearchIcon}
-              message="Busque por produtos em tempo real"
-            />
-          ) : (
-            <div className="flex flex-col lg:flex-row gap-6">
-              {/* Filters */}
-              <SearchFilters
-                minDiscount={minDiscount}
-                minPrice={minPrice}
-                maxPrice={maxPrice}
-                onMinDiscountChange={setMinDiscount}
-                onMinPriceChange={setMinPrice}
-                onMaxPriceChange={setMaxPrice}
-                onClear={handleClearFilters}
-                resultCount={filteredResults.length}
-              />
-
-              {/* Results */}
-              <div className="flex-1 min-w-0">
-                {isSearching && results.length === 0 ? (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {Array.from({ length: 6 }).map((_, i) => (
-                      <ProductSkeleton key={i} />
-                    ))}
-                  </div>
-                ) : filteredResults.length > 0 ? (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {filteredResults.map((product) => (
-                      <ProductCard key={product.id} product={product} />
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState message="Nenhum produto encontrado com os filtros selecionados." />
-                )}
-              </div>
-            </div>
-          )}
+    <PageShell>
+      <div className="max-w-7xl mx-auto">
+        {/* Search Bar */}
+        <div className="mb-6">
+          <SearchBar
+            onSearch={handleSearch}
+            className="w-full max-w-md"
+          />
         </div>
-      </main>
 
-      {/* Mobile Nav */}
-      <MobileNav />
-    </div>
+        {/* Progress indicator */}
+        {isSearching && progress && (
+          <div className="mb-4 p-3 rounded-md bg-surface-container text-text-secondary text-label-sm">
+            Buscando em {progress.store}... ({progress.current}/{progress.total})
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="mb-4 p-3 rounded-md bg-error-container text-on-error-container text-label-bold">
+            {error}
+          </div>
+        )}
+
+        {/* Content: Search prompts or Results */}
+        {!searchQuery.trim() ? (
+          <EmptyState
+            icon={SearchIcon}
+            message="Busque por produtos em tempo real"
+          />
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Filters */}
+            <SearchFilters
+              minDiscount={minDiscount}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              onMinDiscountChange={setMinDiscount}
+              onMinPriceChange={setMinPrice}
+              onMaxPriceChange={setMaxPrice}
+              onClear={handleClearFilters}
+              resultCount={filteredResults.length}
+            />
+
+            {/* Results */}
+            <div className="flex-1 min-w-0">
+              {isSearching && results.length === 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <ProductSkeleton key={i} />
+                  ))}
+                </div>
+              ) : filteredResults.length > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {filteredResults.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState message="Nenhum produto encontrado com os filtros selecionados." />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </PageShell>
   );
 }

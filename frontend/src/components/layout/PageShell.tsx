@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { clsx } from 'clsx';
 import { Header } from './Header';
 import { MobileNav } from './MobileNav';
+import { WhatsAppDrawer } from '../ui/WhatsAppFloat';
 
 interface PageShellProps {
   children: ReactNode;
@@ -9,9 +11,11 @@ interface PageShellProps {
 }
 
 export function PageShell({ children, sidebar }: PageShellProps) {
+  const [isWhatsAppOpen, setIsWhatsAppOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-app-bg text-text-primary transition-colors duration-300">
-      <Header />
+      <Header onToggleWhatsApp={() => setIsWhatsAppOpen(true)} />
 
       <div className="flex overflow-hidden">
         {/* Sidebar — desktop only */}
@@ -38,6 +42,9 @@ export function PageShell({ children, sidebar }: PageShellProps) {
 
       {/* Mobile bottom nav */}
       <MobileNav />
+
+      {/* WhatsApp Drawer */}
+      <WhatsAppDrawer isOpen={isWhatsAppOpen} onClose={() => setIsWhatsAppOpen(false)} />
     </div>
   );
 }

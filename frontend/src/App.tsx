@@ -9,7 +9,6 @@ import { CreatedLinks } from './pages/CreatedLinks';
 import { Notifications } from './pages/Notifications';
 import { Search } from './pages/Search';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { WhatsAppFloat } from './components/ui/WhatsAppFloat';
 
 function App() {
   return (
@@ -54,7 +53,6 @@ function App() {
           />
         </Routes>
       </AuthProvider>
-      <WhatsAppFloat />
     </BrowserRouter>
   );
 }

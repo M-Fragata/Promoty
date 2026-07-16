@@ -3,8 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { Button } from '../components/ui/Button';
-import { Header } from '../components/layout/Header';
-import { MobileNav } from '../components/layout/MobileNav';
+import { PageShell } from '../components/layout/PageShell';
 
 type TabType = 'login' | 'register';
 
@@ -82,12 +81,9 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-app-bg">
-      {/* Header */}
-      <Header />
-
+    <PageShell>
       {/* Content */}
-      <div className="flex items-center justify-center p-4 pt-24 pb-24">
+      <div className="flex items-center justify-center">
         <div className="w-full max-w-md">
 
           {/* Card */}
@@ -268,9 +264,6 @@ export function Login() {
           </div>
         </div>
       </div>
-
-      {/* Mobile Nav */}
-      <MobileNav />
-    </div>
+    </PageShell>
   );
 }

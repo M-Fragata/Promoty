@@ -139,16 +139,12 @@ export class WhatsAppService {
             const success = await this.executeRealSend(targetJid, text, imageUrl);
             resolve(success);
 
+            const min = 14000
+            const max = 20000
+            const DELAY_BETWEEN_MESSAGES = Math.floor(Math.random() * (max - min + 1)) + min;
             const remaining = fila.length;
-            if (remaining > 0) {
-                const min = 14000
-                const max = 20000
-                const DELAY_BETWEEN_MESSAGES = Math.floor(Math.random() * (max - min + 1)) + min;
-
-                console.log(`🎲 [Fila WPP - ${targetJid.substring(0, 10)}...] Cadência humana: ${(DELAY_BETWEEN_MESSAGES / 1000).toFixed(1)}s. Restam ${remaining} itens.`)
-
-                await new Promise(res => setTimeout(res, DELAY_BETWEEN_MESSAGES));
-            }
+            console.log(`🎲 [Fila WPP - ${targetJid.substring(0, 10)}...] Cadência humana: ${(DELAY_BETWEEN_MESSAGES / 1000).toFixed(1)}s. Restam ${remaining} itens.`)
+            await new Promise(res => setTimeout(res, DELAY_BETWEEN_MESSAGES));
         }
 
         this.processingMap.set(jid, false);

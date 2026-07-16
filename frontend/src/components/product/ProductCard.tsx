@@ -11,9 +11,10 @@ import type { MlProducts } from '../../types/product';
 
 interface ProductCardProps {
   product: MlProducts;
+  onFavoriteChange?: (productId: string, isFavorited: boolean) => void;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, onFavoriteChange }: ProductCardProps) {
   const navigate = useNavigate();
   const { discount, info } = parseBadge(product.badge);
 
@@ -43,7 +44,11 @@ export function ProductCard({ product }: ProductCardProps) {
           title={product.title}
           store={product.store}
         >
-          <FavoriteButton productId={product.id} size="sm" />
+          <FavoriteButton
+            productId={product.id}
+            size="sm"
+            onFavoriteChange={(isFavorited) => onFavoriteChange?.(product.id, isFavorited)}
+          />
         </ProductCardImage>
       </div>
 

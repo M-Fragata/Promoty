@@ -8,6 +8,7 @@ interface FavoriteButtonProps {
   productId: string;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
+  onFavoriteChange?: (isFavorited: boolean) => void;
 }
 
 const sizeStyles = {
@@ -26,6 +27,7 @@ export function FavoriteButton({
   productId,
   className,
   size = 'md',
+  onFavoriteChange,
 }: FavoriteButtonProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -62,9 +64,11 @@ export function FavoriteButton({
         if (isFavorited) {
           await api.removeFavorite(productId);
           setIsFavorited(false);
+          onFavoriteChange?.(false);
         } else {
           await api.addFavorite(productId);
           setIsFavorited(true);
+          onFavoriteChange?.(true);
         }
       } catch (error) {
         console.error('Erro ao atualizar favorito:', error);
@@ -72,7 +76,7 @@ export function FavoriteButton({
         setIsLoading(false);
       }
     },
-    [productId, isFavorited, isAuthenticated, isLoading]
+    [productId, isFavorited, isAuthenticated, isLoading, onFavoriteChange]
   );
 
   return (

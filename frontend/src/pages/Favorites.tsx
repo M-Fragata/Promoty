@@ -13,6 +13,7 @@ export function Favorites() {
   const [favorites, setFavorites] = useState<MlProducts[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -36,7 +37,13 @@ export function Favorites() {
         setError(err.message || 'Erro ao carregar favoritos');
         setIsLoading(false);
       });
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, refreshKey]);
+
+  const handleFavoriteChange = (_productId: string, isFavorited: boolean) => {
+    if (!isFavorited) {
+      setRefreshKey((prev) => prev + 1);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-app-bg">
@@ -99,7 +106,11 @@ export function Favorites() {
             <div className="p-4 md:p-6">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {favorites.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onFavoriteChange={handleFavoriteChange}
+                  />
                 ))}
               </div>
             </div>

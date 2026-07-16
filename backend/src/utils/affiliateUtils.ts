@@ -75,8 +75,15 @@ export function appendAffiliateParams(url: string, store: StoreType): string {
         break;
       }
 
-      case 'shopee':
+      case 'shopee': {
+        const shopeeId = Env.SHOPEE_ID;
+        if (shopeeId) {
+          urlObj.searchParams.set('mmp_pid', `an_${shopeeId}`);
+          urlObj.searchParams.set('utm_source', `an_${shopeeId}`);
+          urlObj.searchParams.set('utm_medium', 'affiliates');
+        }
         break;
+      }
 
       case 'other':
         break;
@@ -91,8 +98,8 @@ export function appendAffiliateParams(url: string, store: StoreType): string {
 /**
  * Constrói URL final com afiliado + encurtamento (quando aplicável)
  * - ML: parâmetros de afiliado + encurta via Kutt
- * - Amazon: apenas tag de afiliado
- * - Shopee: sem alteração (já vem com afiliado da API)
+ * - Amazon: tag de afiliado
+ * - Shopee: mmp_pid + utm_source + utm_medium
  */
 export async function buildAffiliateUrl(url: string): Promise<string> {
   const store = detectStore(url);

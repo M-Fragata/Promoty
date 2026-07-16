@@ -42,11 +42,13 @@ export function Header() {
           <div className="flex h-full items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <img
-                className="w-6 h-6 rounded-xl transition: all 0.5s ease hover:scale-105 cursor-pointer"
-                src={logo}
-                alt=""
-              />
+              <a href="/">
+                <img
+                  className="w-6 h-6 rounded-xl transition: all 0.5s ease hover:scale-105 cursor-pointer"
+                  src={logo}
+                  alt="Logo Fragata Store"
+                />
+              </a>
               <h1 className="text-headline-md font-bold text-brand tracking-tight">
                 Fragata
               </h1>

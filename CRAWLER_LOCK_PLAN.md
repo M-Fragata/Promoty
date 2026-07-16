@@ -4,11 +4,11 @@
 
 O Promoty possui dois crawlers que rodam em loop contínuo:
 - **crawler-tech**: 5 tasks (Shopee Terabyte, ML, Shopee Keywords, Shopee Pichau, Amazon)
-- **crawler-casa**: 3 tasks (Shopee Keywords, ML, Amazon)
+- **crawler-casa**: 3 tasks (Amazon, Shopee Keywords, ML)
 
 **Problema:** Se ambos iniciam ao mesmo tempo, dois navegadores Playwright rodam simultaneamente, consumindo ~600MB-1GB de RAM e riscando detecção de bot.
 
-**Solução:** Mecanismo de lock via arquivo compartilhado que garante que apenas um crawler executa por vez.
+**Solução:** Mecanismo de lock via arquivo compartilhado que garante que apenas um crawler executa por vez, com cooldown de 15 minutos entre grupos.
 
 ---
 
@@ -30,14 +30,36 @@ O Promoty possui dois crawlers que rodam em loop contínuo:
 ### Fluxo de Execução
 
 ```
-:00:00 - Tech verifica lock → LIVRE → cria lock → inicia Shopee Terabyte
-:00:15 - Casa verifica lock → OCUPADO → aguarda (polling a cada 30s)
-:00:35 - Tech finaliza Shopee → deleta lock
-:00:35 - Casa verifica lock → LIVRE → cria lock → inicia Shopee Keywords
-:01:00 - Casa finaliza Shopee → deleta lock
-:01:30 - Tech verifica lock → LIVRE → cria lock → inicia ML
-...
+┌─────────────────────────────────────────────────────────────────┐
+│                        GRUPO 1 (Tech)                          │
+├─────────────────────────────────────────────────────────────────┤
+│ :00:00 - Tech: Task 1 (Shopee Terabyte, ~1min)                 │
+│ :00:01 - Tech finaliza → lock mantido (15min cooldown)         │
+│ :00:01 - Casa verifica lock → OCUPADO → aguarda                │
+│ :15:01 - Lock liberado (cooldown finalizado)                   │
+│ :15:01 - Tech: Aguarda 30min (TimeBetweenRuns)                 │
+│ :45:01 - Tech: Pode iniciar Task 2                             │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│                        GRUPO 2 (Casa)                          │
+├─────────────────────────────────────────────────────────────────┤
+│ :15:01 - Lock liberado pelo Grupo 1                            │
+│ :15:01 - Casa: Task 1 (Amazon, ~5min)                          │
+│ :15:06 - Casa finaliza → lock mantido (15min cooldown)         │
+│ :30:06 - Lock liberado                                        │
+│ :30:06 - Casa: Aguarda 30min (TimeBetweenRuns)                 │
+│ :60:06 - Casa: Pode iniciar Task 2                             │
+└─────────────────────────────────────────────────────────────────┘
 ```
+
+### Parâmetros
+
+| Parâmetro | Valor | Propósito |
+|-----------|-------|-----------|
+| `LOCK_TIMEOUT` | 20 min | 15min cooldown + 5min buffer de segurança |
+| `unlockWithDelay` | 15 min | Cooldown entre grupos (previne scraping consecutivo) |
+| `TimeBetweenRuns` | 30 min | Cooldown intra-grupo (próxima task do mesmo crawler) |
 
 ---
 
@@ -53,7 +75,7 @@ Módulo responsável pelo gerenciamento do lock.
 import fs from 'fs';
 
 const LOCK_FILE = '/tmp/crawler.lock';
-const LOCK_TIMEOUT = 10 * 60 * 1000; // 10 minutos (timeout de segurança)
+const LOCK_TIMEOUT = 20 * 60 * 1000;  // 20 minutos (15min cooldown + 5min buffer)
 
 interface LockData {
     pid: number;
@@ -71,7 +93,7 @@ export class CrawlerLock {
             const lockData: LockData = JSON.parse(fs.readFileSync(LOCK_FILE, 'utf-8'));
             const age = Date.now() - lockData.timestamp;
             
-            // Se lock expirou (>10min), remove
+            // Se lock expirou (>20min), remove
             if (age > LOCK_TIMEOUT) {
                 console.warn(`⚠️ Lock expirado (${Math.round(age/60000)}min). Removendo...`);
                 fs.unlinkSync(LOCK_FILE);
@@ -123,7 +145,16 @@ export class CrawlerLock {
         }
     }
     
-    // Remove o lock
+    // Unlock com cooldown - MANTÉM LOCK POR 15 MINUTOS ANTES DE LIBERAR
+    // Isso previne que outro crawler inicie imediatamente após a task finalizar
+    static async unlockWithDelay(cooldownMinutes: number = 15): Promise<void> {
+        console.log(`⏳ Cooldown de ${cooldownMinutes}min iniciado. Lock mantido...`);
+        await new Promise(r => setTimeout(r, cooldownMinutes * 60 * 1000));
+        this.unlock();
+        console.log(`🔓 Cooldown finalizado. Lock liberado.`);
+    }
+    
+    // Remove o lock imediatamente
     static unlock(): void {
         try {
             if (fs.existsSync(LOCK_FILE)) {
@@ -179,7 +210,7 @@ Adicionar lock antes e depois de cada task.
 |-------|---------|
 | Imports | Adicionar `import { CrawlerLock } from '../utils/crawlerLock.js';` |
 | Loop principal | Adicionar `waitForUnlock()` + `lock()` antes da task |
-| Após task | Adicionar `unlock()` no bloco `finally` |
+| Após task | Adicionar `unlockWithDelay(15)` no bloco `finally` |
 
 #### Código atual (linhas 22-49):
 
@@ -239,8 +270,8 @@ while (true) {
 
         indiceTarefaAtual = (indiceTarefaAtual + 1) % tarefas.length;
     } finally {
-        // SEMPRE libera o lock, mesmo se der erro
-        CrawlerLock.unlock();
+        // Cooldown de 15min antes de liberar lock
+        await CrawlerLock.unlockWithDelay(15);
     }
 
     console.log(`⏳ [Tech] Tarefa concluída. Aguardando ${TimeBetweenRuns} minutos...`);
@@ -252,15 +283,28 @@ while (true) {
 
 ### 3. MODIFICAR: `src/scripts/crawler-casa.ts`
 
-Mesmas alterações do Tech.
+Mesmas alterações do Tech, com reordenação das tasks.
 
 #### Mudanças necessárias:
 
 | Local | Mudança |
 |-------|---------|
 | Imports | Adicionar `import { CrawlerLock } from '../utils/crawlerLock.js';` |
+| Array tarefas | **Reordenar**: Amazon → Shopee Keywords → ML |
 | Loop principal | Adicionar `waitForUnlock()` + `lock()` antes da task |
-| Após task | Adicionar `unlock()` no bloco `finally` |
+| Após task | Adicionar `unlockWithDelay(15)` no bloco `finally` |
+
+#### Nova ordem das tasks:
+
+```typescript
+// NOVA ORDEM: Amazon → Shopee Keywords → ML
+// Isso evita que Casa comece com a mesma loja que Tech finalizou
+const tarefas: Array<() => any> = [
+    executAmazon,           // 1º Amazon (Playwright - lento)
+    executShopeeKeywords,   // 2º Shopee (API rápida)
+    executMercadoLivre,     // 3º Mercado Livre (Playwright - lento)
+];
+```
 
 #### Código atual (linhas 21-48):
 
@@ -320,8 +364,8 @@ while (true) {
 
         indiceTarefaAtual = (indiceTarefaAtual + 1) % tarefas.length;
     } finally {
-        // SEMPRE libera o lock
-        CrawlerLock.unlock();
+        // Cooldown de 15min antes de liberar lock
+        await CrawlerLock.unlockWithDelay(15);
     }
 
     console.log(`⏳ [Casa] Tarefa concluída. Aguardando ${TimeBetweenRuns} minutos...`);
@@ -333,12 +377,12 @@ while (true) {
 
 ## Mecanismos de Segurança
 
-### 1. Lock Timeout (10 minutos)
+### 1. Lock Timeout (20 minutos)
 
-Se um processo crashar sem liberar o lock, ele expira automaticamente após 10 minutos.
+Se um processo crashar sem liberar o lock, ele expira automaticamente após 20 minutos.
 
 ```typescript
-const LOCK_TIMEOUT = 10 * 60 * 1000; // 10 minutos
+const LOCK_TIMEOUT = 20 * 60 * 1000; // 20 minutos
 
 if (age > LOCK_TIMEOUT) {
     console.warn(`⚠️ Lock expirado. Removendo...`);
@@ -346,7 +390,20 @@ if (age > LOCK_TIMEOUT) {
 }
 ```
 
-### 2. Try/Finally
+### 2. Cooldown entre Grupos (15 minutos)
+
+Mantém o lock por 15 minutos após a task finalizar, garantindo que outro crawler não inicie imediatamente.
+
+```typescript
+static async unlockWithDelay(cooldownMinutes: number = 15): Promise<void> {
+    console.log(`⏳ Cooldown de ${cooldownMinutes}min iniciado. Lock mantido...`);
+    await new Promise(r => setTimeout(r, cooldownMinutes * 60 * 1000));
+    this.unlock();
+    console.log(`🔓 Cooldown finalizado. Lock liberado.`);
+}
+```
+
+### 3. Try/Finally
 
 Garante que o lock é liberado mesmo se ocorrer erro.
 
@@ -355,11 +412,11 @@ CrawlerLock.lock();
 try {
     await tarefa();
 } finally {
-    CrawlerLock.unlock(); // SEMPRE executa
+    await CrawlerLock.unlockWithDelay(15); // SEMPRE executa
 }
 ```
 
-### 3. Verificação de PID
+### 4. Verificação de PID
 
 Apenas o processo que criou o lock pode removê-lo.
 
@@ -372,7 +429,7 @@ static unlock(): void {
 }
 ```
 
-### 4. Polling Seguro
+### 5. Polling Seguro
 
 Verifica o lock a cada 30 segundos (não sobrecarrega o sistema).
 
@@ -392,22 +449,24 @@ static async waitForUnlock(): Promise<void> {
 ### Cenário 1: Funcionamento Normal
 
 ```
-10:00:00 - Tech verifica lock → LIVRE → cria lock
-10:00:01 - Tech executa Shopee Terabyte
-10:00:35 - Casa verifica lock → OCUPADO → aguarda
-10:05:00 - Tech finaliza → deleta lock
-10:05:01 - Casa verifica lock → LIVRE → cria lock
-10:05:02 - Casa executa Shopee Keywords
-10:10:00 - Casa finaliza → deleta lock
+:00:00 - Tech cria lock → inicia Shopee Terabyte
+:00:01 - Tech finaliza → lock mantido (15min cooldown)
+:00:01 - Casa verifica lock → OCUPADO → aguarda
+:15:01 - Lock liberado
+:15:01 - Casa cria lock → inicia Amazon
+:15:06 - Casa finaliza → lock mantido (15min cooldown)
+:30:06 - Lock liberado
+:30:06 - Tech: TimeBetweenRuns (30min) já em andamento
+:45:06 - Tech cria lock → inicia ML
 ```
 
 ### Cenário 2: Processo Crasha
 
 ```
-10:00:00 - Tech cria lock
-10:00:01 - Tech crasha (não deleta lock)
-10:00:35 - Casa verifica lock → OCUPADO → aguarda
-10:10:01 - Lock expira (>10min) → Casa pode rodar
+:00:00 - Tech cria lock
+:00:01 - Tech crasha (não deleta lock)
+:00:01 - Casa verifica lock → OCUPADO → aguarda
+:20:01 - Lock expira (>20min) → Casa pode rodar
 ```
 
 ### Cenário 3: Manutenção
@@ -418,6 +477,15 @@ pm2 stop crawler-casa
 
 # Tech continua funcionando normalmente
 # Casa não tenta rodar (processo parado)
+```
+
+### Cenário 4: Cooldown Previne Scraping Consecutivo
+
+```
+:00:00 - Tech inicia ML (lento, ~5min)
+:00:05 - Tech finaliza ML → lock mantido (15min cooldown)
+:00:05 - Casa verifica lock → OCUPADO → aguarda
+:15:05 - Lock liberado → Casa pode iniciar (evita ML consecutivo)
 ```
 
 ---
@@ -523,9 +591,9 @@ cat /tmp/crawler.lock
 
 | Arquivo | Ação | Linhas Aprox. |
 |---------|------|---------------|
-| `src/utils/crawlerLock.ts` | **CRIAR** | ~70 linhas |
-| `src/scripts/crawler-tech.ts` | **MODIFICAR** | ~10 linhas |
-| `src/scripts/crawler-casa.ts` | **MODIFICAR** | ~10 linhas |
+| `src/utils/crawlerLock.ts` | **CRIAR** | ~85 linhas |
+| `src/scripts/crawler-tech.ts` | **MODIFICAR** | +5 linhas (import + lock + finally) |
+| `src/scripts/crawler-casa.ts` | **MODIFICAR** | +5 linhas + reordenar array |
 
 **Total:** 1 arquivo novo + 2 arquivos modificados
 
@@ -535,7 +603,7 @@ cat /tmp/crawler.lock
 
 - [ ] Criar `src/utils/crawlerLock.ts`
 - [ ] Modificar `src/scripts/crawler-tech.ts` (adicionar imports + lock)
-- [ ] Modificar `src/scripts/crawler-casa.ts` (adicionar imports + lock)
+- [ ] Modificar `src/scripts/crawler-casa.ts` (adicionar imports + lock + reordenar tasks)
 - [ ] Verificar compilação TypeScript
 - [ ] Testar localmente (dois terminais)
 - [ ] Commit das mudanças
@@ -550,7 +618,8 @@ cat /tmp/crawler.lock
 |-----------|-----------|
 | ✅ **Zero sobreposição** | Lock garante apenas um scraper por vez |
 | ✅ **Manutenção independente** | `pm2 stop crawler-casa` não afeta Tech |
-| ✅ **Segurança** | Timeout evita locks para sempre |
+| ✅ **Segurança** | Timeout de 20min evita locks para sempre |
+| ✅ **Cooldown entre grupos** | 15min previne scraping consecutivo da mesma loja |
 | ✅ **Simplicidade** | Poucas mudanças no código |
 | ✅ **Robustez** | Try/finally garante liberação |
 | ✅ **Race condition resolvido** | Flag `wx` garante criação atômica |
@@ -561,9 +630,50 @@ cat /tmp/crawler.lock
 
 | Desvantagem | Mitigação |
 |-------------|-----------|
-| **Complexidade adicional** | Apenas 1 arquivo novo (~70 linhas) |
+| **Complexidade adicional** | Apenas 1 arquivo novo (~85 linhas) |
 | **Dependência do sistema de arquivos** | `/tmp/` é padrão em Linux/Mac; alternativa para Windows: `os.tmpdir()` |
 | **Não escala para múltiplos servidores** | Para escala futura, usar Redis ou DB para lock distribuído |
 | **Debug mais difícil** | Logs claros em cada operação de lock |
 | **Delay de 0-30s antes de cada task** | Polling a cada 30s é aceitável para este caso |
+| **Lock timeout de 20min** | Aceitável; se crashar, lock expira em 20min |
 | **Race condition** | ✅ **RESOLVIDO** com flag `wx` (operação atômica) |
+
+---
+
+## Discussão sobre LOCK_TIMEOUT
+
+### Valor Atual: 20 minutos
+
+O `LOCK_TIMEOUT` é o tempo máximo que um lock pode ficar ativo antes de ser considerado expirado e removido automaticamente.
+
+### Por que 20 minutos?
+
+1. **Cooldown de 15min** - O lock fica ativo durante o cooldown entre grupos
+2. **Buffer de 5min** - Margem de segurança para variações de tempo
+
+### Cenários de Uso
+
+| Cenário | LOCK_TIMEOUT | Comportamento |
+|---------|--------------|---------------|
+| **Funcionamento normal** | 20min | Lock é removido após cooldown (15min) |
+| **Processo crasha** | 20min | Lock expira após 20min (recuperação lenta) |
+| **Manutenção** | 20min | `pm2 stop` + `rm /tmp/crawler.lock` |
+
+### Alternativas
+
+| Alternativa | Prós | Contras |
+|-------------|------|---------|
+| **LOCK_TIMEOUT = 5min** | Recuperação rápida de crash | Lock expira antes do cooldown (15min) |
+| **LOCK_TIMEOUT = 30min** | Margem maior | Recuperação muito lenta |
+| **LOCK_TIMEOUT = 20min** | Equilíbrio | Recuperação em 20min |
+
+### Recomendação
+
+Manter `LOCK_TIMEOUT = 20min` é a melhor opção porque:
+1. Cobrem o cooldown de 15min com margem de segurança
+2. Recuperação de crash em 20min é aceitável (crawlers rodam em loop)
+3. Se precisar de recuperação mais rápida, usar `pm2 restart` ou `forceUnlock()`
+
+### Pergunta para Discussão
+
+Você prefere manter 20min ou ajustar para outro valor?

@@ -79,7 +79,7 @@ export const modaFeminina: NicheConfig = {
     // Outros
     "infantil", "pet", "cachorro", "gato", "bebedouro pet"
   ],
-  limitedWords: [""],
+  limitedWords: ["mini ventilador"],
   minDiscount: 30,
   maxPrice: 4500,
   mlCategoryIds: [

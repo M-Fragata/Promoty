@@ -32,7 +32,12 @@ async function executarRobo() {
         await CrawlerLock.waitForUnlock();
 
         // Pega o lock
-        CrawlerLock.lock();
+        const locked = CrawlerLock.lock();
+        if (!locked) {
+            console.log(`⚠️ [Casa] Lock não adquirido. Pulando ciclo...`);
+            await delay(30);
+            continue;
+        }
 
         try {
             // Pega a função da vez baseada no índice atual
@@ -133,25 +138,23 @@ async function executAmazon() {
         console.log("📦 [Casa/Amazon] Iniciando varredura com fluxo assíncrono...");
         const tempoInicioAmazon = Date.now();
 
-        await scraper.AcessAmazon(async (produtosParciais) => {
+        await scraper.AcessAmazon((produtosParciais) => {
 
             console.log(`⚡ [Casa/Amazon] Lote de ${produtosParciais.length} recebido! Enviando para API local...`);
 
-            try {
-                const response = await fetch("http://localhost:3333/ofertas/amazon", {
-                    method: "POST",
-                    headers: { "Content-type": "application/json" },
-                    body: JSON.stringify(produtosParciais)
+            fetch("http://localhost:3333/ofertas/amazon", {
+                method: "POST",
+                headers: { "Content-type": "application/json" },
+                body: JSON.stringify(produtosParciais)
+            })
+                .then(async (response) => {
+                    if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`);
+                    console.log(`✅ [Casa/Amazon] Lote de ${produtosParciais.length} produtos processado pela API com sucesso!`);
+                })
+                .catch((err) => {
+                    console.error("❌ [Casa/Amazon] Erro ao enviar lote parcial para a API:", err.message);
                 });
 
-                if (!response.ok) {
-                    throw new Error(`${response.status} - ${response.statusText}`);
-                }
-
-                console.log(`✅ [Casa/Amazon] Lote de ${produtosParciais.length} produtos processado com sucesso!`);
-            } catch (err: any) {
-                console.error("❌ [Casa/Amazon] Erro ao enviar lote parcial para a API:", err.message);
-            }
         });
 
         const tempoFimAmazon = Date.now();

@@ -32,7 +32,12 @@ async function executarRobo() {
         await CrawlerLock.waitForUnlock();
 
         // Pega o lock
-        CrawlerLock.lock();
+        const locked = CrawlerLock.lock();
+        if (!locked) {
+            console.log(`⚠️ [Tech] Lock não adquirido. Pulando ciclo...`);
+            await delay(30);
+            continue;
+        }
 
         try {
             // Pega a função da vez baseada no índice atual

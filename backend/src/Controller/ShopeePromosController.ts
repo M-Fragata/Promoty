@@ -154,7 +154,7 @@ export class ShopeePromosController {
                 produtos.push(...produtosShopee)
 
                 if (produtos.length > 0) {
-                    //shopeeController.processProductsShopee(produtos);
+                    shopeeController.processProductsShopee(produtos);
                     console.log(`🚀 [Shopee Keywords] Enviados ${produtos.length} produtos em oferta para processamento.`);
                 } else {
                     console.log(`♻️ [Shopee Keywords] Varredura concluída, mas nenhuma oferta bateu os critérios de >30% OFF.`);

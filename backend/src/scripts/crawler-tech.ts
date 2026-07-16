@@ -1,4 +1,5 @@
 import { AccesWeb } from '../Services/AcessWebService.js';
+import { CrawlerLock } from '../utils/crawlerLock.js';
 
 const delay = (minutos: number) => new Promise(resolve => setTimeout(resolve, minutos * 60 * 1000))
 
@@ -27,21 +28,32 @@ async function executarRobo() {
             continue;
         }
 
-        // Pega a função da vez baseada no índice atual
-        const tarefaDaVez = tarefas[indiceTarefaAtual];
+        // Aguarda lock livre
+        await CrawlerLock.waitForUnlock();
 
-        console.log(`\n🔔 [Tech/Novo Ciclo] Iniciando tarefa ${indiceTarefaAtual + 1} de ${tarefas.length}...`);
+        // Pega o lock
+        CrawlerLock.lock();
 
-        if (!tarefaDaVez) {
-            console.error(`❌ [Tech] Erro: Nenhuma tarefa encontrada no índice ${indiceTarefaAtual}`);
-            continue;
+        try {
+            // Pega a função da vez baseada no índice atual
+            const tarefaDaVez = tarefas[indiceTarefaAtual];
+
+            console.log(`\n🔔 [Tech/Novo Ciclo] Iniciando tarefa ${indiceTarefaAtual + 1} de ${tarefas.length}...`);
+
+            if (!tarefaDaVez) {
+                console.error(`❌ [Tech] Erro: Nenhuma tarefa encontrada no índice ${indiceTarefaAtual}`);
+                continue;
+            }
+
+            // Executa a raspagem da rede atual (aguarda finalizar a navegação/chamada base)
+            await tarefaDaVez();
+
+            // Incrementa o índice para a próxima rodada (e reseta para 0 se chegar ao fim do array)
+            indiceTarefaAtual = (indiceTarefaAtual + 1) % tarefas.length;
+        } finally {
+            // Cooldown de 15min antes de liberar lock
+            await CrawlerLock.unlockWithDelay(15);
         }
-
-        // Executa a raspagem da rede atual (aguarda finalizar a navegação/chamada base)
-        await tarefaDaVez();
-
-        // Incrementa o índice para a próxima rodada (e reseta para 0 se chegar ao fim do array)
-        indiceTarefaAtual = (indiceTarefaAtual + 1) % tarefas.length;
 
         // Aguarda os 30 minutos planejados ANTES de ir para a próxima rede da lista
         console.log(`⏳ [Tech] Tarefa concluída. Aguardando ${TimeBetweenRuns} minutos para a próxima rede... [Próxima chamada às: ${new Date(Date.now() + TimeBetweenRuns * 60 * 1000).toLocaleTimeString('pt-BR')}]`);

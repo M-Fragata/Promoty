@@ -18,7 +18,7 @@ export function CategoryChip({
       type="button"
       onClick={onClick}
       className={clsx(
-        'inline-flex items-center rounded-full px-3 py-1 text-label-bold transition-colors duration-150 whitespace-nowrap',
+        'cursor-pointer inline-flex items-center rounded-full px-3 py-1 text-label-bold transition-colors duration-150 whitespace-nowrap',
         active
           ? 'bg-brand text-brand-on'
           : 'bg-surface-container text-text-secondary hover:bg-surface-container-high hover:text-text-primary',

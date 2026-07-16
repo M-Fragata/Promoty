@@ -24,6 +24,16 @@ export function getStoreInfo(store: string) {
   };
 }
 
+export const CATEGORIES = [
+  'Todos',
+  'Eletrônicos',
+  'Casa',
+  'Moda',
+  'Beleza',
+] as const;
+
+export type CategoryOption = (typeof CATEGORIES)[number];
+
 export const SORT_OPTIONS = [
   { value: 'discount', label: 'Maior desconto' },
   { value: 'price-asc', label: 'Menor preço' },

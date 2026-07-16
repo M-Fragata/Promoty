@@ -1,21 +1,11 @@
 import { clsx } from 'clsx';
 import { CategoryChip } from '../ui/CategoryChip';
 import { SortSelect } from '../ui/SortSelect';
-import type { SortOption } from '../../utils/constants';
-
-const CATEGORIES = [
-  'Todos',
-  'Eletrônicos',
-  'Casa',
-  'Moda',
-  'Esportes',
-  'Beleza',
-  'Infantil',
-] as const;
+import { CATEGORIES, type CategoryOption, type SortOption } from '../../utils/constants';
 
 interface SidebarProps {
-  category: string;
-  onCategoryChange: (category: string) => void;
+  category: CategoryOption;
+  onCategoryChange: (category: CategoryOption) => void;
   sortBy: SortOption;
   onSortChange: (sortBy: SortOption) => void;
   resultCount: number;

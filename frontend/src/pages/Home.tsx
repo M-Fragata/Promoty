@@ -10,19 +10,12 @@ import { SortSelect } from '../components/ui/SortSelect';
 import { Pagination } from '../components/ui/Pagination';
 import { useDeals } from '../hooks/useDeals';
 import { useFilters } from '../hooks/useFilters';
-
-const CATEGORIES = [
-  'Todos',
-  'Eletrônicos',
-  'Casa',
-  'Moda',
-  'Esportes',
-  'Beleza',
-  'Infantil',
-] as const;
+import { CATEGORIES } from '../utils/constants';
+import type { CategoryOption } from '../utils/constants';
 
 export function Home() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [category, setCategory] = useState<CategoryOption>('Todos');
 
   const {
     products,
@@ -31,9 +24,9 @@ export function Home() {
     pagination,
     currentPage,
     goToPage,
-  } = useDeals(searchQuery);
+  } = useDeals(searchQuery, category);
 
-  const { category, sortBy, filteredProducts, setCategory, setSortBy } =
+  const { sortBy, filteredProducts, setSortBy } =
     useFilters(products);
 
   const handlePageChange = useCallback(

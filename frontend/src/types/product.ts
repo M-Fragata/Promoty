@@ -11,6 +11,7 @@ export interface MlProducts {
   link: string;
   store: string;
   installments: string | null;
+  category?: string | null;
   description?: string | null;
   rating?: number | null;
   reviewCount?: number | null;
@@ -38,6 +39,7 @@ export const MlProductsSchema: z.ZodType<MlProducts> = z.lazy(() =>
     link: z.string().url(),
     store: z.string(),
     installments: z.string().nullable(),
+    category: z.string().nullable().optional(),
     description: z.string().nullable().optional(),
     rating: z.number().nullable().optional(),
     reviewCount: z.number().nullable().optional(),

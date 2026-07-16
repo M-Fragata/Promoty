@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, CreditCard, ExternalLink } from 'lucide-react';
+import { ShoppingCart, CreditCard, ExternalLink } from 'lucide-react';
 import { FavoriteButton } from '../components/product/FavoriteButton';
 import { ShareButton } from '../components/product/ShareButton';
 import { RelatedProducts } from '../components/product/RelatedProducts';

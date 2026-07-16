@@ -6,6 +6,8 @@ import { Login } from './pages/Login';
 import { Favorites } from './pages/Favorites';
 import { Profile } from './pages/Profile';
 import { CreatedLinks } from './pages/CreatedLinks';
+import { Notifications } from './pages/Notifications';
+import { Search } from './pages/Search';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 function App() {
@@ -16,6 +18,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/produto/:id" element={<ProductDetail />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/buscar" element={<Search />} />
           <Route
             path="/favoritos"
             element={
@@ -29,6 +32,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreatedLinks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/notificacoes"
+            element={
+              <ProtectedRoute>
+                <Notifications />
               </ProtectedRoute>
             }
           />

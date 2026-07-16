@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Search, Heart, User, Menu, X } from 'lucide-react';
+import { Home, Search, Heart, User, Menu, X, Bell, BellOff } from 'lucide-react';
 import { clsx } from 'clsx';
-import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '../../contexts/AuthContext';
 import logo from '../../assets/fragatalogo.png';
 
@@ -22,6 +21,7 @@ const NAV_ITEMS: NavItem[] = [
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();
@@ -54,9 +54,18 @@ export function Header() {
 
             {/* Actions */}
             <div className="flex items-center gap-3">
-              {/* Mobile: ThemeToggle */}
+              {/* Mobile: Notification Bell */}
               <div className="lg:hidden">
-                <ThemeToggle />
+                <button
+                  type="button"
+                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                  className="p-2 rounded-md bg-surface-container text-text-secondary hover:bg-surface-container-high hover:text-text-primary transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:ring-offset-2 focus:ring-offset-app-bg"
+                  aria-label="Notificações"
+                  title="Notificações"
+                >
+                  <Bell className="w-5 h-5" />
+                  <span className="sr-only">Notificações</span>
+                </button>
               </div>
 
               {/* Desktop: Hamburger Menu */}
@@ -109,7 +118,74 @@ export function Header() {
                   </button>
                 );
               })}
+
+              {/* Notification item */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate('/notificacoes');
+                }}
+                className={clsx(
+                  'cursor-pointer flex items-center gap-3 px-4 py-3 transition-colors duration-150 w-full text-left',
+                  location.pathname === '/notificacoes'
+                    ? 'text-brand bg-surface-container-low'
+                    : 'text-text-primary hover:bg-surface-container-low'
+                )}
+              >
+                <Bell className="w-5 h-5" />
+                <span className="font-label-bold text-label-bold">Notificações</span>
+              </button>
             </nav>
+          </div>
+        </>
+      )}
+
+      {/* Mobile Notification Dropdown */}
+      {isNotificationOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
+            onClick={() => setIsNotificationOpen(false)}
+          />
+
+          {/* Notification Panel */}
+          <div className="fixed top-16 right-4 z-50 w-72 bg-card-bg border border-card-border rounded-xl shadow-lg overflow-hidden lg:hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-card-border">
+              <h2 className="font-label-bold text-label-bold text-text-primary">Notificações</h2>
+              <button
+                type="button"
+                onClick={() => setIsNotificationOpen(false)}
+                className="cursor-pointer p-1 rounded-md hover:bg-surface-container-high transition-colors text-text-secondary"
+                aria-label="Fechar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Empty State */}
+            <div className="flex flex-col items-center justify-center py-8 px-4">
+              <BellOff className="w-10 h-10 text-text-secondary mb-3" />
+              <p className="text-body-md text-text-secondary text-center">
+                Nenhuma notificação no momento
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-card-border">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsNotificationOpen(false);
+                  navigate('/notificacoes');
+                }}
+                className="cursor-pointer w-full px-4 py-3 text-center text-brand font-medium hover:bg-surface-container-low transition-colors"
+              >
+                Ver todas as notificações
+              </button>
+            </div>
           </div>
         </>
       )}

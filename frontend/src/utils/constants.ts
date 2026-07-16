@@ -42,3 +42,19 @@ export const SORT_OPTIONS = [
 ] as const;
 
 export type SortOption = (typeof SORT_OPTIONS)[number]['value'];
+
+export interface WhatsAppGroup {
+  name: string;
+  url: string;
+}
+
+export const WHATSAPP_GROUPS: WhatsAppGroup[] = [
+  {
+    name: 'Fragata | Gamers',
+    url: import.meta.env.VITE_WHATSAPP_GROUP_GAMERS || '#',
+  },
+  {
+    name: 'Fragata | Estilo & Lar',
+    url: import.meta.env.VITE_WHATSAPP_GROUP_ESTILO || '#',
+  },
+].filter((g) => g.url !== '#');

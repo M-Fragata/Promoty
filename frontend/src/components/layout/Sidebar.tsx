@@ -1,7 +1,8 @@
+import { MessageCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { CategoryChip } from '../ui/CategoryChip';
 import { SortSelect } from '../ui/SortSelect';
-import { CATEGORIES, type CategoryOption, type SortOption } from '../../utils/constants';
+import { CATEGORIES, WHATSAPP_GROUPS, type CategoryOption, type SortOption } from '../../utils/constants';
 
 interface SidebarProps {
   category: CategoryOption;
@@ -50,6 +51,27 @@ export function Sidebar({
         <h2 className="text-label-bold text-text-primary mb-3">Ordenar</h2>
         <SortSelect value={sortBy} onChange={onSortChange} />
       </div>
+
+      {/* WhatsApp Groups */}
+      {WHATSAPP_GROUPS.length > 0 && (
+        <div>
+          <h2 className="text-label-bold text-text-primary mb-3">Nossos Grupos</h2>
+          <div className="flex flex-col gap-2">
+            {WHATSAPP_GROUPS.map((group) => (
+              <a
+                key={group.name}
+                href={group.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-label-sm text-brand hover:underline transition-colors"
+              >
+                <MessageCircle className="w-4 h-4 shrink-0" />
+                {group.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -4,13 +4,14 @@
  */
 const SHORTENER_DOMAINS = [
   // Amazon shorteners
-  'amzn.to',
+  'amzn',
   'a.co',
-  'amzn.com',
   // Shopee share link
   's.shopee',
+  'shope.ee',
+  'shp.ee',
   //mercadolivre share link
-  'meli.la'
+  'meli'
 ];
 
 /**

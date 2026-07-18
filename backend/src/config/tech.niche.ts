@@ -26,7 +26,7 @@ export const techNiche: NicheConfig = {
     "case", "suporte de celular", "suporte celular", "suporte p/ celular", "suporte para celular", "fashion",
     "suporte tablet", "infantil", "rato", "bebedouros", "bebedouro",
     "conversor", "lapela", "ddr2", "ddr3", "suporte gpu",
-    "mulher", "feminino", "ventilador de m", "mini ventilador", "mala de bordo"
+    "mulher", "feminino", "ventilador de m", "mini ventilador", "mala de bordo", "papel fotografico", "papel fotográfico"
   ],
   limitedWords: ["Carregador", "smartwatch", "power bank"],
   minDiscount: 35,

@@ -71,16 +71,15 @@ export const modaFeminina: NicheConfig = {
     "gilette", "barbeador", "sabão em barra",
     // Tech (evitar cruzamento com nicho gamers)
     "ferramenta", "parafuso", "broca", "serra", "furadeira",
-    "ddr2", "ddr3", "ddr4", "ddr5", "placa de vídeo", "placa de video",
+    "ddr2", "ddr3", "ddr4", "ddr5", "placa de vídeo", "placa de video", "aparador de pelos",
     "processador", "memória ram", "memoria ram", "fonte para pc",
     "gabinete gamer", "water cooler", "cooler",
-    "mouse gamer", "teclado gamer", "monitor", "notebook",
-    "celular", "smartphone", "ssd", "hd externo",
+    "mouse gamer", "teclado gamer", "monitor", "ssd", "hd externo", "digitalizadora", "cabo smartwatch", "tela para", "pelicula", "película", "suporte de celular", "suporte celular", "suporte p/ celular", "suporte para celular", "suporte tablet",
     // Outros
-    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório"
+    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório", "combo poderoso", "caderno", "ventilador de mão"
   ],
   limitedWords: ["mini ventilador"],
-  minDiscount: 30,
+  minDiscount: 40,
   maxPrice: 4500,
   mlCategoryIds: [
     "MLB1579", // Casa, Móveis e Decoração
@@ -144,7 +143,7 @@ export const modaFeminina: NicheConfig = {
     ["secador de cabelo", "secador", "chapinha", "chapinha profissional", "babyliss", "escova alisadora", "escova rotativa", "escova secadora"],
 
     // Grupo 9: Casa & Móveis (REESCRITO - mais específicos)
-    ["sofá retrátil", "sofá", "poltrona conforto", "poltrona", "mesa de jantar", "mesa", "estante organização", "estante", "armário", "armario", "rack tv", "rack", "gaveteiro", "criado mudo", "prateleira"],
+    ["sofá retrátil", "sofá", "poltrona conforto", "poltrona", "mesa de jantar", "mesa", "estante organização", "estante", "armário", "armario", "rack tv", "rack", "gaveteiro", "criado mudo", "prateleira", "tv", "smartphone"],
 
     // Grupo 10: Eletrodomésticos (CORRIGIDO - com variações)
     ["air fryer", "airfryer", "fritadeira air fryer", "aspirador robô", "aspirador robot", "aspirador portátil", "aspirador", "ventilador", "liquidificador", "cafeteira", "sanduicheira", "microondas", "máquina de lavar", "maquina de lavar"]

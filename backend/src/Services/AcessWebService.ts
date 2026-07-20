@@ -16,6 +16,21 @@ const USER_AGENTS = [
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
 ]
 
+const AMAZON_TRACKING_SCRIPTS = [
+    'unagi.amazon',
+    'ue-full.amazon',
+    'fls-na.amazon',
+    'aanaxss.amazon',
+    'aax-us-east',
+    'aax-fe',
+    'csm-cj',
+    'client-telemetry',
+    'client-side-metrics',
+    'completion.amazon',
+    'm.media-amazon.com',
+    'af-in.amazon',
+];
+
 const HUMAN_DELAY = (min = 2000, max = 5000) => new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * (max - min + 1) + min)))
 
 
@@ -443,13 +458,24 @@ export class AccesWeb {
         const page = await context.newPage();
 
         try {
-            // Bloqueio de recursos desnecessários (Performance)
+            // Bloqueio de recursos desnecessários (Performance + economia de banda para proxy rotativo)
             await page.route('**/*', (route) => {
-                if (['stylesheet', 'font', 'image'].includes(route.request().resourceType())) {
+                const resourceType = route.request().resourceType();
+
+                if (['stylesheet', 'font', 'image'].includes(resourceType)) {
                     route.abort();
-                } else {
-                    route.continue();
+                    return;
                 }
+
+                if (resourceType === 'script') {
+                    const url = route.request().url();
+                    if (AMAZON_TRACKING_SCRIPTS.some(domain => url.includes(domain))) {
+                        route.abort();
+                        return;
+                    }
+                }
+
+                route.continue();
             });
 
             // Verifica se precisa retry de grupo com CAPTCHA

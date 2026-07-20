@@ -15,6 +15,7 @@ const EnvSchema = z.object({
     TELEGRAM_API_ID: z.coerce.number(),
     TELEGRAM_API_HASH: z.string(),
     AWIN_PUBLISHER_ID: z.string(),
+    AWIN_CEA_MERCHANT_ID: z.string(),
     MELI_ID: z.string(),
     TELEGRAM_SESSION: z.string(),
     MATT_TOOL: z.string(),
@@ -30,7 +31,9 @@ const EnvSchema = z.object({
     SHOPEE_API_ID: z.string(),
     SHOPEE_API_PASSWORD: z.string(),
     TELEGRAM_CHAT_ID: z.string(),
-    TELEGRAM_TOKEN: z.string()
+    TELEGRAM_TOKEN: z.string(),
+    TOKEN_AWIN: z.string()
+
 })
 
 const Envirol = EnvSchema.safeParse(process.env);

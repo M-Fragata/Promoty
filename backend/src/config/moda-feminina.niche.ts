@@ -62,6 +62,9 @@ export const modaFeminina: NicheConfig = {
     "frigideira", "forma de bolo", "tabua de corte",
     "congelador", "faqueiro", "jogo de copo",
 
+    // Eletrônicos
+    "smartphone", "celular", "notebook", "tv",
+
     //esportivo
     "whey", "creatina", "bicicleta ergométrica"
   ],

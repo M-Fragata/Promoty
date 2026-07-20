@@ -8,6 +8,7 @@ import { dispatchProductToNiches } from "../Services/NicheDispatcher.js";
 import { buildAffiliateUrl } from "../utils/affiliateUtils.js";
 import { SecondaryFunction } from "../utils/secondaryFunction.js";
 import { categorizeProduct } from "../utils/categoryClassifier.js";
+import { Env } from "../utils/Envirolment.js";
 
 const MARGEM_TOLERANCIA = 0.04
 const utils = new SecondaryFunction();
@@ -87,9 +88,13 @@ export class PromosController {
             lines.push('');
         }
 
-        // URL já vem processada do banco (affiliate + encurtado para ML)
+        // Link para a página de detalhes do produto no nosso site
         lines.push(`*Link com desconto:*`);
-        lines.push(product.link);
+        lines.push(`${Env.FRONTEND_URL}/produto/${product.id}`);
+
+        // URL já vem processada do banco (affiliate + encurtado para ML)
+        // lines.push(`*Link com desconto:*`);
+        // lines.push(product.link);
 
         if (niche?.groupInviteLink) {
             lines.push('')

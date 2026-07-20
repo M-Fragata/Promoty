@@ -32,7 +32,12 @@ const EnvSchema = z.object({
     SHOPEE_API_PASSWORD: z.string(),
     TELEGRAM_CHAT_ID: z.string(),
     TELEGRAM_TOKEN: z.string(),
-    TOKEN_AWIN: z.string()
+    TOKEN_AWIN: z.string(),
+    AWIN_DAFITI_MERCHANT_ID: z.string(),
+    AWIN_KABUM_MERCHANT_ID: z.string(),
+    AWIN_DAFITI_URL: z.string(),
+    AWIN_KABUM_URL: z.string()
+    
 
 })
 

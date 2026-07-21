@@ -2,7 +2,7 @@ import { Env } from '../utils/Envirolment.js';
 import { modaFeminina } from '../config/moda-feminina.niche.js';
 
 const VTEX_BASE_URL = 'https://www.cea.com.br/api/catalog_system/pub/products/search';
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 15;
 const LOTE_SIZE = 10;
 const DESCONTO_MINIMO = 50;
 
@@ -62,7 +62,7 @@ function extrairParcelasSemJuros(installments: VtexInstallment[]): string {
     const semJuros = installments.filter(i => i.InterestRate === 0 && i.NumberOfInstallments > 1);
 
     if (semJuros.length === 0) {
-        return 'à vista';
+        return '';
     }
 
     const maiorParcela = semJuros.reduce((max, curr) =>
@@ -101,7 +101,7 @@ function mapearProduto(product: VtexProduct): ProdutoCea | null {
     if (temBanword(product.productName)) return null;
 
     return {
-        id: product.productId,
+        id: `C&A${product.productId}`,
         title: product.productName,
         price,
         originalPrice: listPrice,
@@ -116,20 +116,18 @@ function mapearProduto(product: VtexProduct): ProdutoCea | null {
 
 export class CeaVtexService {
 
-    private cacheProdutos: ProdutoCea[] = [];
-    private contadorOffset = 0;
+    private from = 0;
 
-    private async baixarEProcessarFeed(): Promise<ProdutoCea[]> {
-        console.log('⏳ Buscando produtos C&A com desconto...');
+    buscarProximoLote = async (): Promise<ProdutoCea[]> => {
+        console.log(`⏳ Buscando produtos C&A com desconto (from: ${this.from})...`);
 
         const todosProdutos: ProdutoCea[] = [];
-        let from = 0;
 
         while (todosProdutos.length < LOTE_SIZE) {
-            const to = from + PAGE_SIZE - 1;
+            const to = this.from + PAGE_SIZE - 1;
 
-            const url = `${VTEX_BASE_URL}?O=OrderByBestDiscountDESC&_from=${from}&_to=${to}`;
-            console.log(`📄 Fetching produtos ${from} a ${to}...`);
+            const url = `${VTEX_BASE_URL}?O=OrderByBestDiscountDESC&_from=${this.from}&_to=${to}`;
+            console.log(`📄 Fetching produtos ${this.from} a ${to}...`);
 
             const response = await fetch(url);
 
@@ -141,7 +139,8 @@ export class CeaVtexService {
             const data: VtexProduct[] = await response.json();
 
             if (!data || data.length === 0) {
-                console.log(`✅ Sem mais produtos a partir do offset ${from}`);
+                console.log(`✅ Sem mais produtos a partir do offset ${this.from}`);
+                this.from = 0;
                 break;
             }
 
@@ -155,28 +154,16 @@ export class CeaVtexService {
 
             console.log(`   → ${data.length} recebidos, ${todosProdutos.length} com desconto ≥${DESCONTO_MINIMO}%`);
 
+            this.from += PAGE_SIZE;
+
             if (data.length < PAGE_SIZE) {
                 console.log(`✅ Fim dos produtos C&A`);
+                this.from = 0;
                 break;
             }
-
-            from += PAGE_SIZE;
         }
 
         console.log(`🔥 Total de produtos C&A válidos: ${todosProdutos.length}`);
         return todosProdutos;
-    }
-
-    buscarProximoLote = async (): Promise<ProdutoCea[]> => {
-        if (this.cacheProdutos.length === 0 || this.contadorOffset >= this.cacheProdutos.length) {
-            this.cacheProdutos = await this.baixarEProcessarFeed();
-            this.contadorOffset = 0;
-        }
-
-        const lote = this.cacheProdutos.slice(this.contadorOffset, this.contadorOffset + LOTE_SIZE);
-        this.contadorOffset += LOTE_SIZE;
-
-        console.log(`📦 Lote C&A entregue: ${lote.length} produtos (offset: ${this.contadorOffset})`);
-        return lote;
     };
 }

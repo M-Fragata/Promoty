@@ -134,6 +134,7 @@ export class ShopeePromosController {
                     const priceOrginalNumber = priceNumber / (1 - produto.priceDiscountRate / 100);
 
                     if (!ShopeePromosController.productMatchesAnyNiche(produto.productName, produto.priceDiscountRate, priceNumber)) return acc
+                    if (acc.some(p => p.title.toLowerCase() === produto.productName.toLowerCase())) return acc
 
                     acc.push({
                         id: produto.itemId.toString(),
@@ -226,6 +227,7 @@ export class ShopeePromosController {
                 const priceOrginalNumber = priceNumber / (1 - produto.priceDiscountRate / 100);
 
                 if (!ShopeePromosController.productMatchesAnyNiche(produto.productName, produto.priceDiscountRate, priceNumber)) return acc
+                if (acc.some(p => p.title.toLowerCase() === produto.productName.toLowerCase())) return acc
 
                 acc.push({
                     id: produto.itemId.toString(),
@@ -317,6 +319,7 @@ export class ShopeePromosController {
                 const priceOrginalNumber = priceNumber / (1 - produto.priceDiscountRate / 100);
 
                 if (!ShopeePromosController.productMatchesAnyNiche(produto.productName, produto.priceDiscountRate, priceNumber)) return acc
+                if (acc.some(p => p.title.toLowerCase() === produto.productName.toLowerCase())) return acc
 
                 acc.push({
                     id: produto.itemId.toString(),
@@ -425,6 +428,7 @@ export class ShopeePromosController {
                     const priceOriginalNumber = priceNumber / (1 - produto.priceDiscountRate / 100);
 
                     if (!ShopeePromosController.productMatchesAnyNiche(produto.productName, produto.priceDiscountRate, priceNumber)) return acc;
+                    if (acc.some(p => p.title.toLowerCase() === produto.productName.toLowerCase())) return acc;
 
                     acc.push({
                         id: produto.itemId.toString(),

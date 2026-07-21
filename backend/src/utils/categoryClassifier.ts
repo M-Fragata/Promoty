@@ -74,7 +74,7 @@ const KEYWORDS_ELETRONICOS = [
   "whey", "creatina",
 ];
 
-export type ProductCategory = "Eletrônicos" | "Casa" | "Moda" | "Beleza";
+export type ProductCategory = "Eletrônicos" | "Casa" | "Moda" | "Beleza" | "Sem Nicho";
 
 /**
  * Classifica um produto em uma categoria baseada no título e nicho.
@@ -97,5 +97,5 @@ export function categorizeProduct(title: string, nicheId?: string): ProductCateg
   if (nicheId === "casa-moda-feminina") return "Casa";
 
   // 3. Último recurso
-  return "Eletrônicos";
+  return "Sem Nicho";
 }

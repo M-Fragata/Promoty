@@ -2,6 +2,7 @@ import { Env } from '../utils/Envirolment.js';
 import { createGunzip } from 'node:zlib';
 import { Readable, Transform } from 'node:stream';
 import { parse } from 'csv-parse';
+import { modaFeminina } from '../config/moda-feminina.niche.js';
 
 export interface ProdutoDafiti {
     id: string;
@@ -50,7 +51,18 @@ function criarDecoderLatin1(): Transform {
     });
 }
 
-const LOTE_SIZE = 500;
+const LOTE_SIZE = 10;
+const DESCONTO_MINIMO = 50;
+
+function temBanword(texto: string): boolean {
+    const textLower = texto.toLowerCase();
+    return modaFeminina.banwords.some(bw => textLower.includes(bw.toLowerCase()));
+}
+
+function repeatName(text: string, products: ProdutoDafiti[]): boolean {
+    const textLower = text.toLowerCase();
+    return products.some(p => p.title.toLowerCase() === textLower);
+}
 
 export class DafitiService {
 
@@ -88,11 +100,14 @@ export class DafitiService {
             if (!precoAntigo || precoAntigo <= precoAtual || precoAtual <= 0) continue;
 
             const desconto = Math.round(((precoAntigo - precoAtual) / precoAntigo) * 100);
-            if (desconto < 70) continue;
+            if (desconto < DESCONTO_MINIMO) continue;
+
+            const titulo = corrigirEncoding(row.product_name);
+            if (temBanword(titulo) || repeatName(titulo, produtos)) continue;
 
             produtos.push({
                 id: row.aw_product_id,
-                title: corrigirEncoding(row.product_name),
+                title: titulo,
                 price: precoAtual,
                 originalPrice: precoAntigo,
                 badge: `${desconto}% OFF`,
@@ -101,10 +116,12 @@ export class DafitiService {
                 link: row.aw_deep_link,
                 store: 'Dafiti'
             });
+
+            if (produtos.length >= LOTE_SIZE) break;
         }
 
         console.log(`📋 Total de produtos analisados: ${contagem}`);
-        console.log(`🔥 Produtos com desconto (≥70%): ${produtos.length}`);
+        console.log(`🔥 Produtos com desconto (≥${DESCONTO_MINIMO}%): ${produtos.length}`);
         return produtos;
     };
 

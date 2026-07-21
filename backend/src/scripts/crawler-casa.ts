@@ -11,11 +11,12 @@ async function executarRobo() {
 
     // Definição das tarefas do nicho Casa & Moda Feminina
     // NOTA: Pichau e Terabyte são lojas Tech, NÃO são usadas neste crawler
-    // NOVA ORDEM: Amazon → Shopee Keywords → ML (evita mesma loja seguida com Tech)
+    // ORDEM: AWIN (Dafiti+C&A) → Amazon → Shopee Keywords → ML
     const tarefas: Array<() => any> = [
-        executAmazon,           // 1º Amazon (Playwright - lento)
-        executShopeeKeywords,   // 2º Shopee (API rápida)
-        executMercadoLivre,     // 3º Mercado Livre (Playwright - lento)
+        executarAwin,           // 1º AWIN: Dafiti + C&A (API rápida)
+        executAmazon,           // 2º Amazon (Playwright - lento)
+        executShopeeKeywords,   // 3º Shopee (API rápida)
+        executMercadoLivre,     // 4º Mercado Livre (Playwright - lento)
     ];
 
     let indiceTarefaAtual = 0;
@@ -66,7 +67,57 @@ async function executarRobo() {
     }
 }
 
-// 🟠 TAREFA 1: SHOPEE KEYWORDS (Casa/Moda)
+// 🟠 TAREFA 1: AWIN - DAFITI & C&A (Casa/Moda)
+async function executarAwin() {
+    await executarDafiti();
+    await executarCea();
+}
+
+async function executarDafiti() {
+    try {
+        console.log("🔍 [Casa/Dafiti] Iniciando varredura de produtos AWIN Dafiti...");
+
+        const response = await fetch("http://localhost:3333/awin/dafiti", {
+            method: "GET",
+            headers: { "Content-type": "application/json" }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error(`⚠️ [Casa/Dafiti] A API retornou erro: ${response.status}`, errorData);
+        } else {
+            const data = await response.json();
+            console.log(`✨ [Casa/Dafiti] ${data.length} produtos processados e enviados para a fila!`);
+        }
+
+    } catch (error: any) {
+        console.error("❌ [Casa/Dafiti] Falha crítica:", error.message);
+    }
+}
+
+async function executarCea() {
+    try {
+        console.log("🔍 [Casa/C&A] Iniciando varredura de produtos AWIN C&A...");
+
+        const response = await fetch("http://localhost:3333/awin/cea", {
+            method: "GET",
+            headers: { "Content-type": "application/json" }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error(`⚠️ [Casa/C&A] A API retornou erro: ${response.status}`, errorData);
+        } else {
+            const data = await response.json();
+            console.log(`✨ [Casa/C&A] ${data.length} produtos processados e enviados para a fila!`);
+        }
+
+    } catch (error: any) {
+        console.error("❌ [Casa/C&A] Falha crítica:", error.message);
+    }
+}
+
+// 🟠 TAREFA 2: SHOPEE KEYWORDS (Casa/Moda)
 async function executShopeeKeywords() {
     try {
         console.log("🔍 [Casa/Bot] Iniciando varredura de keywords na Shopee...");
@@ -88,7 +139,7 @@ async function executShopeeKeywords() {
     }
 }
 
-// 🔵 TAREFA 2: MERCADO LIVRE CRAWLER (Casa/Moda)
+// 🔵 TAREFA 3: MERCADO LIVRE CRAWLER (Casa/Moda)
 async function executMercadoLivre() {
     try {
         console.log("🌐 [Casa/Mercado Livre] Iniciando varredura com fluxo assíncrono...");
@@ -132,7 +183,7 @@ function isHorarioComercial(): boolean {
     return true
 }
 
-// 🟠 TAREFA 3: AMAZON CRAWLER (Casa/Moda)
+// 🟠 TAREFA 4: AMAZON CRAWLER (Casa/Moda)
 async function executAmazon() {
     try {
         console.log("📦 [Casa/Amazon] Iniciando varredura com fluxo assíncrono...");

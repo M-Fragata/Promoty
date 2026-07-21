@@ -1,7 +1,9 @@
 import type { Response, Request } from 'express';
 import { DafitiService } from '../../Services/DafitiAwinService.js';
+import { PromosController } from '../../Controller/PromosController.js';
 
 const dafitiService = new DafitiService();
+const promosController = new PromosController();
 
 export class DafitiController {
 
@@ -10,6 +12,8 @@ export class DafitiController {
             const inicio = Date.now();
 
             const products = await dafitiService.buscarProximoLote();
+
+            promosController.processProductsAwin(products);
 
             const fim = Date.now();
             console.log(`⏱️ Tempo total Dafiti: ${((fim - inicio) / 1000).toFixed(2)} segundos`);

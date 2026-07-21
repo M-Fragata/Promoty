@@ -79,7 +79,7 @@ export const modaFeminina: NicheConfig = {
     "gabinete gamer", "water cooler", "cooler",
     "mouse gamer", "teclado gamer", "monitor", "ssd", "hd externo", "digitalizadora", "cabo smartwatch", "tela para", "pelicula", "película", "suporte de celular", "suporte celular", "suporte p/ celular", "suporte para celular", "suporte tablet",
     // Outros
-    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório", "combo poderoso", "caderno", "ventilador de mão"
+    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório", "combo poderoso", "caderno", "ventilador de mão", "ventilador portátil" , "stitch", "gorro de tricô", "mini chapinha", "copo de liquidificador"
   ],
   limitedWords: ["mini ventilador"],
   minDiscount: 40,

@@ -340,6 +340,107 @@ export class PromosController {
         }
     }
 
+    processProductsAwin = async (products: any) => {
+        try {
+
+            if (!Array.isArray(products)) return
+
+            for (const prod of products) {
+                try {
+                    ensureCategory(prod);
+
+                    const produtoExistente = await prisma.productsMl.findUnique({
+                        where: { id: prod.id }
+                    });
+
+                    if (!produtoExistente) {
+                        await prisma.productsMl.create({ data: prod });
+
+                        console.log(`📣 [NOVA OFERTA AWIN] ${prod.title} por R$ ${prod.price} - Roteando para nichos...`);
+
+                        await this.sendToMatchingNiches(prod);
+
+                    } else {
+                        const precoHistorico = produtoExistente.price
+                        const precoNovo = prod.price
+                        const precoLimiteMaximo = precoHistorico * (1 + MARGEM_TOLERANCIA)
+
+                        if (precoNovo < precoHistorico) {
+                            console.log(`📉 [AWIN - BAIXOU REAL] ${prod.title} caiu de R$ ${precoHistorico} para R$ ${precoNovo}!`);
+
+                            prod.badge = `🔥 MENOR PREÇO HISTÓRICO! • ${prod.badge || ''}`;
+
+                            await prisma.productsMl.update({
+                                where: { id: prod.id },
+                                data: {
+                                    price: precoNovo,
+                                    originalPrice: prod.originalPrice,
+                                    badge: prod.badge,
+                                    link: prod.link,
+                                    category: prod.category
+                                }
+                            });
+
+                            await this.sendToMatchingNiches(prod);
+
+                        } else if (precoNovo <= precoLimiteMaximo) {
+                            const tempoCooldown = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+
+                            if (produtoExistente.updatedAt < tempoCooldown) {
+                                console.log(`⭐ [AWIN - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 3 dias, reenviando...`);
+
+                                prod.badge = `✨ Preço Excelente! • ${prod.badge || ''}`;
+
+                                await prisma.productsMl.update({
+                                    where: { id: prod.id },
+                                    data: {
+                                        originalPrice: prod.originalPrice,
+                                        badge: prod.badge,
+                                        link: prod.link,
+                                        category: prod.category
+                                    }
+                                });
+
+                                await this.sendToMatchingNiches(prod);
+
+                            } else {
+                                console.log(`🤫 [AWIN - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nos últimos 3 dias. Apenas atualizando dados.`);
+
+                                await prisma.productsMl.update({
+                                    where: { id: prod.id },
+                                    data: {
+                                        originalPrice: prod.originalPrice,
+                                        badge: prod.badge,
+                                        link: prod.link,
+                                        category: prod.category
+                                    }
+                                });
+                            }
+                        } else {
+                            console.log(`🔺 [AWIN - FLUTUAÇÃO] ${prod.title} está por R$ ${precoNovo}, mas o menor histórico é R$ ${precoHistorico} (Limite: R$ ${precoLimiteMaximo.toFixed(2)}). Apenas atualizando banco.`);
+
+                            await prisma.productsMl.update({
+                                where: { id: prod.id },
+                                data: {
+                                    originalPrice: prod.originalPrice,
+                                    badge: prod.badge,
+                                    link: prod.link,
+                                    category: prod.category
+                                }
+                            });
+                        }
+                    }
+
+                } catch (itemError: any) {
+                    console.error(`❌ [Erro Item AWIN] Falha ao processar o produto ID: ${prod.id}. Erro:`, itemError.message);
+                }
+            }
+
+        } catch (error: any) {
+            return console.error("💥 [Erro Crítico AWIN] Falha geral no processProductsAwin:", error);
+        }
+    }
+
     processProductsShopee = async (products: any) => {
         try {
 

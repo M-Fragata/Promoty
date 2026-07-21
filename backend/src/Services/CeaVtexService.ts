@@ -1,7 +1,10 @@
 import { Env } from '../utils/Envirolment.js';
+import { modaFeminina } from '../config/moda-feminina.niche.js';
 
 const VTEX_BASE_URL = 'https://www.cea.com.br/api/catalog_system/pub/products/search';
 const PAGE_SIZE = 50;
+const LOTE_SIZE = 10;
+const DESCONTO_MINIMO = 50;
 
 export interface ProdutoCea {
     id: string;
@@ -9,7 +12,7 @@ export interface ProdutoCea {
     price: number;
     originalPrice: number;
     badge: string;
-    description: string;
+    //description: string | null;
     installments: string;
     imageUrl: string;
     link: string;
@@ -74,6 +77,11 @@ function extrairParcelasSemJuros(installments: VtexInstallment[]): string {
     return `${maiorParcela.NumberOfInstallments}x de ${valorParcela} sem juros`;
 }
 
+function temBanword(texto: string): boolean {
+    const textLower = texto.toLowerCase();
+    return modaFeminina.banwords.some(bw => textLower.includes(bw.toLowerCase()));
+}
+
 function mapearProduto(product: VtexProduct): ProdutoCea | null {
     const item = product.items?.[0];
     const seller = item?.sellers?.[0];
@@ -88,13 +96,17 @@ function mapearProduto(product: VtexProduct): ProdutoCea | null {
 
     const desconto = Math.round((1 - price / listPrice) * 100);
 
+    if (desconto < DESCONTO_MINIMO) return null;
+
+    if (temBanword(product.productName)) return null;
+
     return {
         id: product.productId,
         title: product.productName,
         price,
         originalPrice: listPrice,
         badge: `${desconto}% OFF`,
-        description: product.description || '',
+        //description: product.description || '',
         installments: extrairParcelasSemJuros(offer.Installments || []),
         imageUrl: item.images?.[0]?.imageUrl || '',
         link: montarLinkAfiliado(product.link),
@@ -102,58 +114,69 @@ function mapearProduto(product: VtexProduct): ProdutoCea | null {
     };
 }
 
-const LOTE_SIZE = 500;
-let contadorOffset = 0;
+export class CeaVtexService {
 
-export async function buscarProdutosComDesconto(): Promise<ProdutoCea[]> {
-    console.log(`⏳ Buscando produtos C&A com desconto (offset: ${contadorOffset})...`);
+    private cacheProdutos: ProdutoCea[] = [];
+    private contadorOffset = 0;
 
-    const todosProdutos: ProdutoCea[] = [];
-    const limite = contadorOffset + LOTE_SIZE;
-    let from = contadorOffset;
+    private async baixarEProcessarFeed(): Promise<ProdutoCea[]> {
+        console.log('⏳ Buscando produtos C&A com desconto...');
 
-    while (from < limite) {
-        const to = Math.min(from + PAGE_SIZE - 1, limite - 1);
+        const todosProdutos: ProdutoCea[] = [];
+        let from = 0;
 
-        const url = `${VTEX_BASE_URL}?O=OrderByBestDiscountDESC&_from=${from}&_to=${to}`;
-        console.log(`📄 Fetching produtos ${from} a ${to}...`);
+        while (todosProdutos.length < LOTE_SIZE) {
+            const to = from + PAGE_SIZE - 1;
 
-        const response = await fetch(url);
+            const url = `${VTEX_BASE_URL}?O=OrderByBestDiscountDESC&_from=${from}&_to=${to}`;
+            console.log(`📄 Fetching produtos ${from} a ${to}...`);
 
-        if (!response.ok) {
-            console.error(`❌ Erro na requisição VTEX: ${response.statusText}`);
-            break;
-        }
+            const response = await fetch(url);
 
-        const data: VtexProduct[] = await response.json();
-
-        if (!data || data.length === 0) {
-            console.log(`✅ Sem mais produtos a partir do offset ${from}`);
-            contadorOffset = 0;
-            console.log(`🔄 Offset resetado para 0`);
-            return todosProdutos;
-        }
-
-        for (const product of data) {
-            const produto = mapearProduto(product);
-            if (produto) {
-                todosProdutos.push(produto);
+            if (!response.ok) {
+                console.error(`❌ Erro na requisição VTEX: ${response.statusText}`);
+                break;
             }
+
+            const data: VtexProduct[] = await response.json();
+
+            if (!data || data.length === 0) {
+                console.log(`✅ Sem mais produtos a partir do offset ${from}`);
+                break;
+            }
+
+            for (const product of data) {
+                const produto = mapearProduto(product);
+                if (produto) {
+                    todosProdutos.push(produto);
+                    if (todosProdutos.length >= LOTE_SIZE) break;
+                }
+            }
+
+            console.log(`   → ${data.length} recebidos, ${todosProdutos.length} com desconto ≥${DESCONTO_MINIMO}%`);
+
+            if (data.length < PAGE_SIZE) {
+                console.log(`✅ Fim dos produtos C&A`);
+                break;
+            }
+
+            from += PAGE_SIZE;
         }
 
-        console.log(`   → ${data.length} recebidos, ${todosProdutos.length} com desconto`);
-
-        if (data.length < PAGE_SIZE) {
-            contadorOffset = from + data.length;
-            console.log(`📌 Offset atualizado para ${contadorOffset}`);
-            return todosProdutos;
-        }
-
-        from += PAGE_SIZE;
+        console.log(`🔥 Total de produtos C&A válidos: ${todosProdutos.length}`);
+        return todosProdutos;
     }
 
-    contadorOffset = limite;
-    console.log(`📌 Offset atualizado para ${contadorOffset}`);
-    console.log(`✅ Total de produtos C&A com desconto neste lote: ${todosProdutos.length}`);
-    return todosProdutos;
+    buscarProximoLote = async (): Promise<ProdutoCea[]> => {
+        if (this.cacheProdutos.length === 0 || this.contadorOffset >= this.cacheProdutos.length) {
+            this.cacheProdutos = await this.baixarEProcessarFeed();
+            this.contadorOffset = 0;
+        }
+
+        const lote = this.cacheProdutos.slice(this.contadorOffset, this.contadorOffset + LOTE_SIZE);
+        this.contadorOffset += LOTE_SIZE;
+
+        console.log(`📦 Lote C&A entregue: ${lote.length} produtos (offset: ${this.contadorOffset})`);
+        return lote;
+    };
 }

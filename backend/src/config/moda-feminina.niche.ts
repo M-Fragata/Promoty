@@ -12,7 +12,7 @@ export const modaFeminina: NicheConfig = {
     "calça feminina", "calça alfaiataria", "blusa feminina",
     "moletom feminino", "cardigã", "casaco feminino",
     "pijama", "camiseta feminina", "bermuda feminina", "shorts feminino",
-    "sutiã", "calcinha", "conjunto feminino",
+    "sutiã", "calcinha", "conjunto feminino", "regata", "cropped",
 
     // 👗 Roupas de Marca (conversão alta)
     "jaqueta hering", "calca levis", "moletom adidas",
@@ -79,7 +79,7 @@ export const modaFeminina: NicheConfig = {
     "gabinete gamer", "water cooler", "cooler",
     "mouse gamer", "teclado gamer", "monitor", "ssd", "hd externo", "digitalizadora", "cabo smartwatch", "tela para", "pelicula", "película", "suporte de celular", "suporte celular", "suporte p/ celular", "suporte para celular", "suporte tablet",
     // Outros
-    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório", "combo poderoso", "caderno", "ventilador de mão", "ventilador portátil" , "stitch", "gorro de tricô", "mini chapinha", "copo de liquidificador"
+    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório", "combo poderoso", "caderno", "ventilador de mão", "ventilador portátil" , "stitch", "gorro de tricô", "mini chapinha", "copo de liquidificador", "cinto"
   ],
   limitedWords: ["mini ventilador"],
   minDiscount: 40,

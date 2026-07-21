@@ -24,6 +24,8 @@ export function getStoreInfo(store: string) {
   };
 }
 
+export const STORES = Object.keys(STORE_LABELS);
+
 export const CATEGORIES = [
   'Todos',
   'Eletrônicos',

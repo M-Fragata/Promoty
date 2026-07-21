@@ -44,11 +44,13 @@ export class DealsController {
     try {
       const page = Math.max(1, parseInt(req.query.page as string) || 1);
       const skip = (page - 1) * PAGE_SIZE;
-      const category = (req.query.category as string || "").trim();
+      const categories = (req.query.category as string || "").split(',').filter(Boolean);
+      const stores = (req.query.store as string || "").split(',').filter(Boolean);
 
       const where = {
         ...getRecentWhere(),
-        ...(category ? { category } : {}),
+        ...(categories.length > 0 ? { category: { in: categories } } : {}),
+        ...(stores.length > 0 ? { store: { in: stores } } : {}),
       };
 
       const [products, total] = await Promise.all([
@@ -82,7 +84,8 @@ export class DealsController {
       const q = (req.query.q as string || "").trim();
       const page = Math.max(1, parseInt(req.query.page as string) || 1);
       const skip = (page - 1) * PAGE_SIZE;
-      const category = (req.query.category as string || "").trim();
+      const categories = (req.query.category as string || "").split(',').filter(Boolean);
+      const stores = (req.query.store as string || "").split(',').filter(Boolean);
 
       if (!q) {
         return res.status(400).json({ success: false, error: "Parâmetro 'q' é obrigatório." });
@@ -97,7 +100,8 @@ export class DealsController {
             ],
           },
           getRecentWhere(),
-          ...(category ? [{ category }] : []),
+          ...(categories.length > 0 ? [{ category: { in: categories } }] : []),
+          ...(stores.length > 0 ? [{ store: { in: stores } }] : []),
         ],
       };
 

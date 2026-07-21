@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../services/api';
 import type { MlProducts } from '../types/product';
 import type { PaginationInfo } from '../types/api';
-import type { CategoryOption } from '../utils/constants';
 
 interface UseDealsReturn {
   products: MlProducts[];
@@ -20,34 +19,40 @@ const DEFAULT_PAGINATION: PaginationInfo = {
   totalPages: 0,
 };
 
-export function useDeals(searchQuery: string = '', category: CategoryOption = 'Todos'): UseDealsReturn {
+export function useDeals(
+  searchQuery: string = '',
+  categories: string[] = [],
+  stores: string[] = []
+): UseDealsReturn {
   const [products, setProducts] = useState<MlProducts[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState<PaginationInfo>(DEFAULT_PAGINATION);
 
-  // Reset to page 1 when search query or category changes
   const prevQueryRef = useRef(searchQuery);
-  const prevCategoryRef = useRef(category);
+  const prevCategoriesRef = useRef(categories);
+  const prevStoresRef = useRef(stores);
+
   useEffect(() => {
     const queryChanged = prevQueryRef.current !== searchQuery;
-    const categoryChanged = prevCategoryRef.current !== category;
+    const categoriesChanged = JSON.stringify(prevCategoriesRef.current) !== JSON.stringify(categories);
+    const storesChanged = JSON.stringify(prevStoresRef.current) !== JSON.stringify(stores);
     prevQueryRef.current = searchQuery;
-    prevCategoryRef.current = category;
-    if (queryChanged || categoryChanged) {
+    prevCategoriesRef.current = categories;
+    prevStoresRef.current = stores;
+    if (queryChanged || categoriesChanged || storesChanged) {
       setCurrentPage(1);
     }
-  }, [searchQuery, category]);
+  }, [searchQuery, categories, stores]);
 
-  const fetchData = useCallback(async (page: number, query: string, cat: CategoryOption) => {
+  const fetchData = useCallback(async (page: number, query: string, cats: string[], str: string[]) => {
     setIsLoading(true);
     setError(null);
     try {
-      const categoryParam = cat === 'Todos' ? undefined : cat;
       const result = query.trim()
-        ? await api.search(query, page, categoryParam)
-        : await api.getDeals(page, categoryParam);
+        ? await api.search(query, page, cats, str)
+        : await api.getDeals(page, cats, str);
       setProducts(result.products);
       setPagination(result.pagination);
     } catch (err) {
@@ -58,8 +63,8 @@ export function useDeals(searchQuery: string = '', category: CategoryOption = 'T
   }, []);
 
   useEffect(() => {
-    fetchData(currentPage, searchQuery, category);
-  }, [currentPage, searchQuery, category, fetchData]);
+    fetchData(currentPage, searchQuery, categories, stores);
+  }, [currentPage, searchQuery, categories, stores, fetchData]);
 
   const goToPage = useCallback((page: number) => {
     setCurrentPage(page);

@@ -41,7 +41,7 @@ export function ProductDetail() {
   useEffect(() => {
     if (!product) return;
 
-    api.getDeals(1, product.category || undefined)
+    api.getDeals(1, product.category ? [product.category] : [])
       .then((result) => {
         const related = result.products
           .filter((p) => p.category === product.category && p.id !== product.id)

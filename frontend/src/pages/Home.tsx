@@ -1,21 +1,22 @@
 import { useState, useCallback } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
 import { PageShell } from '../components/layout/PageShell';
 import { Sidebar } from '../components/layout/Sidebar';
 import { SearchBar } from '../components/search/SearchBar';
 import { ProductCard } from '../components/product/ProductCard';
 import { ProductSkeleton } from '../components/product/ProductSkeleton';
 import { EmptyState } from '../components/ui/EmptyState';
-import { CategoryChip } from '../components/ui/CategoryChip';
 import { SortSelect } from '../components/ui/SortSelect';
+import { FilterDrawer } from '../components/ui/FilterDrawer';
 import { Pagination } from '../components/ui/Pagination';
 import { useDeals } from '../hooks/useDeals';
 import { useFilters } from '../hooks/useFilters';
-import { CATEGORIES } from '../utils/constants';
-import type { CategoryOption } from '../utils/constants';
 
 export function Home() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [category, setCategory] = useState<CategoryOption>('Todos');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedStores, setSelectedStores] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const {
     products,
@@ -24,7 +25,7 @@ export function Home() {
     pagination,
     currentPage,
     goToPage,
-  } = useDeals(searchQuery, category);
+  } = useDeals(searchQuery, selectedCategories, selectedStores);
 
   const { sortBy, filteredProducts, setSortBy } =
     useFilters(products);
@@ -41,10 +42,17 @@ export function Home() {
     setSearchQuery(query);
   }, []);
 
+  const handleApplyFilters = useCallback((categories: string[], stores: string[]) => {
+    setSelectedCategories(categories);
+    setSelectedStores(stores);
+  }, []);
+
   const sidebarContent = (
     <Sidebar
-      category={category}
-      onCategoryChange={setCategory}
+      selectedCategories={selectedCategories}
+      onCategoriesChange={setSelectedCategories}
+      selectedStores={selectedStores}
+      onStoresChange={setSelectedStores}
       sortBy={sortBy}
       onSortChange={setSortBy}
       resultCount={pagination.total}
@@ -59,29 +67,32 @@ export function Home() {
           {searchQuery ? `Resultados para "${searchQuery}"` : 'Ofertas do Dia'}
         </h2>
 
-        {/* Search + Sort */}
+        {/* Search + Sort + Filter button */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <SearchBar
             onSearch={handleSearch}
             className="w-full sm:max-w-md"
           />
 
-          {/* Mobile sort */}
-          <div className="lg:hidden">
-            <SortSelect value={sortBy} onChange={setSortBy} />
-          </div>
-        </div>
+          <div className="flex items-center gap-2">
+            {/* Mobile filter button */}
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(true)}
+              className="lg:hidden flex items-center gap-2 px-3 py-2 rounded-xl border border-card-border text-text-secondary hover:bg-surface-container-low transition-colors"
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span className="text-label-sm">Filtros</span>
+              {(selectedCategories.length > 0 || selectedStores.length > 0) && (
+                <span className="w-2 h-2 rounded-full bg-text-primary" />
+              )}
+            </button>
 
-        {/* Mobile categories */}
-        <div className="flex gap-2 mt-4 overflow-x-auto pb-2 lg:hidden">
-          {CATEGORIES.map((cat) => (
-            <CategoryChip
-              key={cat}
-              label={cat}
-              active={category === cat}
-              onClick={() => setCategory(cat)}
-            />
-          ))}
+            {/* Mobile sort */}
+            <div className="lg:hidden">
+              <SortSelect value={sortBy} onChange={setSortBy} />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -118,6 +129,15 @@ export function Home() {
           className="mt-8"
         />
       )}
+
+      {/* Filter Drawer (mobile) */}
+      <FilterDrawer
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        selectedCategories={selectedCategories}
+        selectedStores={selectedStores}
+        onApply={handleApplyFilters}
+      />
     </PageShell>
   );
 }

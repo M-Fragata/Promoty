@@ -51,9 +51,10 @@ export const api = {
     return MlProductsSchema.parse(response.data);
   },
 
-  async getDeals(page: number = 1, category?: string): Promise<PaginatedResult> {
+  async getDeals(page: number = 1, categories: string[] = [], stores: string[] = []): Promise<PaginatedResult> {
     const params = new URLSearchParams({ page: String(page) });
-    if (category) params.set('category', category);
+    if (categories.length > 0) params.set('category', categories.join(','));
+    if (stores.length > 0) params.set('store', stores.join(','));
     const response = await fetchJson<DealsResponse>(`/api/deals?${params.toString()}`);
     if (!response.success || !response.data) {
       throw new Error(response.error || 'Falha ao buscar ofertas');
@@ -63,9 +64,10 @@ export const api = {
     return { products, pagination };
   },
 
-  async search(query: string, page: number = 1, category?: string): Promise<PaginatedResult> {
+  async search(query: string, page: number = 1, categories: string[] = [], stores: string[] = []): Promise<PaginatedResult> {
     const params = new URLSearchParams({ q: query, page: String(page) });
-    if (category) params.set('category', category);
+    if (categories.length > 0) params.set('category', categories.join(','));
+    if (stores.length > 0) params.set('store', stores.join(','));
     const response = await fetchJson<SearchResponse>(
       `/api/search?${params.toString()}`
     );

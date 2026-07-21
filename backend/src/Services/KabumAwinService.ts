@@ -91,7 +91,7 @@ export class KabumService {
             //if (desconto < 20) continue;
 
             produtos.push({
-                id: row.aw_product_id,
+                id: `Kabum${row.aw_product_id}`,
                 title: corrigirEncoding(row.product_name),
                 price: precoAtual,
                 originalPrice: precoAntigo,

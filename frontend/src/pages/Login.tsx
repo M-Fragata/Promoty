@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { Button } from '../components/ui/Button';
@@ -19,6 +19,7 @@ export function Login() {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -30,6 +31,12 @@ export function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!acceptTerms) {
+      setError('Você precisa aceitar os Termos de Uso e a Política de Privacidade');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -50,6 +57,11 @@ export function Login() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!acceptTerms) {
+      setError('Você precisa aceitar os Termos de Uso e a Política de Privacidade');
+      return;
+    }
 
     // Validar senhas
     if (registerPassword !== registerConfirmPassword) {
@@ -93,10 +105,10 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => { setActiveTab('login'); setError(null); }}
-                className={`flex-1 pb-3 text-label-bold font-semibold transition-colors ${
+                className={`cursor-pointer flex-1 pb-3 text-label-bold font-semibold transition-colors ${
                   activeTab === 'login'
                     ? 'text-brand border-b-2 border-brand'
-                    : 'text-text-secondary hover:text-text-primary'
+                    : 'text-text-secondary hover:text-color-card-bg'
                 }`}
               >
                 Entrar
@@ -104,7 +116,7 @@ export function Login() {
               <button
                 type="button"
                 onClick={() => { setActiveTab('register'); setError(null); }}
-                className={`flex-1 pb-3 text-label-bold font-semibold transition-colors ${
+                className={`cursor-pointer flex-1 pb-3 text-label-bold font-semibold transition-colors ${
                   activeTab === 'register'
                     ? 'text-brand border-b-2 border-brand'
                     : 'text-text-secondary hover:text-text-primary'
@@ -154,7 +166,27 @@ export function Login() {
                   />
                 </div>
 
-                <Button type="submit" fullWidth disabled={isLoading}>
+                <div className="flex items-start gap-2">
+                  <input
+                    id="login-accept-terms"
+                    type="checkbox"
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-card-border text-brand focus:ring-brand/30"
+                  />
+                  <label htmlFor="login-accept-terms" className="text-sm text-text-secondary">
+                    Li e aceito os{' '}
+                    <Link to="/termos" target="_blank" className="text-brand hover:underline">
+                      Termos de Uso
+                    </Link>{' '}
+                    e a{' '}
+                    <Link to="/privacidade" target="_blank" className="text-brand hover:underline">
+                      Política de Privacidade
+                    </Link>
+                  </label>
+                </div>
+
+                <Button className="hover:text-[#f3f3f3] hover:bg- cursor-pointer" type="submit" fullWidth disabled={isLoading}>
                   {isLoading ? 'Entrando...' : 'Entrar'}
                 </Button>
               </form>
@@ -223,7 +255,27 @@ export function Login() {
                   />
                 </div>
 
-                <Button type="submit" fullWidth disabled={isLoading}>
+                <div className="flex items-start gap-2">
+                  <input
+                    id="register-accept-terms"
+                    type="checkbox"
+                    checked={acceptTerms}
+                    onChange={(e) => setAcceptTerms(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-card-border text-brand focus:ring-brand/30"
+                  />
+                  <label htmlFor="register-accept-terms" className="text-sm text-text-secondary">
+                    Li e aceito os{' '}
+                    <Link to="/termos" target="_blank" className="text-brand hover:underline">
+                      Termos de Uso
+                    </Link>{' '}
+                    e a{' '}
+                    <Link to="/privacidade" target="_blank" className="text-brand hover:underline">
+                      Política de Privacidade
+                    </Link>
+                  </label>
+                </div>
+
+                <Button className="hover:text-[#f3f3f3] hover:bg- cursor-pointer" type="submit" fullWidth disabled={isLoading}>
                   {isLoading ? 'Criando conta...' : 'Criar Conta'}
                 </Button>
               </form>

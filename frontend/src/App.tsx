@@ -8,6 +8,9 @@ import { Profile } from './pages/Profile';
 import { CreatedLinks } from './pages/CreatedLinks';
 import { Notifications } from './pages/Notifications';
 import { Search } from './pages/Search';
+import { Sobre } from './pages/Sobre';
+import { Privacidade } from './pages/Privacidade';
+import { Termos } from './pages/Termos';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 function App() {
@@ -19,6 +22,9 @@ function App() {
           <Route path="/produto/:id" element={<ProductDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/buscar" element={<Search />} />
+          <Route path="/sobre" element={<Sobre />} />
+          <Route path="/privacidade" element={<Privacidade />} />
+          <Route path="/termos" element={<Termos />} />
           <Route
             path="/favoritos"
             element={

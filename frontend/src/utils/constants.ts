@@ -14,13 +14,23 @@ export const STORE_LABELS: Record<string, { label: string; color: string; icon: 
     color: 'bg-pink-500 text-white',
     icon: '',
   },
+  'C&A': {
+    label: 'C&A',
+    color: 'bg-white text-blue-800',
+    icon: '',
+  },
+  'Dafiti': {
+    label: 'Dafiti',
+    color: 'bg-black text-#f3f3f3',
+    icon: '',
+  },
 };
 
 export function getStoreInfo(store: string) {
   return STORE_LABELS[store] || {
     label: store,
     color: 'bg-gray-500 text-white',
-    icon: '🏪',
+    icon: '',
   };
 }
 

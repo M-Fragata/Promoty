@@ -67,11 +67,28 @@ export class PromosController {
         lines.push('');
 
         if (product.badge) {
-            const badgeTrimmed = product.badge.trim()
-            if (badgeTrimmed.startsWith('🔥') || badgeTrimmed.startsWith('✨')) {
-                lines.push(`_${badgeTrimmed}_`);
-            } else {
-                lines.push(`⚡ *Destaque:* _${badgeTrimmed}_`);
+            const badgeTrimmed = product.badge.trim();
+            const storeName = product.store || '';
+
+            const percentMatch = badgeTrimmed.match(/(\d+%\s*OFF)/i);
+            const percent = percentMatch ? percentMatch[1] : '';
+
+            const isMenorPreco = badgeTrimmed.includes('MENOR PREÇO HISTÓRICO');
+            const isPrecoExcelente = badgeTrimmed.includes('Preço Excelente');
+            const isOfertaRelampago = badgeTrimmed.includes('Oferta Relâmpago');
+
+            if (storeName && percent) {
+                lines.push(`${storeName} *${percent}*`);
+            } else if (percent) {
+                lines.push(`*${percent}*`);
+            }
+
+            if (isMenorPreco) {
+                lines.push('🔥 Menor preço histórico');
+            } else if (isPrecoExcelente) {
+                lines.push('✨ Preço Excelente!');
+            } else if (isOfertaRelampago) {
+                lines.push('⚡ Oferta Relâmpago');
             }
         }
         lines.push('')

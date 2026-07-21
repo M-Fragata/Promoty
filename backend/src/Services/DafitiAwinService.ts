@@ -69,8 +69,10 @@ export class DafitiService {
     private cacheProdutos: ProdutoDafiti[] = [];
     private contadorOffset = 0;
 
-    private async baixarEProcessarFeed(): Promise<ProdutoDafiti[]> {
-        console.log('⏳ Baixando e processando feed da Dafiti...');
+    private async baixarFeedCompleto(): Promise<void> {
+        console.log('⏳ Baixando e processando feed completo da Dafiti...');
+
+        this.cacheProdutos = [];
 
         const response = await fetch(Env.AWIN_DAFITI_URL);
         if (!response.ok) {
@@ -89,7 +91,6 @@ export class DafitiService {
             }));
 
         let contagem = 0;
-        const produtos: ProdutoDafiti[] = [];
 
         for await (const row of parser) {
             contagem++;
@@ -103,10 +104,10 @@ export class DafitiService {
             if (desconto < DESCONTO_MINIMO) continue;
 
             const titulo = corrigirEncoding(row.product_name);
-            if (temBanword(titulo) || repeatName(titulo, produtos)) continue;
+            if (temBanword(titulo) || repeatName(titulo, this.cacheProdutos)) continue;
 
-            produtos.push({
-                id: row.aw_product_id,
+            this.cacheProdutos.push({
+                id: `Dafiti${row.aw_product_id}`,
                 title: titulo,
                 price: precoAtual,
                 originalPrice: precoAntigo,
@@ -116,18 +117,15 @@ export class DafitiService {
                 link: row.aw_deep_link,
                 store: 'Dafiti'
             });
-
-            if (produtos.length >= LOTE_SIZE) break;
         }
 
         console.log(`📋 Total de produtos analisados: ${contagem}`);
-        console.log(`🔥 Produtos com desconto (≥${DESCONTO_MINIMO}%): ${produtos.length}`);
-        return produtos;
+        console.log(`🔥 Produtos com desconto (≥${DESCONTO_MINIMO}%): ${this.cacheProdutos.length}`);
     };
 
     buscarProximoLote = async (): Promise<ProdutoDafiti[]> => {
         if (this.cacheProdutos.length === 0 || this.contadorOffset >= this.cacheProdutos.length) {
-            this.cacheProdutos = await this.baixarEProcessarFeed();
+            await this.baixarFeedCompleto();
             this.contadorOffset = 0;
         }
 
@@ -139,6 +137,7 @@ export class DafitiService {
     };
 
     buscarProdutos = async (): Promise<ProdutoDafiti[]> => {
-        return this.baixarEProcessarFeed();
+        await this.baixarFeedCompleto();
+        return this.cacheProdutos;
     };
 }

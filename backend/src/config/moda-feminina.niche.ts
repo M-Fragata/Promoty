@@ -9,9 +9,9 @@ export const modaFeminina: NicheConfig = {
   keywords: [
     // 👗 Moda Feminina Genérica (captura ampla)
     "vestido", "saia", "jaqueta feminina", "jaqueta jeans",
-    "calça feminina", "calça alfaiataria", "blusa feminina",
+    "calça feminina", "calça alfaiataria", "blusa feminina", "blusa", "tshirt", "blazer", "calça",
     "moletom feminino", "cardigã", "casaco feminino",
-    "pijama", "camiseta feminina", "bermuda feminina", "shorts feminino",
+    "pijama", "camiseta feminina", "camiseta", "bermuda feminina", "shorts feminino",
     "sutiã", "calcinha", "conjunto feminino", "regata", "cropped",
 
     // 👗 Roupas de Marca (conversão alta)
@@ -79,7 +79,7 @@ export const modaFeminina: NicheConfig = {
     "gabinete gamer", "water cooler", "cooler",
     "mouse gamer", "teclado gamer", "monitor", "ssd", "hd externo", "digitalizadora", "cabo smartwatch", "tela para", "pelicula", "película", "suporte de celular", "suporte celular", "suporte p/ celular", "suporte para celular", "suporte tablet",
     // Outros
-    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório", "combo poderoso", "caderno", "ventilador de mão", "ventilador portátil" , "stitch", "gorro de tricô", "mini chapinha", "copo de liquidificador", "cinto"
+    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório", "combo poderoso", "caderno", "ventilador de mão", "ventilador portátil" , "stitch", "gorro de tricô", "mini chapinha", "copo de liquidificador", "cinto", "estojo de chaves", "organizador", "organizadores", "organizadora", "snoopy", "juvenil"
   ],
   limitedWords: ["mini ventilador"],
   minDiscount: 40,

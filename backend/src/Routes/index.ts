@@ -7,6 +7,7 @@ import { favoritesRoutes } from './FavoritesRoutes.js';
 import { createdLinksRoutes } from './CreatedLinksRoutes.js';
 import { createdLinksController } from '../Controller/CreatedLinksController.js';
 import { CeARoutes } from './AwinRoutes.js'
+import { adminRoutes } from './AdminRoutes.js'
 
 export const routes = Router();
 
@@ -14,6 +15,7 @@ routes.use('/api/auth', authRoutes);
 routes.use('/api/favorites', favoritesRoutes);
 routes.use('/api/links', createdLinksRoutes);
 routes.use('/api', dealsRoutes);
+routes.use('/api/admin', adminRoutes);
 routes.use('/ofertas', offersRoutes);
 routes.use('/awin', CeARoutes)
 

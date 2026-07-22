@@ -11,6 +11,7 @@ import { Search } from './pages/Search';
 import { Sobre } from './pages/Sobre';
 import { Privacidade } from './pages/Privacidade';
 import { Termos } from './pages/Termos';
+import { Painel } from './pages/Painel';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 function App() {
@@ -54,6 +55,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/painel"
+            element={
+              <ProtectedRoute>
+                <Painel />
               </ProtectedRoute>
             }
           />

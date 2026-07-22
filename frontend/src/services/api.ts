@@ -170,6 +170,37 @@ export const api = {
       { method: 'DELETE' }
     );
   },
+
+  // ============================================
+  // ADMIN (painel administrativo)
+  // ============================================
+
+  admin: {
+    async getProducts(page: number = 1, q: string = '', category: string = '', store: string = ''): Promise<PaginatedResult> {
+      const params = new URLSearchParams({ page: String(page) });
+      if (q) params.set('q', q);
+      if (category) params.set('category', category);
+      if (store) params.set('store', store);
+      const response = await fetchJson<DealsResponse>(`/api/admin/products?${params.toString()}`);
+      if (!response.success || !response.data) {
+        throw new Error(response.error || 'Falha ao buscar produtos');
+      }
+      const products = MlProductsArraySchema.parse(response.data);
+      const pagination = response.pagination ?? { page: 1, pageSize: 15, total: 0, totalPages: 0 };
+      return { products, pagination };
+    },
+
+    async deleteProduct(id: string): Promise<void> {
+      await fetchJson<{ message: string }>(`/api/admin/products/${id}`, { method: 'DELETE' });
+    },
+
+    async updateCategory(id: string, category: string): Promise<void> {
+      await fetchJson<{ message: string }>(`/api/admin/products/${id}/category`, {
+        method: 'PUT',
+        body: JSON.stringify({ category }),
+      });
+    },
+  },
 };
 
 // ============================================

@@ -36,9 +36,8 @@ const EnvSchema = z.object({
     AWIN_DAFITI_MERCHANT_ID: z.string(),
     AWIN_KABUM_MERCHANT_ID: z.string(),
     AWIN_DAFITI_URL: z.string(),
-    AWIN_KABUM_URL: z.string()
-    
-
+    AWIN_KABUM_URL: z.string(),
+    ADMIN_EMAILS: z.string()
 })
 
 const Envirol = EnvSchema.safeParse(process.env);

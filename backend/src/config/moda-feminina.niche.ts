@@ -81,7 +81,7 @@ export const modaFeminina: NicheConfig = {
     // Outros
     "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório", "combo poderoso", "caderno", "ventilador de mão", "ventilador portátil" , "stitch", "gorro de tricô", "mini chapinha", "copo de liquidificador", "cinto", "estojo de chaves", "organizador", "organizadores", "organizadora", "snoopy", "juvenil", "aparador de pelos"
   ],
-  limitedWords: ["mini ventilador"],
+  limitedWords: ["mini ventilador", "meia-calça", "meias-calças"],
   minDiscount: 40,
   maxPrice: 4500,
   mlCategoryIds: [

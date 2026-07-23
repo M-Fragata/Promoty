@@ -1,27 +1,37 @@
 export const STORE_LABELS: Record<string, { label: string; color: string; icon: string }> = {
   'Mercado Livre': {
     label: 'Mercado Livre',
-    color: 'bg-yellow-500 text-white',
+    color: 'bg-#F7E000 text-#2C3E79',
     icon: '',
   },
   'Amazon': {
     label: 'Amazon',
-    color: 'bg-orange-500 text-white',
+    color: 'bg-#F75F01 text-#06070C',
     icon: '',
   },
   'Shopee': {
     label: 'Shopee',
-    color: 'bg-pink-500 text-white',
+    color: 'bg-#E74B2C text-#F7F7F7',
     icon: '',
   },
   'C&A': {
     label: 'C&A',
-    color: 'bg-white text-blue-800',
+    color: 'bg-#F7F7F7 text-#1F398D',
     icon: '',
   },
   'Dafiti': {
     label: 'Dafiti',
-    color: 'bg-black text-#f3f3f3',
+    color: 'bg-#F7F7F7 text-#0D0D0D',
+    icon: '',
+  },
+    'Riachuelo': {
+    label: 'Riachuelo',
+    color: 'bg-#0C2D2C text-#D0C9B3',
+    icon: '',
+  },
+    'Kabum': {
+    label: 'Kabum',
+    color: 'bg-#F6611B text-#005BB2',
     icon: '',
   },
 };

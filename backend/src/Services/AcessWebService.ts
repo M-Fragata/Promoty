@@ -560,19 +560,20 @@ export class AccesWeb {
                             const title = (await titleEl?.innerText()) || "";
                             if (!titleMatchesAnyNiche(title) || !utils.checkLimitedWords(title)) continue
 
-                            const priceEls = await card.$$('.a-price .a-offscreen');
+                            const mainPriceEl = await card.$('.a-price:not(.a-text-price) .a-offscreen');
 
                             const formatPrice = (text: string): number => {
                                 const val = parseFloat(text.replace(/[^\d,]/g, '').replace(',', '.'));
                                 return isNaN(val) ? 0 : Number(val.toFixed(2));
                             };
 
-                            const rawPrice = priceEls[0] ? await priceEls[0].innerText() : "0";
+                            const rawPrice = mainPriceEl ? await mainPriceEl.innerText() : "0";
                             const cleanPrice = formatPrice(rawPrice);
 
                             let originalPrice: number | null = null;
-                            if (priceEls.length > 1) {
-                                const rawOriginal = await priceEls[1]!.innerText();
+                            const origPriceEl = await card.$('.a-price[data-a-strike="true"] .a-offscreen');
+                            if (origPriceEl) {
+                                const rawOriginal = await origPriceEl.innerText();
                                 if (rawOriginal) {
                                     originalPrice = formatPrice(rawOriginal);
                                 }

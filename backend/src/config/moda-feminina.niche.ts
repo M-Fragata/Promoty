@@ -12,7 +12,7 @@ export const modaFeminina: NicheConfig = {
     "calça feminina", "calça alfaiataria", "blusa feminina", "blusa", "tshirt", "blazer", "calça",
     "moletom feminino", "cardigã", "casaco feminino",
     "pijama", "camiseta feminina", "camiseta", "bermuda feminina", "shorts feminino",
-    "sutiã", "calcinha", "conjunto feminino", "regata", "cropped",
+    "sutiã", "calcinha", "conjunto feminino", "regata", "cropped", "biquíni", "biquini",
 
     // 👗 Roupas de Marca (conversão alta)
     "jaqueta hering", "calca levis", "moletom adidas",
@@ -77,9 +77,9 @@ export const modaFeminina: NicheConfig = {
     "ddr2", "ddr3", "ddr4", "ddr5", "placa de vídeo", "placa de video", "aparador de pelos",
     "processador", "memória ram", "memoria ram", "fonte para pc",
     "gabinete gamer", "water cooler", "cooler",
-    "mouse gamer", "teclado gamer", "monitor", "ssd", "hd externo", "digitalizadora", "cabo smartwatch", "tela para", "pelicula", "película", "suporte de celular", "suporte celular", "suporte p/ celular", "suporte para celular", "suporte tablet",
+    "mouse gamer", "gamer", "teclado gamer", "monitor", "ssd", "hd externo", "digitalizadora", "cabo smartwatch", "tela para", "pelicula", "película", "suporte de celular", "suporte celular", "suporte p/ celular", "suporte para celular", "suporte tablet", "switch",
     // Outros
-    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório", "combo poderoso", "caderno", "ventilador de mão", "ventilador portátil" , "stitch", "gorro de tricô", "mini chapinha", "copo de liquidificador", "cinto", "estojo de chaves", "organizador", "organizadores", "organizadora", "snoopy", "juvenil", "aparador de pelos"
+    "infantil", "pet", "cachorro", "gato", "bebedouro pet", "escritorio", "escritório", "combo poderoso", "caderno", "ventilador de mão", "ventilador portátil" , "stitch", "gorro de tricô", "mini chapinha", "copo de liquidificador", "cinto", "estojo de chaves", "organizador", "organizadores", "organizadora", "snoopy", "juvenil", "aparador de pelos", "filamento", "chave", "espelho adesivo"
   ],
   limitedWords: ["mini ventilador", "meia-calça", "meias-calças"],
   minDiscount: 40,

@@ -9,6 +9,10 @@ const STORE_LABELS: Record<StoreType, string> = {
   mercadolivre: 'Mercado Livre',
   amazon: 'Amazon',
   shopee: 'Shopee',
+  cea: 'C&A',
+  riachuelo: 'Riachuelo',
+  dafiti: 'Dafiti',
+  kabum: 'KaBuM',
   other: 'Outro'
 };
 

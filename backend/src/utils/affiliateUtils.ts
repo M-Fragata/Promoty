@@ -1,7 +1,7 @@
 import { Env } from './Envirolment.js';
 import { encurtarLink } from './encurtador.js';
 
-export type StoreType = 'mercadolivre' | 'amazon' | 'shopee' | 'other';
+export type StoreType = 'mercadolivre' | 'amazon' | 'shopee' | 'cea' | 'riachuelo' | 'dafiti' | 'kabum' | 'other';
 
 /**
  * Detecta a loja a partir da URL
@@ -17,6 +17,18 @@ export function detectStore(url: string): StoreType {
   }
   if (lowerUrl.includes('shopee')) {
     return 'shopee';
+  }
+  if (lowerUrl.includes('riachuelo')) {
+    return 'riachuelo';
+  }
+  if (lowerUrl.includes('ceadns.com') || lowerUrl.includes('cea.com')) {
+    return 'cea';
+  }
+  if (lowerUrl.includes('dafiti')) {
+    return 'dafiti';
+  }
+  if (lowerUrl.includes('kabum')) {
+    return 'kabum';
   }
 
   return 'other';
@@ -85,6 +97,19 @@ export function appendAffiliateParams(url: string, store: StoreType): string {
         break;
       }
 
+      case 'cea':
+      case 'riachuelo':
+      case 'dafiti':
+      case 'kabum': {
+        const merchantIds: Record<string, string> = {
+          cea: Env.AWIN_CEA_MERCHANT_ID,
+          riachuelo: Env.AWIN_RIACHUELO_MERCHANT_ID,
+          dafiti: Env.AWIN_DAFITI_MERCHANT_ID,
+          kabum: Env.AWIN_KABUM_MERCHANT_ID,
+        };
+        return `https://www.awin1.com/cread.php?awinmid=${merchantIds[store]}&awinaffid=${Env.AWIN_PUBLISHER_ID}&ued=${encodeURIComponent(url)}`;
+      }
+
       case 'other':
         break;
     }
@@ -100,6 +125,7 @@ export function appendAffiliateParams(url: string, store: StoreType): string {
  * - ML: parâmetros de afiliado + encurta via Kutt
  * - Amazon: tag de afiliado
  * - Shopee: mmp_pid + utm_source + utm_medium
+ * - C&A, Riachuelo, Dafiti, KaBuM: Awin cread.php
  */
 export async function buildAffiliateUrl(url: string): Promise<string> {
   const store = detectStore(url);

@@ -12,6 +12,7 @@
     "mercadolivre": "tsx src/scripts/mercadolivre.ts",
     "amazon": "tsx src/scripts/amazon.ts",
     "shopee": "tsx src/scripts/shopee.ts",
+    "riachuelo": "tsx src/scripts/test-riachuelo.ts",
     "list-groups": "tsx src/scripts/list-groups.ts",
     "build": "tsc"
   },

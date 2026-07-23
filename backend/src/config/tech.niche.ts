@@ -102,4 +102,5 @@ export const techNiche: NicheConfig = {
       "https://www.amazon.com.br/s?k=tv&i=electronics&rh=p_n_deal_type%3A23565493011&dc&page=1",
     ],
   ],
+  riachueloUrls: [],
 }

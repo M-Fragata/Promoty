@@ -16,6 +16,7 @@ const EnvSchema = z.object({
     TELEGRAM_API_HASH: z.string(),
     AWIN_PUBLISHER_ID: z.string(),
     AWIN_CEA_MERCHANT_ID: z.string(),
+    AWIN_RIACHUELO_MERCHANT_ID: z.string(),
     MELI_ID: z.string(),
     TELEGRAM_SESSION: z.string(),
     MATT_TOOL: z.string(),

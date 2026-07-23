@@ -19,4 +19,5 @@ export interface NicheConfig {
   mlUrls: string[][]
   amazonCategoryNodes: string[]
   amazonUrls: string[][]
+  riachueloUrls: string[][]
 }

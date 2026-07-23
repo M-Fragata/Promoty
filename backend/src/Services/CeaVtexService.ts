@@ -1,4 +1,5 @@
 import { Env } from '../utils/Envirolment.js';
+import { buildAffiliateUrl } from '../utils/affiliateUtils.js';
 import { modaFeminina } from '../config/moda-feminina.niche.js';
 
 const VTEX_BASE_URL = 'https://www.cea.com.br/api/catalog_system/pub/products/search';
@@ -53,11 +54,6 @@ interface VtexProduct {
     items: VtexItem[];
 }
 
-function montarLinkAfiliado(productUrl: string): string {
-    const encoded = encodeURIComponent(productUrl);
-    return `https://www.awin1.com/cread.php?awinmid=${Env.AWIN_CEA_MERCHANT_ID}&awinaffid=${Env.AWIN_PUBLISHER_ID}&ued=${encoded}`;
-}
-
 function extrairParcelasSemJuros(installments: VtexInstallment[]): string {
     const semJuros = installments.filter(i => i.InterestRate === 0 && i.NumberOfInstallments > 1);
 
@@ -82,7 +78,7 @@ function temBanword(texto: string): boolean {
     return modaFeminina.banwords.some(bw => textLower.includes(bw.toLowerCase()));
 }
 
-function mapearProduto(product: VtexProduct): ProdutoCea | null {
+async function mapearProduto(product: VtexProduct): Promise<ProdutoCea | null> {
     const item = product.items?.[0];
     const seller = item?.sellers?.[0];
     const offer = seller?.commertialOffer;
@@ -109,7 +105,7 @@ function mapearProduto(product: VtexProduct): ProdutoCea | null {
         //description: product.description || '',
         installments: extrairParcelasSemJuros(offer.Installments || []),
         imageUrl: item.images?.[0]?.imageUrl || '',
-        link: montarLinkAfiliado(product.link),
+        link: await buildAffiliateUrl(product.link),
         store: 'C&A'
     };
 }
@@ -145,7 +141,7 @@ export class CeaVtexService {
             }
 
             for (const product of data) {
-                const produto = mapearProduto(product);
+                const produto = await mapearProduto(product);
                 if (produto) {
                     todosProdutos.push(produto);
                     if (todosProdutos.length >= LOTE_SIZE) break;

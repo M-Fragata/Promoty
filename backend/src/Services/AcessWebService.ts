@@ -65,7 +65,6 @@ export class AccesWeb {
     private urlsMl: string[][]
     private contadorAmazon: number = 0
     private urlsAmazon: string[][]
-    private contadorRiachuelo: number = 0
     private urlsRiachuelo: string[][]
     private captchaRetryPending = false;
     private lastCaptchaGroupIndex = -1;
@@ -686,7 +685,6 @@ export class AccesWeb {
     // ====================
     // Bloco Riachuelo
     // ====================
-    private static readonly MAX_RIACHUELO_PAGES = 9
 
     async AcessRiachuelo(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
         const browser = await chromium.launch({
@@ -716,194 +714,178 @@ export class AccesWeb {
                 route.continue();
             });
 
-            if (this.contadorRiachuelo >= this.urlsRiachuelo.length) {
-                this.contadorRiachuelo = 0;
-                console.log("🔄 [Riachuelo] Ciclo reiniciado.");
-            }
-
-            if (this.urlsRiachuelo.length === 0) {
+            if (this.urlsRiachuelo.length === 0 || !this.urlsRiachuelo[0] || this.urlsRiachuelo[0].length === 0) {
                 console.log("⚠️ [Riachuelo] Nenhuma URL configurada.");
                 return;
             }
 
-            const group: string[] = this.urlsRiachuelo[this.contadorRiachuelo]!;
-            let groupSuccessCount = 0;
+            utils.resetWordsAlreadyUsed();
 
-            for (let i = 0; i < group.length; i++) {
-                utils.resetWordsAlreadyUsed();
+            // Pega a URL atual (sempre índice [0][0])
+            const pageUrl = this.urlsRiachuelo[0]![0]!;
+            const urlObj = new URL(pageUrl);
+            const currentPage = parseInt(urlObj.searchParams.get('page') || '1');
 
-                const startTime = Date.now();
-                const URL = group[i]!;
+            const startTime = Date.now();
 
+            console.log(`🌐 [Riachuelo] Acessando página ${currentPage}: ${pageUrl.substring(0, 80)}...`);
+
+            await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+            await HUMAN_DELAY(3000, 6000);
+
+            const cards = await page.$$('[class*="mui-t2bp7g-product"]');
+            console.log(`📦 [Riachuelo] Página ${currentPage} - ${cards.length} produtos.`);
+
+            if (cards.length === 0) {
+                const duration = (Date.now() - startTime) / 1000;
+                await TakePrintScreenService({
+                    page: page,
+                    store: "Riachuelo",
+                    produtosLength: 0,
+                    tempoExecucao: duration,
+                    status: "Fim dos produtos",
+                    url: pageUrl
+                });
+
+                // 🔄 VAZIO → RESET TOTAL para page=1
+                urlObj.searchParams.set('page', '1');
+                this.urlsRiachuelo = [[urlObj.toString()]];
+                console.log("🔄 [Riachuelo] Página vazia - reiniciando para page=1");
+                return;
+            }
+
+            const productsPage: MlProducts[] = [];
+
+            for (const card of cards) {
                 try {
-                    console.log(`🌐 [Riachuelo] Acessando: ${URL.substring(0, 80)}...`);
+                    // 1. CAPTURA LINK e ID
+                    const linkElement = await card.$('a[class*="linkWrapper"]');
+                    if (!linkElement) continue;
 
-                    await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
-                    await HUMAN_DELAY(3000, 6000);
+                    const linkRelative = await linkElement.getAttribute('href');
+                    if (!linkRelative) continue;
 
-                    const cards = await page.$$('[class*="mui-t2bp7g-product"]');
-                    console.log(`📦 [Riachuelo] Encontrados ${cards.length} produtos.`);
+                    const linkOriginal = `https://www.riachuelo.com.br${linkRelative}`;
+                    const linkAfiliado = await buildAffiliateUrl(linkOriginal);
 
-                    if (cards.length === 0) {
-                        const duration = (Date.now() - startTime) / 1000;
-                        await TakePrintScreenService({
-                            page: page,
-                            store: "Riachuelo",
-                            produtosLength: 0,
-                            tempoExecucao: duration,
-                            status: "Fim dos produtos",
-                            url: URL
-                        });
-                        continue;
+                    // Extrair SKU do link (ex: "...-15451771_sku_sku" → "15451771")
+                    const skuMatch = linkRelative.match(/-(\d+)_sku/);
+                    const skuId = skuMatch ? skuMatch[1] : null;
+                    if (!skuId) continue;
+
+                    const id = `riachuelo${skuId}`;
+
+                    // 2. CAPTURA TÍTULO
+                    const titleElement = await card.$('[class*="productName"]');
+                    const title = titleElement ? await titleElement.innerText() : "";
+                    if (!title || !titleMatchesAnyNiche(title) || !utils.checkLimitedWords(title)) continue;
+
+                    // 3. CAPTURA PREÇO ATUAL
+                    const priceElement = await card.$('[class*="currentPrice"]:not([class*="Discount"])');
+                    const priceText = priceElement ? await priceElement.innerText() : "0";
+                    const price = parseFloat(priceText.replace('R$', '').replace(',', '.').trim());
+                    if (isNaN(price) || price <= 0) continue;
+
+                    // 4. CAPTURA PREÇO ORIGINAL
+                    const originalPriceElement = await card.$('[class*="currentPriceDiscount"]');
+                    const originalPriceText = originalPriceElement ? await originalPriceElement.innerText() : "";
+                    let originalPrice: number | null = null;
+                    if (originalPriceText) {
+                        originalPrice = parseFloat(originalPriceText.replace('R$', '').replace(',', '.').trim());
+                        if (isNaN(originalPrice) || originalPrice <= price) originalPrice = null;
                     }
 
-                    const productsPage: MlProducts[] = [];
+                    if (originalPrice === null) continue;
 
-                    for (const card of cards) {
-                        try {
-                            // 1. CAPTURA LINK e ID
-                            const linkElement = await card.$('a[class*="linkWrapper"]');
-                            if (!linkElement) continue;
+                    // Verifica se o produto atende os critérios de pelo menos um nicho
+                    if (!productMatchesAnyNiche(title, originalPrice, price)) continue;
 
-                            const linkRelative = await linkElement.getAttribute('href');
-                            if (!linkRelative) continue;
+                    // 5. CAPTURA BADGE DE DESCONTO
+                    const badgeElement = await card.$('[class*="discountBadgePrice"]');
+                    let badge: string | null = null;
+                    if (badgeElement) {
+                        badge = (await badgeElement.innerText()).replace('-', '');
+                    } else {
+                        badge = `${(100 - (price / originalPrice) * 100).toFixed(0)}% OFF`;
+                    }
 
-                            const linkOriginal = `https://www.riachuelo.com.br${linkRelative}`;
-                            const linkAfiliado = await buildAffiliateUrl(linkOriginal);
-
-                            // Extrair SKU do link (ex: "...-15451771_sku_sku" → "15451771")
-                            const skuMatch = linkRelative.match(/-(\d+)_sku/);
-                            const skuId = skuMatch ? skuMatch[1] : null;
-                            if (!skuId) continue;
-
-                            const id = `riachuelo${skuId}`;
-
-                            // 2. CAPTURA TÍTULO
-                            const titleElement = await card.$('[class*="productName"]');
-                            const title = titleElement ? await titleElement.innerText() : "";
-                            if (!title || !titleMatchesAnyNiche(title) || !utils.checkLimitedWords(title)) continue;
-
-                            // 3. CAPTURA PREÇO ATUAL
-                            const priceElement = await card.$('[class*="currentPrice"]:not([class*="Discount"])');
-                            const priceText = priceElement ? await priceElement.innerText() : "0";
-                            const price = parseFloat(priceText.replace('R$', '').replace(',', '.').trim());
-                            if (isNaN(price) || price <= 0) continue;
-
-                            // 4. CAPTURA PREÇO ORIGINAL
-                            const originalPriceElement = await card.$('[class*="currentPriceDiscount"]');
-                            const originalPriceText = originalPriceElement ? await originalPriceElement.innerText() : "";
-                            let originalPrice: number | null = null;
-                            if (originalPriceText) {
-                                originalPrice = parseFloat(originalPriceText.replace('R$', '').replace(',', '.').trim());
-                                if (isNaN(originalPrice) || originalPrice <= price) originalPrice = null;
-                            }
-
-                            if (originalPrice === null) continue;
-
-                            // Verifica se o produto atende os critérios de pelo menos um nicho
-                            if (!productMatchesAnyNiche(title, originalPrice, price)) continue;
-
-                            // 5. CAPTURA BADGE DE DESCONTO
-                            const badgeElement = await card.$('[class*="discountBadgePrice"]');
-                            let badge: string | null = null;
-                            if (badgeElement) {
-                                badge = (await badgeElement.innerText()).replace('-', '');
-                            } else {
-                                badge = `${(100 - (price / originalPrice) * 100).toFixed(0)}% OFF`;
-                            }
-
-                            // 6. CAPTURA CUPOM
-                            const couponElement = await card.$('[class*="couponBadge"]');
-                            let coupon: string | null = null;
-                            if (couponElement) {
-                                const couponText = await couponElement.innerText();
-                                // Extrair apenas o código do cupom (ex: "CUPOM SALDOS 20%" de "CUPOM SALDOS 20%|MÍN R$199")
-                                if (couponText && couponText.includes('CUPOM')) {
-                                    const parts = couponText.split('|');
-                                    coupon = parts[0]?.trim() || null;
-                                }
-                            }
-
-                            // 7. CAPTURA IMAGEM
-                            const imgElement = await card.$('[class*="productImage-frontImage"]');
-                            const imageUrl = imgElement ? await imgElement.getAttribute('src') : null;
-
-                            // 8. CAPTURA PARCELAS
-                            const installmentElement = await card.$('[class*="installment"], [class*="parcela"]');
-                            let installments: string | null = null;
-                            if (installmentElement) {
-                                const installText = await installmentElement.innerText();
-                               
-                                const match = installText.match(/(\d+)x\s*(?:de\s*)?R?\$?\s*([\d.,]+)\s*(sem juros|s\/?\s*juros)?/i);
-                                if (match && match[1] && match[2]) {
-                                    const qty = match[1];
-                                    const val = match[2].replace('.', '').replace(',', '.');
-                                    installments = `${qty}x R$${val} s/ juros`;
-                                }
-                            }
-
-                            productsPage.push({
-                                id,
-                                title: title.trim(),
-                                price,
-                                originalPrice,
-                                coupon,
-                                badge,
-                                imageUrl,
-                                link: linkAfiliado,
-                                installments,
-                                store: 'Riachuelo'
-                            });
-
-                        } catch (erroCard) {
-                            continue;
+                    // 6. CAPTURA CUPOM
+                    const couponElement = await card.$('[class*="couponBadge"]');
+                    let coupon: string | null = null;
+                    if (couponElement) {
+                        const couponText = await couponElement.innerText();
+                        if (couponText && couponText.includes('CUPOM')) {
+                            const parts = couponText.split('|');
+                            coupon = parts[0]?.trim() || null;
                         }
                     }
 
-                    if (productsPage.length > 0) {
-                        groupSuccessCount++;
-                        const duration = (Date.now() - startTime) / 1000;
+                    // 7. CAPTURA IMAGEM
+                    const imgElement = await card.$('[class*="productImage-frontImage"]');
+                    const imageUrl = imgElement ? await imgElement.getAttribute('src') : null;
 
-                        await TakePrintScreenService({
-                            page: page,
-                            store: "Riachuelo",
-                            produtosLength: productsPage.length,
-                            tempoExecucao: duration,
-                            status: "Sucesso",
-                            url: URL
-                        });
-
-                        onPageScraped?.(productsPage);
+                    // 8. CAPTURA PARCELAS
+                    const installmentElement = await card.$('[class*="installment"], [class*="parcela"]');
+                    let installments: string | null = null;
+                    if (installmentElement) {
+                        const installText = await installmentElement.innerText();
+                        console.log(`💳 [Riachuelo] Parcelas bruto: "${installText}"`);
+                        const match = installText.match(/(\d+)x\s*(?:de\s*)?R?\$?\s*([\d.,]+)\s*(sem juros|s\/?\s*juros)?/i);
+                        if (match && match[1] && match[2]) {
+                            const qty = match[1];
+                            const val = match[2].replace('.', '').replace(',', '.');
+                            installments = `${qty}x R$${val} s/ juros`;
+                            console.log(`✅ [Riachuelo] Parcelas formatado: ${installments}`);
+                        } else {
+                            console.log(`⚠️ [Riachuelo] Parcelas não bateu regex: "${installText}"`);
+                        }
+                    } else {
+                        console.log(`ℹ️ [Riachuelo] Sem elemento de parcelas encontrado`);
                     }
 
-                } catch (err) {
-                    console.error(`❌ [Riachuelo] Erro na URL: ${URL}`, err);
-                }
-            }
-
-            // Gerar próxima página se não atingiu o limite
-            if (groupSuccessCount > 0 && group.length > 0) {
-                const firstUrl = new URL(group[0]!);
-                const currentPage = parseInt(firstUrl.searchParams.get('page') || '1');
-
-                if (currentPage < AccesWeb.MAX_RIACHUELO_PAGES) {
-                    const nextPageGroup = group.map(url => {
-                        const obj = new URL(url);
-                        obj.searchParams.set('page', (currentPage + 1).toString());
-                        return obj.toString();
+                    productsPage.push({
+                        id,
+                        title: title.trim(),
+                        price,
+                        originalPrice,
+                        coupon,
+                        badge,
+                        imageUrl,
+                        link: linkAfiliado,
+                        installments,
+                        store: 'Riachuelo'
                     });
-                    this.urlsRiachuelo.push(nextPageGroup);
-                    console.log(`📄 [Riachuelo] Grupo page ${currentPage + 1} adicionado à fila.`);
+
+                } catch (erroCard) {
+                    continue;
                 }
-            } else if (groupSuccessCount === 0) {
-                console.log(`🛑 [Riachuelo] Grupo sem produtos. Próxima página não gerada.`);
             }
+
+            if (productsPage.length > 0) {
+                const duration = (Date.now() - startTime) / 1000;
+
+                await TakePrintScreenService({
+                    page: page,
+                    store: "Riachuelo",
+                    produtosLength: productsPage.length,
+                    tempoExecucao: duration,
+                    status: "Sucesso",
+                    url: pageUrl
+                });
+
+                onPageScraped?.(productsPage);
+            }
+
+            // Sucesso → incrementa page na URL existente
+            const nextPage = currentPage + 1;
+            urlObj.searchParams.set('page', nextPage.toString());
+            this.urlsRiachuelo[0]![0] = urlObj.toString();
+            console.log(`📄 [Riachuelo] Próxima página: ${nextPage}`);
 
         } catch (error) {
             console.error("❌ Erro catastrófico na Riachuelo:", error);
         } finally {
             await browser.close();
-            this.contadorRiachuelo++;
         }
     }
 

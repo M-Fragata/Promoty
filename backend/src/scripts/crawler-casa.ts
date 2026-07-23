@@ -11,12 +11,12 @@ async function executarRobo() {
 
     // Definição das tarefas do nicho Casa & Moda Feminina
     // NOTA: Pichau e Terabyte são lojas Tech, NÃO são usadas neste crawler
-    // ORDEM: AWIN (Dafiti+C&A) → Amazon → Shopee Keywords → ML
+    // ORDEM: AWIN (Dafiti+C&A) → Playwright (Amazon+Riachuelo) → Shopee Keywords → ML
     const tarefas: Array<() => any> = [
-        executarAwin,           // 1º AWIN: Dafiti + C&A (API rápida)
-        executAmazon,           // 2º Amazon (Playwright - lento)
-        executShopeeKeywords,   // 3º Shopee (API rápida)
-        executMercadoLivre,     // 4º Mercado Livre (Playwright - lento)
+        executarAwin,              // 1º AWIN: Dafiti + C&A (API rápida)
+        executarAmazonRiachuelo,        // 2º Playwright: Amazon + Riachuelo
+        executShopeeKeywords,      // 3º Shopee (API rápida)
+        executMercadoLivre,        // 4º Mercado Livre (Playwright - lento)
     ];
 
     let indiceTarefaAtual = 0;
@@ -73,6 +73,12 @@ async function executarAwin() {
     await executarCea();
 }
 
+// 🟠 TAREFA 2: PLAYWRIGHT - AMAZON + RIACHUELO (Casa/Moda)
+async function executarAmazonRiachuelo() {
+    await executAmazon();
+    await executarRiachuelo();
+}
+
 async function executarDafiti() {
     try {
         console.log("🔍 [Casa/Dafiti] Iniciando varredura de produtos AWIN Dafiti...");
@@ -117,7 +123,7 @@ async function executarCea() {
     }
 }
 
-// 🟠 TAREFA 2: SHOPEE KEYWORDS (Casa/Moda)
+// 🟠 TAREFA 3: SHOPEE KEYWORDS (Casa/Moda)
 async function executShopeeKeywords() {
     try {
         console.log("🔍 [Casa/Bot] Iniciando varredura de keywords na Shopee...");
@@ -173,16 +179,6 @@ async function executMercadoLivre() {
     }
 }
 
-// Função auxiliar
-function isHorarioComercial(): boolean {
-    const now = new Date();
-    const hours = now.getHours();
-
-    if (hours >= 0 && hours < 7) return false;
-
-    return true
-}
-
 // 🟠 TAREFA 4: AMAZON CRAWLER (Casa/Moda)
 async function executAmazon() {
     try {
@@ -215,6 +211,48 @@ async function executAmazon() {
     } catch (error) {
         console.error("❌ [Casa/Amazon] Falha crítica no teste principal:", error);
     }
+}
+
+// 🛍️ TAREFA: RIACHUELO CRAWLER (Casa/Moda)
+async function executarRiachuelo() {
+    try {
+        console.log("🛍️ [Casa/Riachuelo] Iniciando varredura com fluxo assíncrono...");
+        const tempoInicio = Date.now();
+
+        await scraper.AcessRiachuelo((produtosParciais) => {
+            console.log(`⚡ [Casa/Riachuelo] Lote de ${produtosParciais.length} recebido! Enviando para API local...`);
+
+            fetch("http://localhost:3333/ofertas/riachuelo", {
+                method: "POST",
+                headers: { "Content-type": "application/json" },
+                body: JSON.stringify(produtosParciais)
+            })
+                .then(async (response) => {
+                    if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`);
+                    console.log(`✅ [Casa/Riachuelo] Lote de ${produtosParciais.length} produtos processado pela API com sucesso!`);
+                })
+                .catch((err) => {
+                    console.error("❌ [Casa/Riachuelo] Erro ao enviar lote parcial para a API:", err.message);
+                });
+        });
+
+        const tempoFim = Date.now();
+        const tempoTotal = ((tempoFim - tempoInicio) / 1000).toFixed(2);
+        console.log(`⏱️ [Casa/Riachuelo] Navegador finalizou todas as URLs em ${tempoTotal} segundos!`);
+
+    } catch (error) {
+        console.error("❌ [Casa/Riachuelo] Falha crítica:", error);
+    }
+}
+
+// Função auxiliar
+function isHorarioComercial(): boolean {
+    const now = new Date();
+    const hours = now.getHours();
+
+    if (hours >= 0 && hours < 7) return false;
+
+    return true
 }
 
 //Chamada para iniciar o script

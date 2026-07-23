@@ -8,7 +8,8 @@ const shopeePromoController = new ShopeePromosController()
 
 offersRoutes.post('/mercadolivre', promosController.processProductsML);
 offersRoutes.post('/amazon', promosController.processProductsAmazon);
-offersRoutes.post('/shopee', promosController.processProductsShopee)
+offersRoutes.post('/shopee', promosController.processProductsShopee);
+offersRoutes.post('/riachuelo', promosController.processProductsRiachuelo);
 
 
 //Chamada na API da shopee

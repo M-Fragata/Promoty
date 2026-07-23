@@ -563,4 +563,114 @@ export class PromosController {
             return console.error("💥 [Erro Crítico Shopee] Falha geral no processProductsShopee:", error);
         }
     }
+
+    processProductsRiachuelo = async (req: Request, res: Response) => {
+        try {
+            const products = req.body;
+
+            if (!Array.isArray(products)) {
+                return res.status(400).json({ error: "O corpo da requisição deve ser um array de produtos." });
+            }
+
+            for (const prod of products) {
+                try {
+                    prod.link = await buildAffiliateUrl(prod.link);
+                    ensureCategory(prod);
+
+                    const produtoExistente = await prisma.productsMl.findUnique({
+                        where: { id: prod.id }
+                    });
+
+                    if (!produtoExistente) {
+                        await prisma.productsMl.create({ data: prod });
+
+                        console.log(`📣 [NOVA OFERTA RIACHUELO] ${prod.title} por R$ ${prod.price} - Roteando para nichos...`);
+
+                        await this.sendToMatchingNiches(prod);
+                    } else {
+                        const precoHistorico = produtoExistente.price;
+                        const precoNovo = prod.price;
+                        const precoLimiteMaximo = precoHistorico * (1 + MARGEM_TOLERANCIA);
+
+                        if (precoNovo < precoHistorico) {
+                            console.log(`📉 [RIACHUELO - BAIXOU REAL] ${prod.title} caiu de R$ ${precoHistorico} para R$ ${precoNovo}!`);
+
+                            prod.badge = `🔥 MENOR PREÇO HISTÓRICO! • ${prod.badge || ''}`;
+
+                            await prisma.productsMl.update({
+                                where: { id: prod.id },
+                                data: {
+                                    price: precoNovo,
+                                    originalPrice: prod.originalPrice,
+                                    coupon: prod.coupon,
+                                    badge: prod.badge,
+                                    link: prod.link,
+                                    category: prod.category
+                                }
+                            });
+
+                            await this.sendToMatchingNiches(prod);
+
+                        } else if (precoNovo <= precoLimiteMaximo) {
+                            const tempoCooldown = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+
+                            if (produtoExistente.updatedAt < tempoCooldown) {
+                                console.log(`⭐ [RIACHUELO - REANÚNCIO NA MARGEM] ${prod.title} continua por R$ ${precoNovo} (dentro da margem). Já se passaram 3 dias, reenviando...`);
+
+                                prod.badge = `✨ Preço Excelente! • ${prod.badge || ''}`;
+
+                                await prisma.productsMl.update({
+                                    where: { id: prod.id },
+                                    data: {
+                                        originalPrice: prod.originalPrice,
+                                        coupon: prod.coupon,
+                                        badge: prod.badge,
+                                        link: prod.link,
+                                        category: prod.category
+                                    }
+                                });
+
+                                await this.sendToMatchingNiches(prod);
+
+                            } else {
+                                console.log(`🤫 [RIACHUELO - SILENCIADO] ${prod.title} continua por R$ ${precoNovo}. Já foi postado recentemente nos últimos 3 dias. Apenas atualizando dados.`);
+
+                                await prisma.productsMl.update({
+                                    where: { id: prod.id },
+                                    data: {
+                                        originalPrice: prod.originalPrice,
+                                        coupon: prod.coupon,
+                                        badge: prod.badge,
+                                        link: prod.link,
+                                        category: prod.category
+                                    }
+                                });
+                            }
+                        } else {
+                            console.log(`🔺 [RIACHUELO - FLUTUAÇÃO] ${prod.title} está por R$ ${precoNovo}, mas o menor histórico é R$ ${precoHistorico} (Limite: R$ ${precoLimiteMaximo.toFixed(2)}). Apenas atualizando banco.`);
+
+                            await prisma.productsMl.update({
+                                where: { id: prod.id },
+                                data: {
+                                    originalPrice: prod.originalPrice,
+                                    coupon: prod.coupon,
+                                    badge: prod.badge,
+                                    link: prod.link,
+                                    category: prod.category
+                                }
+                            });
+                        }
+                    }
+                } catch (itemError: any) {
+                    console.error(`❌ [Erro Item Riachuelo] Falha ao processar o produto ID: ${prod.id}. Erro:`, itemError.message);
+                }
+            }
+
+            return res.status(200).json({ success: true, message: "Produtos da Riachuelo processados." });
+
+        } catch (error: any) {
+            console.error("💥 [Erro Crítico Riachuelo] Falha geral no processProductsRiachuelo:", error);
+            return res.status(500).json({ error: "Erro interno ao processar ofertas da Riachuelo." });
+        }
+    }
 }

@@ -234,25 +234,9 @@ export const modaFeminina: NicheConfig = {
     ],
   ],
   riachueloUrls: [
-    // Lote 0: Outlet 50% OFF - Coleção Feminina (p1, p2)
+    // Outlet 50% OFF - Coleção Feminina (page=1, incrementado automaticamente)
     [
       "https://www.riachuelo.com.br/outlet/50off?page=1&catalog_line=Cole%C3%A7%C3%A3o%20Feminina&order=desc&sort=best-sellers",
-      "https://www.riachuelo.com.br/outlet/50off?page=2&catalog_line=Cole%C3%A7%C3%A3o%20Feminina&order=desc&sort=best-sellers",
-    ],
-    // Lote 1: Outlet 50% OFF - Coleção Feminina (p3, p4)
-    [
-      "https://www.riachuelo.com.br/outlet/50off?page=3&catalog_line=Cole%C3%A7%C3%A3o%20Feminina&order=desc&sort=best-sellers",
-      "https://www.riachuelo.com.br/outlet/50off?page=4&catalog_line=Cole%C3%A7%C3%A3o%20Feminina&order=desc&sort=best-sellers",
-    ],
-    // Lote 2: Outlet 50% OFF - Coleção Feminina (p5, p6)
-    [
-      "https://www.riachuelo.com.br/outlet/50off?page=5&catalog_line=Cole%C3%A7%C3%A3o%20Feminina&order=desc&sort=best-sellers",
-      "https://www.riachuelo.com.br/outlet/50off?page=6&catalog_line=Cole%C3%A7%C3%A3o%20Feminina&order=desc&sort=best-sellers",
-    ],
-    // Lote 3: Outlet 50% OFF - Coleção Feminina (p7, p8)
-    [
-      "https://www.riachuelo.com.br/outlet/50off?page=7&catalog_line=Cole%C3%A7%C3%A3o%20Feminina&order=desc&sort=best-sellers",
-      "https://www.riachuelo.com.br/outlet/50off?page=8&catalog_line=Cole%C3%A7%C3%A3o%20Feminina&order=desc&sort=best-sellers",
     ],
   ],
 }

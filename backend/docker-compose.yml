@@ -27,7 +27,7 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      DEFAULT_DOMAIN: fragata.me
+      DEFAULT_DOMAIN: oferta.fragata.me
       DB_CLIENT: pg
       DB_HOST: kutt_db
       DB_USER: kuttuser

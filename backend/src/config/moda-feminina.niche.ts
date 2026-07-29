@@ -12,7 +12,7 @@ export const modaFeminina: NicheConfig = {
     "calça feminina", "calça alfaiataria", "blusa feminina", "blusa", "tshirt", "blazer", "calça",
     "moletom feminino", "cardigã", "casaco feminino",
     "pijama", "camiseta feminina", "camiseta", "bermuda feminina", "shorts feminino",
-    "sutiã", "calcinha", "conjunto feminino", "regata", "cropped", "biquíni", "biquini",
+    "sutiã", "calcinha", "conjunto feminino", "regata", "cropped", "biquíni", "biquini", "maiô", "feminina", "feminino",
 
     // 👗 Roupas de Marca (conversão alta)
     "jaqueta hering", "calca levis", "moletom adidas",
@@ -122,22 +122,22 @@ export const modaFeminina: NicheConfig = {
   ],
   shopeeKeywordGroups: [
     // Grupo 1: Achadinhos de Cozinha & Organização
-    ["organizador acrilico", "organizador", "pote hermetico", "pote", "mop giratorio", "mop", "porta temperos rotativo", "organizador geladeira", "tabua de corte", "tábua de corte"],
+    ["pote hermetico", "pote", "mop giratorio", "mop", "porta temperos rotativo", "organizador geladeira", "tabua de corte", "tábua de corte"],
 
     // Grupo 2: Casa & Decoração "Estilo Pinterest"
-    ["luminaria led", "luminária led", "difusor de ambiente", "espelho decorativo", "espelho", "capa de almofada", "manta", "quadro decorativo", "quadro", "cortina"],
+    ["luminaria led", "luminária led", "difusor de ambiente", "espelho decorativo", "espelho", "manta", "quadro decorativo", "quadro", "cortina"],
 
     // Grupo 3: Cama, Mesa & Banho
-    ["pijama cetim", "pijama", "jogo de cama", "toalha de banho", "toalha", "trilho de mesa", "jogo americano", "jogo de toalha"],
+    ["pijama cetim", "jogo de cama", "toalha de banho", "toalha", "trilho de mesa", "jogo americano", "jogo de toalha"],
 
     // Grupo 4: Moda Feminina Genérica
-    ["vestido feminino", "vestido", "jaqueta jeans", "calça alfaiataria", "calça", "blazer", "saia", "casaco", "moletom feminino", "moletom", "shorts feminino"],
+    ["vestido feminino", "vestido", "jaqueta jeans", "calça alfaiataria", "calça", "blazer", "saia", "casaco", "shorts feminino"],
 
     // Grupo 5: Bolsas & Malas
-    ["bolsa feminina", "bolsa", "mochila feminina", "mochila", "carteira feminina", "carteira", "maleta de maquiagem", "necessaire", "bolsa couro"],
+    ["bolsa feminina", "bolsa", "mochila feminina", "mochila", "carteira feminina", "maleta de maquiagem", "necessaire", "bolsa couro"],
 
     // Grupo 6: Calçados
-    ["tênis feminino", "tênis", "sandália", "chinelo feminino", "chinelo", "sapatilha", "bota", "rasteira", "mocassim", "scarpin"],
+    ["tênis feminino", "tênis", "sandália", "chinelo feminino", "sapatilha", "bota feminina", "rasteira", "mocassim", "scarpin"],
 
     // Grupo 7: Beleza & Skincare
     ["protetor solar", "hidratante", "hidratante facial", "sérum", "sérum facial", "kit eudora", "kit boticario", "kit natura", "creme para pele", "creme facial"],
@@ -146,33 +146,33 @@ export const modaFeminina: NicheConfig = {
     ["secador de cabelo", "secador", "chapinha", "chapinha profissional", "babyliss", "escova alisadora", "escova rotativa", "escova secadora"],
 
     // Grupo 9: Casa & Móveis (REESCRITO - mais específicos)
-    ["sofá retrátil", "sofá", "poltrona conforto", "poltrona", "mesa de jantar", "mesa", "estante organização", "estante", "armário", "armario", "rack tv", "rack", "gaveteiro", "criado mudo", "prateleira", "tv", "smartphone"],
+    ["sofá retrátil", "sofá", "poltrona conforto", "poltrona", "mesa de jantar", "mesa", "estante", "armário", "armario", "rack tv", "rack", "gaveteiro", "criado mudo", "prateleira", "tv", "smartphone"],
 
     // Grupo 10: Eletrodomésticos (CORRIGIDO - com variações)
-    ["air fryer", "airfryer", "fritadeira air fryer", "aspirador robô", "aspirador robot", "aspirador portátil", "aspirador", "ventilador", "liquidificador", "cafeteira", "sanduicheira", "microondas", "máquina de lavar", "maquina de lavar"]
+    ["air fryer", "airfryer", "fritadeira air fryer", "aspirador robô", "aspirador robot", "aspirador", "liquidificador", "cafeteira", "sanduicheira", "microondas", "máquina de lavar", "maquina de lavar"]
   ],
   shopeeCategoriesGroup: [
     // Grupo 0: Móveis
     [
-      { id: 101166, name: 'Almofadas' },
+      //{ id: 101166, name: 'Almofadas' },
       { id: 101171, name: 'Bancos, Cadeiras e Banquetas' },
       { id: 101172, name: 'Sofás' },
       { id: 101173, name: 'Armários e Gabinetes' },
       { id: 101174, name: 'Prateleiras e Racks' },
     ],
-    // Grupo 1: Organizadores
+   /* // Grupo 1: Organizadores
     [
       { id: 101253, name: 'Cabides' },
       { id: 101254, name: 'Caixas, Bolsas e Cestas' },
       { id: 101257, name: 'Sacos e Cestos de Roupa' },
       { id: 101259, name: 'Organizadores de Guarda-Roupas' },
-    ],
+    ],*/
     // Grupo 2: Fragrância da Casa
-    [
+    /*[
       { id: 101127, name: 'Purificadores de Ar' },
       { id: 101128, name: 'Óleos Essenciais' },
       { id: 101129, name: 'Difusores' },
-    ],
+    ],*/
     // Grupo 3: Roupas Femininas
     [
       { id: 100350, name: 'Blusas' },
@@ -181,7 +181,7 @@ export const modaFeminina: NicheConfig = {
       { id: 100354, name: 'Saias' },
       { id: 100355, name: 'Vestidos' },
       { id: 100356, name: 'Jeans' },
-      { id: 100380, name: 'Lingerie e Roupa Íntima' },
+      //{ id: 100380, name: 'Lingerie e Roupa Íntima' },
     ],
     // Grupo 4: Acessórios de Moda
     [

@@ -1,4 +1,4 @@
-import makeWASocket, { DisconnectReason, type WASocket, useMultiFileAuthState } from "@whiskeysockets/baileys"
+import makeWASocket, { DisconnectReason, type WASocket, useMultiFileAuthState, fetchLatestWaWebVersion, Browsers } from "@whiskeysockets/baileys"
 import { Boom } from '@hapi/boom';
 import pino from 'pino';
 import path from 'path';
@@ -44,6 +44,10 @@ export class WhatsAppService {
                 this.socket = null;
             }
 
+            console.log('🔍 Buscando versão atual do WhatsApp Web...');
+            const { version } = await fetchLatestWaWebVersion();
+            console.log(`✅ Versão do WhatsApp Web: ${version.join('.')}`);
+
             console.log('🔍 Tentando ler a pasta de autenticação em:', this.authFolder);
             const { state, saveCreds } = await useMultiFileAuthState(this.authFolder);
             console.log('✅ Pasta de autenticação carregada com sucesso.');
@@ -51,6 +55,8 @@ export class WhatsAppService {
             const sock = makeWASocket({
                 logger: pino({ level: 'warn' }),
                 auth: state,
+                version,
+                browser: Browsers.ubuntu('Promoty'),
                 printQRInTerminal: false,
                 defaultQueryTimeoutMs: undefined
             });
@@ -72,6 +78,13 @@ export class WhatsAppService {
                     const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
                     const errorMsg = lastDisconnect?.error?.message || 'desconhecido';
                     console.log(`❌ Conexão fechada. Motivo: ${errorMsg} (statusCode: ${statusCode})`);
+
+                    // Reconexão normal após escanear QR code
+                    if (statusCode === DisconnectReason.restartRequired) {
+                        console.log('🔄 Restart required pelo WhatsApp. Reconectando...');
+                        this.initialize();
+                        return;
+                    }
 
                     // Credenciais inválidas ou expiradas - NÃO reconectar
                     if (statusCode === DisconnectReason.loggedOut || statusCode === 411) {

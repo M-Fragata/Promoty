@@ -23,6 +23,8 @@ export class WhatsAppService {
     private socket: WASocket | null = null;
     private authFolder = path.resolve(__dirname, '../../auth_info_baileys');
 
+    private reconnectAttempts = 0;
+    private maxReconnectAttempts = 5;
 
     // Propriedades da fila - fila independente por JID
     private queues: Map<string, ProductQueue[]> = new Map();
@@ -36,12 +38,18 @@ export class WhatsAppService {
 
     async initialize() {
         try {
+            // Fechar socket antigo antes de criar novo
+            if (this.socket) {
+                try { this.socket.end(undefined); } catch {}
+                this.socket = null;
+            }
+
             console.log('🔍 Tentando ler a pasta de autenticação em:', this.authFolder);
             const { state, saveCreds } = await useMultiFileAuthState(this.authFolder);
             console.log('✅ Pasta de autenticação carregada com sucesso.');
 
             const sock = makeWASocket({
-                logger: pino({ level: 'silent' }),
+                logger: pino({ level: 'warn' }),
                 auth: state,
                 printQRInTerminal: false,
                 defaultQueryTimeoutMs: undefined
@@ -61,11 +69,31 @@ export class WhatsAppService {
                 }
 
                 if (connection === 'close') {
-                    const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut;
-                    console.log('❌ Conexão fechada. Reconectando:', shouldReconnect);
-                    if (shouldReconnect) { this.initialize() }
+                    const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
+                    const errorMsg = lastDisconnect?.error?.message || 'desconhecido';
+                    console.log(`❌ Conexão fechada. Motivo: ${errorMsg} (statusCode: ${statusCode})`);
+
+                    // Credenciais inválidas ou expiradas - NÃO reconectar
+                    if (statusCode === DisconnectReason.loggedOut || statusCode === 411) {
+                        console.log('🔴 Credenciais inválidas ou expiradas. Delete a pasta auth_info_baileys e reinicie o serviço.');
+                        return;
+                    }
+
+                    // Limite de tentativas atingido
+                    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+                        console.log(`🔴 Máximo de tentativas de reconexão (${this.maxReconnectAttempts}) atingido. Delete a pasta auth_info_baileys e reinicie o serviço.`);
+                        return;
+                    }
+
+                    // Reconectar com delay exponencial
+                    this.reconnectAttempts++;
+                    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
+                    console.log(`⏳ Reconectando em ${delay / 1000}s (tentativa ${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+                    await new Promise(r => setTimeout(r, delay));
+                    this.initialize();
 
                 } else if (connection === 'open') {
+                    this.reconnectAttempts = 0;
                     console.log('🎉 Parabéns! Seu robô está conectado com sucesso ao WhatsApp e pronto para enviar ofertas!');
                     console.log('✅ [WhatsApp] Conectado com sucesso e em prontidão!');
                 }

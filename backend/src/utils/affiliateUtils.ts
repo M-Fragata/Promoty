@@ -1,7 +1,7 @@
 import { Env } from './Envirolment.js';
 import { encurtarLink } from './encurtador.js';
 
-export type StoreType = 'mercadolivre' | 'amazon' | 'shopee' | 'cea' | 'riachuelo' | 'dafiti' | 'kabum' | 'other';
+export type StoreType = 'mercadolivre' | 'amazon' | 'shopee' | 'cea' | 'riachuelo' | 'dafiti' | 'kabum' | 'aliexpress' | 'lojastorra' | 'other';
 
 /**
  * Detecta a loja a partir da URL
@@ -100,12 +100,16 @@ export function appendAffiliateParams(url: string, store: StoreType): string {
       case 'cea':
       case 'riachuelo':
       case 'dafiti':
-      case 'kabum': {
+      case 'kabum':
+      case 'aliexpress':
+      case 'lojastorra': {
         const merchantIds: Record<string, string> = {
           cea: Env.AWIN_CEA_MERCHANT_ID,
           riachuelo: Env.AWIN_RIACHUELO_MERCHANT_ID,
           dafiti: Env.AWIN_DAFITI_MERCHANT_ID,
           kabum: Env.AWIN_KABUM_MERCHANT_ID,
+          aliexpress: Env.AWIN_ALIEXPRESS_MERCHANT_ID,
+          lojastorra: Env.AWIN_LOJASTORRA_MERCHANT_ID
         };
         return `https://www.awin1.com/cread.php?awinmid=${merchantIds[store]}&awinaffid=${Env.AWIN_PUBLISHER_ID}&ued=${encodeURIComponent(url)}`;
       }

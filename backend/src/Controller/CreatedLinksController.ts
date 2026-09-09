@@ -13,6 +13,8 @@ const STORE_LABELS: Record<StoreType, string> = {
   riachuelo: 'Riachuelo',
   dafiti: 'Dafiti',
   kabum: 'KaBuM',
+  aliexpress: 'AliExpress',
+  lojastorra: 'Lojas Torra',
   other: 'Outro'
 };
 

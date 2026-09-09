@@ -11,15 +11,32 @@ const SHORTENER_DOMAINS = [
   'shope.ee',
   'shp.ee',
   //mercadolivre share link
-  'meli'
+  'meli',
+  // AliExpress share link
+  'a.aliexpress.com'
 ];
 
 /**
  * Verifica se uma URL é de um encurtador conhecido
  */
 export function isShortenedUrl(url: string): boolean {
-  const lowerUrl = url.toLowerCase();
-  return SHORTENER_DOMAINS.some((domain) => lowerUrl.includes(domain));
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return SHORTENER_DOMAINS.some((domain) => {
+      if (domain === 'a.co') {
+        return host === 'a.co' || host.endsWith('.a.co');
+      }
+      return host === domain || host.endsWith('.' + domain) || host.includes(domain);
+    });
+  } catch {
+    const lowerUrl = url.toLowerCase();
+    return SHORTENER_DOMAINS.some((domain) => {
+      if (domain === 'a.co') {
+        return lowerUrl.includes('://a.co/') || lowerUrl.includes('.a.co/');
+      }
+      return lowerUrl.includes(domain);
+    });
+  }
 }
 
 /**

@@ -29,25 +29,34 @@ export const STORE_LABELS: Record<string, { label: string; color: string; icon: 
     color: 'bg-[#0C2D2C] text-[#D0C9B3]',
     icon: '',
   },
-    'Kabum': {
-    label: 'Kabum',
+    'KaBuM': {
+    label: 'KaBuM',
     color: 'bg-[#F6611B] text-[#005BB2]',
     icon: '',
   },
   'Lojas Torra': {
     label: 'Lojas Torra',
-    color: 'bg-[#333333] text-[#FFFFFF]',
+    color: 'bg-[#F26522] text-[#FFFFFF]',
     icon: '',
   },
   'AliExpress': {
     label: 'AliExpress',
-    color: 'bg-[#F6611B] text-[#005BB2]',
+    color: 'bg-[#FF4747] text-[#FFFFFF]',
     icon: '',
   },
 };
 
 export function getStoreInfo(store: string) {
-  return STORE_LABELS[store] || {
+  if (STORE_LABELS[store]) {
+    return STORE_LABELS[store];
+  }
+  const match = Object.keys(STORE_LABELS).find(
+    (key) => key.toLowerCase() === store.toLowerCase()
+  );
+  if (match) {
+    return STORE_LABELS[match];
+  }
+  return {
     label: store,
     color: 'bg-gray-500 text-white',
     icon: '',

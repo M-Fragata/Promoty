@@ -30,6 +30,12 @@ export function detectStore(url: string): StoreType {
   if (lowerUrl.includes('kabum')) {
     return 'kabum';
   }
+  if (lowerUrl.includes('aliexpress')) {
+    return 'aliexpress';
+  }
+  if (lowerUrl.includes('lojastorra') || lowerUrl.includes('torra.com.br')) {
+    return 'lojastorra';
+  }
 
   return 'other';
 }

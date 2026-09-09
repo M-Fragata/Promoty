@@ -1,21 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Link2, Copy, Trash2, Check, ExternalLink, ShoppingCart, Package, Store } from 'lucide-react';
+import { Link2, Copy, Trash2, Check, ExternalLink, ShoppingCart, Package, Store, Globe, Shirt, ShoppingBag, Monitor, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { api, type CreatedLink } from '../services/api';
 import { PageShell } from '../components/layout/PageShell';
 import { clsx } from 'clsx';
 
-const STORE_ICONS: Record<string, typeof ShoppingCart> = {
+const STORE_ICONS: Record<string, LucideIcon> = {
   mercadolivre: ShoppingCart,
   amazon: Package,
   shopee: Store,
+  aliexpress: Globe,
+  lojastorra: Shirt,
+  cea: ShoppingBag,
+  riachuelo: ShoppingBag,
+  dafiti: ShoppingBag,
+  kabum: Monitor,
 };
 
 const STORE_COLORS: Record<string, string> = {
   mercadolivre: 'text-yellow-500',
   amazon: 'text-orange-500',
   shopee: 'text-pink-500',
+  aliexpress: 'text-red-500',
+  lojastorra: 'text-orange-500',
+  cea: 'text-blue-500',
+  riachuelo: 'text-emerald-500',
+  dafiti: 'text-slate-400',
+  kabum: 'text-orange-600',
   other: 'text-text-secondary',
 };
 
@@ -139,7 +151,7 @@ export function CreatedLinks() {
               </button>
             </div>
             <p className="text-xs text-text-secondary mt-2">
-              Suporta Mercado Livre, Amazon, Shopee.
+              Suporta Mercado Livre, Amazon, Shopee, AliExpress, Lojas Torra e mais.
             </p>
           </div>
         </section>

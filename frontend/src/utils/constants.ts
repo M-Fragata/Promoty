@@ -34,6 +34,16 @@ export const STORE_LABELS: Record<string, { label: string; color: string; icon: 
     color: 'bg-[#F6611B] text-[#005BB2]',
     icon: '',
   },
+  'Lojas Torra': {
+    label: 'Lojas Torra',
+    color: 'bg-[#333333] text-[#FFFFFF]',
+    icon: '',
+  },
+  'AliExpress': {
+    label: 'AliExpress',
+    color: 'bg-[#F6611B] text-[#005BB2]',
+    icon: '',
+  },
 };
 
 export function getStoreInfo(store: string) {

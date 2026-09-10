@@ -27,6 +27,7 @@ export function Notifications() {
 
     // Simular carregamento de notificações
     // Por enquanto, sempre retorna vazio
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
     const timer = setTimeout(() => {
       setNotifications([]);

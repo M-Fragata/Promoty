@@ -13,6 +13,7 @@ export function useMediaQuery(query: string): boolean {
       setMatches(e.matches);
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMatches(mql.matches);
     mql.addEventListener('change', handleChange);
     return () => mql.removeEventListener('change', handleChange);

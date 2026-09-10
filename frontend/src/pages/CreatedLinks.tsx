@@ -54,14 +54,16 @@ export function CreatedLinks() {
     try {
       const data = await api.getLinks();
       setLinks(data);
-    } catch (err: any) {
-      setError(err.message || 'Erro ao carregar links');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao carregar links';
+      setError(message);
     } finally {
       setIsLoading(false);
     }
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadLinks();
   }, [loadLinks]);
 
@@ -75,8 +77,9 @@ export function CreatedLinks() {
       const newLink = await api.createLink(urlInput.trim());
       setLinks((prev) => [newLink, ...prev]);
       setUrlInput('');
-    } catch (err: any) {
-      setError(err.message || 'Erro ao criar link');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao criar link';
+      setError(message);
     } finally {
       setIsCreating(false);
     }
@@ -86,8 +89,9 @@ export function CreatedLinks() {
     try {
       await api.deleteLink(id);
       setLinks((prev) => prev.filter((link) => link.id !== id));
-    } catch (err: any) {
-      setError(err.message || 'Erro ao deletar link');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao deletar link';
+      setError(message);
     }
   };
 

@@ -65,9 +65,10 @@ export function useAdminProducts(
           setProducts(result.products);
           setPagination(result.pagination);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!cancelled) {
-          setError(err.message || 'Erro ao buscar produtos');
+          const message = err instanceof Error ? err.message : 'Erro ao buscar produtos';
+          setError(message);
         }
       } finally {
         if (!cancelled) {

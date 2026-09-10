@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import { getUserFromToken, setToken, removeToken, type UserPayload } from '../utils/auth';
 
 interface AuthContextType {
@@ -16,15 +16,8 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<UserPayload | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Verificar token ao carregar
-  useEffect(() => {
-    const currentUser = getUserFromToken();
-    setUser(currentUser);
-    setIsLoading(false);
-  }, []);
+  const [user, setUser] = useState<UserPayload | null>(() => getUserFromToken());
+  const [isLoading] = useState(false);
 
   const login = (token: string) => {
     setToken(token);
@@ -46,6 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
 

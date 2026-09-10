@@ -10,6 +10,7 @@ offersRoutes.post('/mercadolivre', promosController.processProductsML);
 offersRoutes.post('/amazon', promosController.processProductsAmazon);
 offersRoutes.post('/shopee', promosController.processProductsShopee);
 offersRoutes.post('/riachuelo', promosController.processProductsRiachuelo);
+offersRoutes.post('/torra', promosController.processProductsTorra);
 
 
 //Chamada na API da shopee

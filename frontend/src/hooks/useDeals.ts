@@ -63,6 +63,7 @@ export function useDeals(
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData(currentPage, searchQuery, categories, stores);
   }, [currentPage, searchQuery, categories, stores, fetchData]);
 

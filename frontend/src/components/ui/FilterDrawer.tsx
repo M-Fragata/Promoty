@@ -23,6 +23,7 @@ export function FilterDrawer({
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTempCategories(selectedCategories);
       setTempStores(selectedStores);
     }

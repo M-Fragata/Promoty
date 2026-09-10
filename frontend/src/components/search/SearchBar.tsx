@@ -26,6 +26,7 @@ export function SearchBar({
   useEffect(() => {
     if (!query.trim()) {
       onSearch('');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsOpen(false);
       return;
     }

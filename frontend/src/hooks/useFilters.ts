@@ -13,7 +13,7 @@ export function useFilters(products: MlProducts[]): UseFiltersReturn {
   const [sortBy, setSortBy] = useState<SortOption>('discount');
 
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    const result = [...products];
 
     // Sort
     switch (sortBy) {

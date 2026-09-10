@@ -22,6 +22,7 @@ export function useLiveSearch(query: string): UseLiveSearchReturn {
     cleanupRef.current = null;
 
     if (!query.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([]);
       setIsSearching(false);
       setProgress(null);

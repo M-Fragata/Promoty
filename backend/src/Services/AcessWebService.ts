@@ -66,6 +66,10 @@ export class AccesWeb {
     private contadorAmazon: number = 0
     private urlsAmazon: string[][]
     private urlsRiachuelo: string[][]
+    private urlsTorra: string[] = [
+        'https://www.lojastorra.com.br/outlet?sort=discount%3Adesc&page=1',
+        'https://www.lojastorra.com.br/feminino?sort=discount%3Adesc&page=1'
+    ];
     private captchaRetryPending = false;
     private lastCaptchaGroupIndex = -1;
 
@@ -107,11 +111,21 @@ export class AccesWeb {
 
     async AcessMercadoLivre(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
 
-        const browser = await chromium.launch({
-            headless: Env.HEADLESS, // false ele irá abrir a tela do chrome
-            slowMo: 100,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        let browser;
+        try {
+            browser = await chromium.launch({
+                headless: Env.HEADLESS,
+                channel: 'chrome',
+                slowMo: 100,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+        } catch {
+            browser = await chromium.launch({
+                headless: Env.HEADLESS,
+                slowMo: 100,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+        }
 
         const userAgentRandom = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] ?? USER_AGENTS[0]
 
@@ -444,11 +458,21 @@ export class AccesWeb {
     private static readonly MAX_AMAZON_PAGES = 4
 
     async AcessAmazon(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
-        const browser = await chromium.launch({
-            headless: Env.HEADLESS,
-            slowMo: 100,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        let browser;
+        try {
+            browser = await chromium.launch({
+                headless: Env.HEADLESS,
+                channel: 'chrome',
+                slowMo: 100,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+        } catch {
+            browser = await chromium.launch({
+                headless: Env.HEADLESS,
+                slowMo: 100,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+        }
 
         const userAgentRandom = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] ?? USER_AGENTS[0];
 
@@ -687,11 +711,21 @@ export class AccesWeb {
     // ====================
 
     async AcessRiachuelo(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
-        const browser = await chromium.launch({
-            headless: Env.HEADLESS,
-            slowMo: 100,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        let browser;
+        try {
+            browser = await chromium.launch({
+                headless: Env.HEADLESS,
+                channel: 'chrome',
+                slowMo: 100,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+        } catch {
+            browser = await chromium.launch({
+                headless: Env.HEADLESS,
+                slowMo: 100,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+        }
 
         const userAgentRandom = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] ?? USER_AGENTS[0];
 
@@ -733,7 +767,10 @@ export class AccesWeb {
             await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
             await HUMAN_DELAY(3000, 6000);
 
-            const cards = await page.$$('[class*="mui-t2bp7g-product"]');
+            let cards = await page.$$('[class*="mui-t2bp7g-product"]');
+            if (cards.length === 0) {
+                cards = await page.$$('[class*="-product"]');
+            }
             console.log(`📦 [Riachuelo] Página ${currentPage} - ${cards.length} produtos.`);
 
             if (cards.length === 0) {
@@ -884,6 +921,197 @@ export class AccesWeb {
 
         } catch (error) {
             console.error("❌ Erro catastrófico na Riachuelo:", error);
+        } finally {
+            await browser.close();
+        }
+    }
+
+    // ====================
+    // Bloco Lojas Torra
+    // ====================
+
+    async AcessTorra(onPageScraped?: (produtos: MlProducts[]) => void): Promise<void> {
+        let browser;
+        try {
+            browser = await chromium.launch({
+                headless: Env.HEADLESS,
+                channel: 'chrome',
+                slowMo: 100,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+        } catch {
+            browser = await chromium.launch({
+                headless: Env.HEADLESS,
+                slowMo: 100,
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+        }
+
+        const userAgentRandom = USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)] ?? USER_AGENTS[0];
+
+        const context = await browser.newContext({
+            userAgent: userAgentRandom as string,
+            viewport: { width: 1366, height: 768 },
+            locale: 'pt-BR',
+            timezoneId: 'America/Sao_Paulo',
+        });
+
+        const page = await context.newPage();
+
+        try {
+            await page.route('**/*', (route) => {
+                const resourceType = route.request().resourceType();
+                if (['font', 'media'].includes(resourceType)) {
+                    route.abort();
+                    return;
+                }
+                route.continue();
+            });
+
+            for (let i = 0; i < this.urlsTorra.length; i++) {
+                const pageUrl = this.urlsTorra[i]!;
+                const urlObj = new URL(pageUrl);
+                const currentPage = parseInt(urlObj.searchParams.get('page') || '1');
+                const startTime = Date.now();
+
+                console.log(`\n🌐 [Torra] Acessando página ${currentPage}: ${pageUrl.substring(0, 80)}...`);
+
+                try {
+                    await page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+                    await HUMAN_DELAY(2000, 4000);
+                    await page.evaluate(() => window.scrollBy(0, 800));
+                    await HUMAN_DELAY(1500, 2500);
+
+                    const rawProducts = await page.evaluate(() => {
+                        const items: any[] = [];
+                        const links = Array.from(document.querySelectorAll('a')).filter(a => {
+                            const href = a.getAttribute('href') || '';
+                            return (href.endsWith('/p') || href.includes('/p?')) && a.querySelector('h3');
+                        });
+
+                        for (const a of links) {
+                            const link = a.getAttribute('href') || '';
+                            const skuMatch = link.match(/-(\d+)\/p/);
+                            const skuId = skuMatch ? skuMatch[1] : null;
+                            if (!skuId) continue;
+
+                            const titleEl = a.querySelector('h3');
+                            const title = titleEl ? (titleEl as HTMLElement).innerText.trim() : '';
+
+                            // Preço original (riscado / line-through)
+                            const origPriceEl = a.querySelector('[class*="line-through"]');
+                            let originalPrice: number | null = null;
+                            let price = 0;
+
+                            if (origPriceEl && origPriceEl.textContent) {
+                                const origText = origPriceEl.textContent.replace(/[^\d,]/g, '').replace(',', '.');
+                                originalPrice = parseFloat(origText);
+                                if (isNaN(originalPrice)) originalPrice = null;
+
+                                // Preço atual é o irmão direto ao lado do preço riscado
+                                const currentPriceEl = origPriceEl.nextElementSibling;
+                                if (currentPriceEl && currentPriceEl.textContent) {
+                                    const priceText = currentPriceEl.textContent.replace(/[^\d,]/g, '').replace(',', '.');
+                                    price = parseFloat(priceText);
+                                    if (isNaN(price)) price = 0;
+                                }
+                            }
+
+                            if (!originalPrice || !price || originalPrice <= price) continue;
+
+                            const discount = Math.round((1 - price / originalPrice) * 100);
+
+                            // Filtro estrito de desconto mínimo de 35%
+                            if (discount < 35) continue;
+
+                            // Badge de desconto
+                            const badgeEl = a.querySelector('[class*="bg-secondary-700"]');
+                            const badge = badgeEl?.textContent?.trim() || `${discount}% OFF`;
+
+                            // Imagem do produto
+                            const imgEl = a.querySelector('img[src*="vtexassets.com"]') || a.querySelector('img');
+                            const imageUrl = imgEl ? imgEl.getAttribute('src') : null;
+
+                            items.push({
+                                id: `torra${skuId}`,
+                                title,
+                                price,
+                                originalPrice,
+                                badge,
+                                imageUrl,
+                                rawLink: link,
+                                discount
+                            });
+                        }
+
+                        return items;
+                    });
+
+                    console.log(`📦 [Torra] Página ${currentPage} (${urlObj.pathname}) - ${rawProducts.length} produtos com desconto >= 35%.`);
+
+                    if (rawProducts.length === 0) {
+                        // 🔄 NENHUM PRODUTO COM DESCONTO >= 35% → RESET PARA page=1
+                        urlObj.searchParams.set('page', '1');
+                        this.urlsTorra[i] = urlObj.toString();
+                        console.log(`🔄 [Torra] ${urlObj.pathname} sem ofertas >= 35% - reiniciando para page=1`);
+
+                        const duration = (Date.now() - startTime) / 1000;
+                        await TakePrintScreenService({
+                            page: page,
+                            store: "Lojas Torra",
+                            produtosLength: 0,
+                            tempoExecucao: duration,
+                            status: "Fim das ofertas / Reset page=1",
+                            url: pageUrl
+                        });
+                        continue;
+                    }
+
+                    // Montar produtos finais com links afiliados
+                    const productsPage: MlProducts[] = [];
+                    for (const raw of rawProducts) {
+                        const fullLink = raw.rawLink.startsWith('http') ? raw.rawLink : `https://www.lojastorra.com.br${raw.rawLink}`;
+                        const affiliateLink = await buildAffiliateUrl(fullLink);
+
+                        productsPage.push({
+                            id: raw.id,
+                            title: raw.title,
+                            price: raw.price,
+                            originalPrice: raw.originalPrice,
+                            coupon: null,
+                            badge: raw.badge,
+                            imageUrl: raw.imageUrl,
+                            link: affiliateLink,
+                            installments: null,
+                            store: 'Lojas Torra'
+                        });
+                    }
+
+                    const duration = (Date.now() - startTime) / 1000;
+                    await TakePrintScreenService({
+                        page: page,
+                        store: "Lojas Torra",
+                        produtosLength: productsPage.length,
+                        tempoExecucao: duration,
+                        status: "Sucesso",
+                        url: pageUrl
+                    });
+
+                    onPageScraped?.(productsPage);
+
+                    // Sucesso com produtos >= 35% → incrementa para próxima página
+                    const nextPage = currentPage + 1;
+                    urlObj.searchParams.set('page', nextPage.toString());
+                    this.urlsTorra[i] = urlObj.toString();
+                    console.log(`📄 [Torra] ${urlObj.pathname} avançou para página ${nextPage}`);
+
+                } catch (pageError: any) {
+                    console.error(`⚠️ [Torra] Erro na URL ${pageUrl}:`, pageError.message);
+                }
+            }
+
+        } catch (error) {
+            console.error("❌ Erro catastrófico na Lojas Torra:", error);
         } finally {
             await browser.close();
         }

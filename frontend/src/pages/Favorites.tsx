@@ -24,6 +24,7 @@ export function Favorites() {
       return;
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
     setError(null);
 

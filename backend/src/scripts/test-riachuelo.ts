@@ -53,6 +53,7 @@ async function testarRiachuelo() {
                 console.log(`  Desconto: ${prod.badge || 'N/A'}`);
                 console.log(`  Cupom: ${prod.coupon || 'N/A'}`);
                 console.log(`  Loja: ${prod.store}`);
+                console.log(`  Imagem: ${prod.imageUrl || 'NULL!'}`);
                 console.log(`  Link: ${prod.link}`);
                 console.log("─".repeat(80));
             }

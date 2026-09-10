@@ -73,10 +73,11 @@ async function executarAwin() {
     await executarCea();
 }
 
-// 🟠 TAREFA 2: PLAYWRIGHT - AMAZON + RIACHUELO (Casa/Moda)
+// 🟠 TAREFA 2: PLAYWRIGHT - AMAZON + RIACHUELO + TORRA (Casa/Moda)
 async function executarAmazonRiachuelo() {
     await executAmazon();
     await executarRiachuelo();
+    await executarTorra();
 }
 
 async function executarDafiti() {
@@ -242,6 +243,38 @@ async function executarRiachuelo() {
 
     } catch (error) {
         console.error("❌ [Casa/Riachuelo] Falha crítica:", error);
+    }
+}
+
+// 🛍️ TAREFA: LOJAS TORRA CRAWLER (Casa/Moda)
+async function executarTorra() {
+    try {
+        console.log("🛍️ [Casa/Lojas Torra] Iniciando varredura com fluxo assíncrono...");
+        const tempoInicio = Date.now();
+
+        await scraper.AcessTorra((produtosParciais) => {
+            console.log(`⚡ [Casa/Lojas Torra] Lote de ${produtosParciais.length} recebido! Enviando para API local...`);
+
+            fetch("http://localhost:3333/ofertas/torra", {
+                method: "POST",
+                headers: { "Content-type": "application/json" },
+                body: JSON.stringify(produtosParciais)
+            })
+                .then(async (response) => {
+                    if (!response.ok) throw new Error(`${response.status} - ${response.statusText}`);
+                    console.log(`✅ [Casa/Lojas Torra] Lote de ${produtosParciais.length} produtos processado pela API com sucesso!`);
+                })
+                .catch((err) => {
+                    console.error("❌ [Casa/Lojas Torra] Erro ao enviar lote parcial para a API:", err.message);
+                });
+        });
+
+        const tempoFim = Date.now();
+        const tempoTotal = ((tempoFim - tempoInicio) / 1000).toFixed(2);
+        console.log(`⏱️ [Casa/Lojas Torra] Navegador finalizou todas as URLs em ${tempoTotal} segundos!`);
+
+    } catch (error) {
+        console.error("❌ [Casa/Lojas Torra] Falha crítica:", error);
     }
 }
 
